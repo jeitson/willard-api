@@ -6,9 +6,8 @@ import { MenuModule } from '../menu/menu.module';
 import { RoleController } from './role.controller';
 import { RoleEntity } from './role.entity';
 import { RoleService } from './role.service';
-import { SseService } from 'src/modules/sse/sse.service';
 
-const providers = [RoleService, SseService];
+const providers = [RoleService];
 
 @Module({
 	imports: [

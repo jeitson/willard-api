@@ -7,7 +7,6 @@ import { In, IsNull, Like, Not, Repository } from 'typeorm';
 
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
-import { SseService } from 'src/modules/sse/sse.service';
 import { MenuEntity } from 'src/modules/system/menu/menu.entity';
 
 import { deleteEmptyChildren } from 'src/core/utils';
@@ -22,7 +21,6 @@ export class MenuService {
 		@InjectRepository(MenuEntity)
 		private menuRepository: Repository<MenuEntity>,
 		private roleService: RoleService,
-		private sseService: SseService,
 	) {}
 
 	/**

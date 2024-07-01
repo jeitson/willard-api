@@ -1,7 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { HealthModule } from './modules/health/health.module';
 import { ConfigModule } from '@nestjs/config';
-import { SseModule } from './modules/sse/sse.module';
 import { SystemModule } from './modules/system/system.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -20,7 +19,6 @@ import { SeederService } from './core/common/services/seeder/seeder.service';
 			envFilePath: ['.env.local', `.env.${process.env.NODE_ENV}`, '.env'],
 			load: [...Object.values(config)],
 		}),
-		SseModule,
 		SystemModule,
 		HealthModule,
 		SharedModule,
