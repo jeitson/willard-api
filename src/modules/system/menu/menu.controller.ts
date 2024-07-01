@@ -46,6 +46,15 @@ export class MenuController {
 		return this.menuService.list(dto);
 	}
 
+	@Get('permissions')
+	@ApiOperation({
+		summary:
+			'Obtener todos los conjuntos de permisos definidos en el backend',
+	})
+	async getPermissions(): Promise<string[]> {
+		return getDefinePermissions();
+	}
+
 	@Get(':id')
 	@ApiOperation({
 		summary: 'Obtener información detallada de un menú o permiso',
@@ -102,14 +111,5 @@ export class MenuController {
 		await this.menuService.deleteMenuItem(flattenDeep([id, childMenus]));
 		// Actualizar los permisos de los usuarios en línea
 		await this.menuService.refreshOnlineUserPerms();
-	}
-
-	@Get('permissions')
-	@ApiOperation({
-		summary:
-			'Obtener todos los conjuntos de permisos definidos en el backend',
-	})
-	async getPermissions(): Promise<string[]> {
-		return getDefinePermissions();
 	}
 }

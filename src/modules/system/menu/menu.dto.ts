@@ -44,27 +44,27 @@ export class MenuDto {
 		default: 1,
 	})
 	@ValidateIf((o: MenuDto) => o.isExt)
-	@IsIn([1, 2])
-	extOpenMode: number;
+	@IsBoolean()
+	extOpenMode: boolean;
 
 	@ApiProperty({ description: '¿Mostrar el menú?', default: 1 })
 	@ValidateIf((o: MenuDto) => o.type !== 2)
-	@IsIn([0, 1])
-	show: number;
+	@IsBoolean()
+	show: boolean;
 
 	@ApiProperty({
 		description: 'Identificador del menú activo',
 		required: false,
 	})
-	@ValidateIf((o: MenuDto) => o.type !== 2 && o.show === 0)
+	@ValidateIf((o: MenuDto) => o.type !== 2 && o.show)
 	@IsString()
 	@IsOptional()
 	activeMenu?: string;
 
 	@ApiProperty({ description: '¿Activar la caché de la página?', default: 1 })
 	@ValidateIf((o: MenuDto) => o.type === 1)
-	@IsIn([0, 1])
-	keepAlive: number;
+	@IsBoolean()
+	keepAlive: boolean;
 
 	@ApiProperty({ description: 'Estado', default: true })
 	@IsBoolean()

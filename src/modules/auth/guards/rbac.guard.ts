@@ -43,9 +43,10 @@ export class RbacGuard implements CanActivate {
 			string | string[]
 		>(PERMISSION_KEY, [context.getHandler(), context.getClass()]);
 
+
 		if (!payloadPermission) return true;
 
-		if (user.roles.includes(Roles.ADMIN)) return true;
+		if (user.roles.map(r => r.toLowerCase()).includes(Roles.ADMIN.toLowerCase())) return true;
 
 		const allPermissions = []; // Aquí deberías llenar allPermissions con los permisos del usuario
 

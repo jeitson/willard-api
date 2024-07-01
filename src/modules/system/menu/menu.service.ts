@@ -54,13 +54,11 @@ export class MenuService {
 	}
 
 	async create(menu: MenuDto): Promise<void> {
-		// const result = await this.menuRepository.save(menu);
-		// this.sseService.noticeClientToUpdateMenusByMenuIds([result]);
+		await this.menuRepository.save(menu);
 	}
 
 	async update(id: string, menu: MenuUpdateDto): Promise<void> {
-		// await this.menuRepository.update(id, menu);
-		// this.sseService.noticeClientToUpdateMenusByMenuIds([id]);
+		await this.menuRepository.update(id, menu);
 	}
 
 	/**
