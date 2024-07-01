@@ -27,26 +27,26 @@ export class UserController {
 	constructor(private userService: UserService) {}
 
 	@Get()
-	@ApiOperation({ summary: 'Get list of users' })
+	@ApiOperation({ summary: 'Listado de usuarios' })
 	@ApiResult({ type: [UserEntity], isPage: true })
 	async list(@Query() dto: any) {
 		return this.userService.list(dto);
 	}
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get user by ID' })
+	@ApiOperation({ summary: 'Obtener usuario por ID' })
 	async read(@IdParam() id: string) {
 		return this.userService.info(id);
 	}
 
 	@Post()
-	@ApiOperation({ summary: 'Create new user' })
+	@ApiOperation({ summary: 'Creación de nuevo usuario' })
 	async create(@Body() dto: UserDto): Promise<void> {
 		await this.userService.create(dto);
 	}
 
 	@Put(':id')
-	@ApiOperation({ summary: 'Update user' })
+	@ApiOperation({ summary: 'Actualizar usuario' })
 	async update(
 		@IdParam() id: string,
 		@Body() dto: UserUpdateDto,
@@ -55,7 +55,7 @@ export class UserController {
 	}
 
 	@Delete(':id')
-	@ApiOperation({ summary: 'Delete user' })
+	@ApiOperation({ summary: 'Eliminar usuario' })
 	@ApiParam({
 		name: 'id',
 		type: String,
@@ -70,7 +70,7 @@ export class UserController {
 	}
 
 	@Post(':id/password')
-	@ApiOperation({ summary: 'Change user password' })
+	@ApiOperation({ summary: 'Cambiar contraseña de usuario' })
 	async password(
 		@IdParam() id: string,
 		@Body() dto: UserPasswordDto,

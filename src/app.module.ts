@@ -9,6 +9,7 @@ import config from './core/config';
 import { SharedModule } from './core/shared/shared.module';
 import { DatabaseModule } from './core/shared/database/database.module';
 import { SeederService } from './core/common/services/seeder/seeder.service';
+import { RbacGuard } from './modules/auth/guards/rbac.guard';
 
 @Module({
 	imports: [
@@ -31,11 +32,12 @@ import { SeederService } from './core/common/services/seeder/seeder.service';
 			provide: APP_GUARD,
 			useClass: JwtAuthGuard,
 		},
-		// SeederService,
+    	{ provide: APP_GUARD, useClass: RbacGuard },
+		SeederService,
 	],
 })
 export class AppModule implements OnModuleInit {
-	// constructor(private readonly seederService: SeederService) {}
+	constructor(private readonly seederService: SeederService) {}
 
 	async onModuleInit() {
 		// await this.seederService.seedInitialData();

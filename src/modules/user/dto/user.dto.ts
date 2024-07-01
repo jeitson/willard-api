@@ -56,7 +56,7 @@ export class UserDto {
 	@IsString()
 	nickname: string;
 
-	@ApiProperty({ description: 'Email', example: 'bqy.dev@qq.com' })
+	@ApiProperty({ description: 'Email', example: 'username@email.com' })
 	@IsEmail()
 	@ValidateIf((o) => !isEmpty(o.email))
 	email: string;

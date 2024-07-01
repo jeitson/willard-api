@@ -20,25 +20,6 @@ export class LoginDto {
 			'La contraseña debe tener al menos 6 caracteres y contener al menos un número y una letra',
 	})
 	password: string;
-
-	@ApiProperty({ description: 'Identificador de captcha', example: '123456' })
-	@IsString()
-	captchaId: string;
-
-	@ApiProperty({
-		description: 'Código de verificación ingresado por el usuario',
-		example: '1234',
-	})
-	@IsString()
-	@MinLength(4, {
-		message:
-			'El código de verificación debe tener exactamente 4 caracteres',
-	})
-	@MaxLength(4, {
-		message:
-			'El código de verificación debe tener exactamente 4 caracteres',
-	})
-	verifyCode: string;
 }
 
 // DTO para el registro de usuarios

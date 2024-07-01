@@ -9,7 +9,6 @@ import { Public } from './decorators/public.decorator';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { LocalGuard } from './guards/local.guard';
 import { LoginToken } from './models/auth.model';
-import { CaptchaService } from './services/captcha.service';
 
 @ApiTags('Autenticación - Módulo de autenticación')
 @UseGuards(LocalGuard)
@@ -19,7 +18,6 @@ export class AuthController {
 	constructor(
 		private authService: AuthService,
 		private userService: UserService,
-		private captchaService: CaptchaService,
 	) {}
 
 	@Post('login')
@@ -28,10 +26,6 @@ export class AuthController {
 	async login(
 		@Body() dto: LoginDto
 	): Promise<LoginToken> {
-		await this.captchaService.checkImgCaptcha(
-			dto.captchaId,
-			dto.verifyCode,
-		);
 		const token = await this.authService.login(
 			dto.email,
 			dto.password

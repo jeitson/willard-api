@@ -16,16 +16,14 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AccountController } from './controllers/account.controller';
-import { CaptchaController } from './controllers/captcha.controller';
 import { AccessTokenEntity } from './entities/access-token.entity';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
-import { CaptchaService } from './services/captcha.service';
 import { TokenService } from './services/token.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
 const controllers = [AuthController, AccountController];
-const providers = [AuthService, TokenService, CaptchaService];
+const providers = [AuthService, TokenService];
 const strategies = [LocalStrategy, JwtStrategy];
 
 @Module({

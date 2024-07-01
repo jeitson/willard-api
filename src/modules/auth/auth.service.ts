@@ -72,12 +72,7 @@ export class AuthService {
 			user.id,
 			roles,
 		);
-
-		const permissions = await this.menuService.getPermissions(user.id);
-		await this.setPermissionsCache(user.id, permissions);
-
-		// await this.loginLogService.create(user.id, ip, ua);
-
+		
 		return token.accessToken;
 	}
 
@@ -90,10 +85,6 @@ export class AuthService {
 		const comparePassword = md5(`${password}${user.psalt}`);
 		if (user.password !== comparePassword)
 			throw new BusinessException(ErrorEnum.INVALID_EMAIL_PASSWORD);
-	}
-
-	async loginLog(uid: string, ip: string, ua: string) {
-		return;
 	}
 
 	/**
@@ -132,25 +123,5 @@ export class AuthService {
 	 */
 	async getPermissions(uid: string): Promise<string[]> {
 		return this.menuService.getPermissions(uid);
-	}
-
-	async getPermissionsCache(uid: string): Promise<string[]> {
-		// const permissionString = await this.redis.get(genAuthPermKey(uid));
-		return [];
-	}
-
-	async setPermissionsCache(
-		uid: string,
-		permissions: string[],
-	): Promise<void> {
-		return;
-	}
-
-	async getPasswordVersionByUid(uid: string): Promise<string> {
-		return '';
-	}
-
-	async getTokenByUid(uid: string): Promise<string> {
-		return '';
 	}
 }

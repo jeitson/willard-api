@@ -42,7 +42,7 @@ export class DeptController {
 
 	// Get department list
 	@Get()
-	@ApiOperation({ summary: 'Get department list' })
+	@ApiOperation({ summary: 'Listado de departamentos' })
 	@ApiResult({ type: [DeptEntity] })
 	@Perm(permissions.LIST)
 	async list(
@@ -54,7 +54,7 @@ export class DeptController {
 
 	// Create department
 	@Post()
-	@ApiOperation({ summary: 'Create department' })
+	@ApiOperation({ summary: 'Crear departamento' })
 	@Perm(permissions.CREATE)
 	async create(@Body() dto: DeptDto): Promise<void> {
 		await this.deptService.create(dto);
@@ -62,7 +62,7 @@ export class DeptController {
 
 	// Get department information by ID
 	@Get(':id')
-	@ApiOperation({ summary: 'Get department information' })
+	@ApiOperation({ summary: 'Obtener departamento por ID' })
 	@Perm(permissions.READ)
 	async info(@IdParam() id: string) {
 		return this.deptService.info(id);
@@ -70,7 +70,7 @@ export class DeptController {
 
 	// Update department
 	@Put(':id')
-	@ApiOperation({ summary: 'Update department' })
+	@ApiOperation({ summary: 'Actualizar departamento' })
 	@Perm(permissions.UPDATE)
 	async update(
 		@IdParam() id: string,
@@ -81,7 +81,7 @@ export class DeptController {
 
 	// Delete department
 	@Delete(':id')
-	@ApiOperation({ summary: 'Delete department' })
+	@ApiOperation({ summary: 'Eleminar departamento' })
 	@Perm(permissions.DELETE)
 	async delete(@IdParam() id: string): Promise<void> {
 		// Check if the department has associated users

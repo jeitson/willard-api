@@ -4,8 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger'; // Asegúrate de ajustar la ruta correcta
 import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
-import { HttpStatus, UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, HttpStatus, UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 import { isDev } from './core/global/env';
+import { ValidationError } from 'class-validator';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
@@ -13,23 +14,20 @@ async function bootstrap() {
 
 	app.enableCors();
 
-	app.useGlobalPipes(
-		new ValidationPipe({
-		  transform: true,
-		  whitelist: true,
-		  transformOptions: { enableImplicitConversion: true },
-		  errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-		  stopAtFirstError: true,
-		  exceptionFactory: errors =>
-			new UnprocessableEntityException(
-			  errors.map((e) => {
-				const rule = Object.keys(e.constraints!)[0]
-				const msg = e.constraints![rule]
-				return msg
-			  })[0],
-			),
-		}),
-	  );
+	app.useGlobalPipes(new ValidationPipe({
+		whitelist: true, // Remover propiedades no definidas en el DTO
+		forbidNonWhitelisted: true, // Lanza error si se encuentra una propiedad no definida en el DTO
+		transform: true, // Transforma las propiedades a los tipos esperados,
+		exceptionFactory: (errors: ValidationError[]) => {
+			const formattedErrors = errors.map(error => {
+				return {
+					property: error.property,
+					errors: Object.values(error.constraints),
+				};
+			});
+			return new BadRequestException(formattedErrors);
+		},
+	}));
 
 	if (isDev)
 		app.useGlobalInterceptors(new LoggingInterceptor())

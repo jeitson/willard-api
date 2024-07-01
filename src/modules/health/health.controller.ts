@@ -36,7 +36,7 @@ export class HealthController {
 	@HealthCheck()
 	@Perm(PermissionHealth.NETWORK)
 	async checkNetwork() {
-		return this.http.pingCheck('buqiyuan', 'https://buqiyuan.gitee.io/');
+		return this.http.pingCheck('google', 'https://google.com/');
 	}
 
 	@Get('database')
