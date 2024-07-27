@@ -11,11 +11,6 @@ export const AppConfig = registerAs(appRegToken, () => ({
 	locale: env('APP_LOCALE', 'sp-CO'),
 	/** Si se permite el inicio de sesión múltiple */
 	multiDeviceLogin: envBoolean('MULTI_DEVICE_LOGIN', true),
-
-	logger: {
-		level: env('LOGGER_LEVEL'),
-		maxFiles: envNumber('LOGGER_MAX_FILES'),
-	},
 }));
 
 export type IAppConfig = ConfigType<typeof AppConfig>;

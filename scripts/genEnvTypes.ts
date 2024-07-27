@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 
 const directoryPath = path.resolve(__dirname, '..');
 
-const targets = ['.env', `.env.${process.env.NODE_ENV || 'development'}`];
+const targets = ['.env'];
 
 const envObj = targets.reduce((prev, file) => {
 	const result = dotenv.parse(

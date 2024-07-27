@@ -5,7 +5,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { env, envBoolean, envNumber } from '../global/env';
 
-dotenv.config({ path: `.env.${process.env?.NODE_ENV || 'development'}` });
+dotenv.config({ path: `.env` });
 
 const currentScript = process.env.npm_lifecycle_event;
 
@@ -17,10 +17,13 @@ const dataSourceOptions: DataSourceOptions = {
 	password: env('DB_PASSWORD'),
 	database: env('DB_DATABASE'),
 	synchronize: envBoolean('DB_SYNCHRONIZE', false),
+	logging: false,
 	entities: ['dist/modules/**/*.entity{.ts,.js}'],
 	migrations: ['dist/migrations/*{.ts,.js}'],
 	subscribers: ['dist/modules/**/*.subscriber{.ts,.js}'],
+	ssl: true
 };
+
 
 export const dbRegToken = 'database';
 
