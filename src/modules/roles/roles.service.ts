@@ -13,8 +13,8 @@ import { ErrorEnum } from 'src/core/constants/error-code.constant';
 export class RolesService {
 	constructor(
 		@InjectRepository(Rol)
-		private readonly roleRepository: Repository<Rol>,
-		@InjectEntityManager() private entityManager: EntityManager,
+		private readonly rolesRepository: Repository<Rol>,
+		@InjectEntityManager() private entityManager: EntityManager
 	) { }
 
 	async findAll({
@@ -22,7 +22,7 @@ export class RolesService {
 		pageSize,
 		Nombre
 	}: RolQueryDto): Promise<Pagination<Rol>> {
-		const queryBuilder = this.roleRepository
+		const queryBuilder = this.rolesRepository
 			.createQueryBuilder('rol')
 			.where({
 				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
@@ -35,7 +35,7 @@ export class RolesService {
 	}
 
 	async findOneById(id: string): Promise<Rol | undefined> {
-		return this.roleRepository.findOneBy({
+		return this.rolesRepository.findOneBy({
 			Id: id
 		});
 	}
@@ -44,7 +44,7 @@ export class RolesService {
 		Nombre,
 		Descripcion
 	}: RolDto): Promise<void> {
-		const exists = await this.roleRepository.findOneBy({ Nombre });
+		const exists = await this.rolesRepository.findOneBy({ Nombre });
 
 		if (!isEmpty(exists))
 			throw new BusinessException(ErrorEnum.SYSTEM_ROLE_EXISTS);

@@ -1,6 +1,6 @@
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity } from "typeorm";
-
+import { UserRol } from "src/modules/users/entities/user-rol.entity";
+import { Column, Entity, ManyToMany, JoinTable, OneToMany } from "typeorm";
 @Entity({ name: 'usuario' })
 export class User extends CompleteEntity {
 	@Column({ unique: true, type: 'bigint', default: null, nullable: true })
@@ -14,4 +14,7 @@ export class User extends CompleteEntity {
 
 	@Column({ type: 'varchar', length: 255 })
 	Email: string;
+
+	@OneToMany(() => UserRol, userRol => userRol.usuario)
+	roles: UserRol[];
 }

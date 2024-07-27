@@ -8,6 +8,8 @@ import { ErrorEnum } from 'src/core/constants/error-code.constant';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
+import { Rol } from '../roles/entities/rol.entity';
+import { UserRol } from './entities/user-rol.entity';
 
 @Injectable()
 export class UsersService {
@@ -15,9 +17,11 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
-		// @InjectRepository(RoleEntity)
-		// private readonly roleRepository: Repository<RoleEntity>,
 		@InjectEntityManager() private entityManager: EntityManager,
+		@InjectRepository(Rol)
+		private readonly rolesRepository: Repository<Rol>,
+		@InjectRepository(UserRol)
+		private readonly userRolRepository: Repository<UserRol>,
 	) { }
 
 	async findAll({
@@ -28,6 +32,8 @@ export class UsersService {
 	}: UserQueryDto): Promise<Pagination<User>> {
 		const queryBuilder = this.userRepository
 			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.roles', 'userRol')
+			.leftJoinAndSelect('userRol.rol', 'rol')
 			.where({
 				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
 				...(Email ? { Email: Like(`%${Email}%`) } : null),
@@ -40,11 +46,13 @@ export class UsersService {
 	}
 
 	async findUserById(id: string): Promise<User | undefined> {
-		return this.userRepository.findOneBy({
-			Id: id
-		});
+		return this.userRepository
+			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.roles', 'userRol')
+			.leftJoinAndSelect('userRol.rol', 'rol')
+			.where('user.Id = :id', { id })
+			.getOne();
 	}
-
 	async create({
 		Email,
 		...data
@@ -72,5 +80,21 @@ export class UsersService {
 		await this.entityManager.transaction(async (manager) => {
 			await manager.update(User, id, data);
 		});
+	}
+
+
+	async addRolToUser(userId: string, rolId: string): Promise<UserRol> {
+		const user = await this.userRepository.findOneBy({ Id: userId });
+		const rol = await this.rolesRepository.findOneBy({ Id: rolId });
+
+		if (!user || !rol) {
+			throw new Error('Usuario o Rol no encontrado');
+		}
+
+		const userRol = new UserRol();
+		userRol.usuario = user;
+		userRol.rol = rol;
+
+		return this.userRolRepository.save(userRol);
 	}
 }

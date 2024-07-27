@@ -38,4 +38,10 @@ export class UsersController {
 	): Promise<void> {
 		await this.usersService.update(id, dto);
 	}
+
+	@Post(':id/role/:rol_id')
+	@ApiOperation({ summary: 'Asignar role a usuario' })
+	async addRolToUser(@IdParam('id') id: string, @IdParam('rol_id') rol_id: string): Promise<void> {
+		await this.usersService.addRolToUser(id, rol_id);
+	}
 }
