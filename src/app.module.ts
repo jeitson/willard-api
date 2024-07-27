@@ -6,6 +6,7 @@ import { SharedModule } from './core/shared/shared.module';
 import { DatabaseModule } from './core/shared/database/database.module';
 import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 import { UsersModule } from './modules/users/users.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
 	imports: [
@@ -19,6 +20,7 @@ import { UsersModule } from './modules/users/users.module';
 		SharedModule,
 		DatabaseModule,
 		UsersModule,
+		RolesModule,
 	],
 	controllers: [],
 	providers: [],
