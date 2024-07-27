@@ -5,6 +5,7 @@ import config from './core/config';
 import { SharedModule } from './core/shared/shared.module';
 import { DatabaseModule } from './core/shared/database/database.module';
 import { AllExceptionsFilter } from './core/filters/any-exception.filter';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
 	imports: [
@@ -17,10 +18,9 @@ import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 		}),
 		SharedModule,
 		DatabaseModule,
+		UsersModule,
 	],
 	controllers: [],
-	providers: [
-		{ provide: APP_FILTER, useClass: AllExceptionsFilter },
-	],
+	providers: [],
 })
 export class AppModule { }

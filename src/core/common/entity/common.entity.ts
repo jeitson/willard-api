@@ -7,66 +7,44 @@ import {
 	CreateDateColumn,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
-	VirtualColumn,
 } from 'typeorm';
 
 export abstract class CommonEntity extends BaseEntity {
-	@PrimaryGeneratedColumn('uuid')
-	id: string;
+	@PrimaryGeneratedColumn({ type: 'bigint' })
+	Id: string;
 
 	@ApiHideProperty()
 	@CreateDateColumn({
-		name: 'created_at',
 		nullable: true,
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',
 	})
-	createdAt: Date;
+	FechaCreacion: Date;
+
 	@ApiHideProperty()
 	@UpdateDateColumn({
-		name: 'updated_at',
 		nullable: true,
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',
 		onUpdate: 'CURRENT_TIMESTAMP(6)',
 	})
-	updatedAt: Date;
+	FechaModificado: Date;
 
 	@ApiHideProperty()
 	@ApiProperty({ description: 'Estado' })
-	@Column({ name: 'status', comment: 'Estado', default: true })
-	status: boolean;
+	@Column({ comment: 'Estado', default: true })
+	Estado: boolean;
 }
 
 export abstract class CompleteEntity extends CommonEntity {
 	@ApiHideProperty()
 	@Exclude()
-	@Column({ name: 'create_by', update: false, comment: 'Fundador' })
-	createBy: string;
+	@Column({ update: false, comment: 'Creador', type: 'bigint', nullable: true })
+	CreadoPor: string;
 
 	@ApiHideProperty()
 	@Exclude()
-	@Column({ name: 'update_by', comment: 'Actualizador' })
+	@Column({ comment: 'Actualizador', type: 'bigint', nullable: true })
 	@IsOptional()
-	updateBy: string;
-
-	/**
-	 * Las columnas virtuales no se guardarán en la base de datos, puede haber problemas de rendimiento cuando el volumen de datos es grande.
-	 * @see https://typeorm.io/decorator-reference#virtualcolumn
-	 */
-	@ApiHideProperty()
-	@ApiProperty({ description: 'Fundador' })
-	@VirtualColumn({
-		query: (alias) =>
-			`SELECT username FROM sys_user WHERE id = ${alias}.create_by`,
-	})
-	creator: string;
-
-	@ApiHideProperty()
-	@ApiProperty({ description: 'Actualizador' })
-	@VirtualColumn({
-		query: (alias) =>
-			`SELECT username FROM sys_user WHERE id = ${alias}.update_by`,
-	})
-	updater: string;
+	ModificadoPor: string;
 }

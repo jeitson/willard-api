@@ -2,7 +2,7 @@ import {
 	HttpStatus,
 	NotAcceptableException,
 	Param,
-	ParseUUIDPipe,
+	ParseIntPipe,
 } from '@nestjs/common';
 
 import { IsUUID } from 'class-validator';
@@ -12,10 +12,9 @@ export class UUIDParamDto {
 	id: string;
 }
 
-export function IdParam() {
-	return Param(
-		'id',
-		new ParseUUIDPipe({
+export function IdParam(key: string = 'id') {
+	return Param(key,
+		new ParseIntPipe({
 			errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
 			exceptionFactory: () => {
 				throw new NotAcceptableException('ID Formato incorrecto');
