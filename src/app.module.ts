@@ -8,6 +8,7 @@ import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AuditsModule } from './modules/audits/audits.module';
+import { CatalogsModule } from './modules/catalogs/catalogs.module';
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { AuditsModule } from './modules/audits/audits.module';
 		UsersModule,
 		RolesModule,
 		AuditsModule,
+		CatalogsModule,
 	],
 	controllers: [],
 	providers: [],
