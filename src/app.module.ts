@@ -7,6 +7,7 @@ import { DatabaseModule } from './core/shared/database/database.module';
 import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { AuditsModule } from './modules/audits/audits.module';
 
 @Module({
 	imports: [
@@ -21,6 +22,7 @@ import { RolesModule } from './modules/roles/roles.module';
 		DatabaseModule,
 		UsersModule,
 		RolesModule,
+		AuditsModule,
 	],
 	controllers: [],
 	providers: [],
