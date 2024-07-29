@@ -3,7 +3,7 @@ import { RolesService } from './roles.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { RolDto, RolUpdateDto } from './dto/rol.dto';
+import { RolDto, RolQueryDto, RolUpdateDto } from './dto/rol.dto';
 import { Rol } from './entities/rol.entity';
 
 @ApiTags('Sistema - Roles')
@@ -14,7 +14,7 @@ export class RolesController {
 	@Get()
 	@ApiOperation({ summary: 'Obtener listado de todos los roles - Paginación' })
 	@ApiResult({ type: [Rol], isPage: true })
-	async findAll(@Query() dto: any) {
+	async findAll(@Query() dto: RolQueryDto) {
 		return this.rolesService.findAll(dto);
 	}
 

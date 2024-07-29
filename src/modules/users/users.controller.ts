@@ -4,7 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { User } from './entities/user.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { UserDto, UserUpdateDto } from './dto/user.dto';
+import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
 
 @ApiTags('Sistema - Usuarios')
 @Controller('users')
@@ -14,7 +14,7 @@ export class UsersController {
 	@Get()
 	@ApiOperation({ summary: 'Obtener listado de todos los usuarios - Paginación' })
 	@ApiResult({ type: [User], isPage: true })
-	async findAll(@Query() dto: any) {
+	async findAll(@Query() dto: UserQueryDto) {
 		return this.usersService.findAll(dto);
 	}
 
