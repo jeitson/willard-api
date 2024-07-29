@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { CatalogsService } from './catalogs.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ChildDto, ChildUpdateDto } from './dto/child.dto';
+import { ChildDto, ChildSearchDto, ChildUpdateDto } from './dto/child.dto';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { Child } from './entities/child.entity';
 
@@ -52,15 +52,15 @@ export class CatalogsController {
 		return await this.catalogsService.getChildById(id);
 	}
 
-	@Get(':key')
-	@ApiOperation({ summary: 'Crear hijos por su llave - KEY' })
+	@Get('key/:key')
+	@ApiOperation({ summary: 'Obtener hijos por su llave - KEY' })
 	async getByKey(@Param('key') key: string): Promise<Child[]> {
 		return await this.catalogsService.getChildrenByKey(key);
 	}
 
 	@Post('search-by-keys')
 	@ApiOperation({ summary: 'Buscar hijos de catalogos por sus padres' })
-	async searchByKeys(@Body('keys') keys: string[]): Promise<Child[]> {
+	async searchByKeys(@Body() { keys }: ChildSearchDto): Promise<Child[]> {
 		return await this.catalogsService.getChildrenByKeys(keys);
 	}
 

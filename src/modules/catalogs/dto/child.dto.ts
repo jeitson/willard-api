@@ -1,5 +1,7 @@
 import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
 import {
+	ArrayNotEmpty,
+	IsArray,
 	IsInt,
 	IsNotEmpty,
 	IsOptional,
@@ -73,3 +75,11 @@ export class ChildQueryDto extends IntersectionType(
 	PagerDto<ChildDto>,
 	PartialType(ChildDto),
 ) { }
+
+
+export class ChildSearchDto {
+	@IsArray()
+	@ArrayNotEmpty()
+	@IsString({ each: true })
+	keys: string[] = ['']
+}
