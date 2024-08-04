@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Parent } from './entities/parent.entity';
 import { EntityManager, In, Repository } from 'typeorm';
 import { Child } from './entities/child.entity';
 import { ChildDto, ChildUpdateDto } from './dto/child.dto';
+import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 
 @Injectable()
 export class CatalogsService {
@@ -21,12 +22,12 @@ export class CatalogsService {
 
 		const parent = await this.parentsRepository.findOne({ where: { Codigo: CodigoCatalogo } });
 		if (!parent) {
-		  throw new NotFoundException('Padre no encontrado');
+		  throw new BusinessException('Padre no encontrado', 400);
 		}
 
 		const parentChild = await this.childrensRepository.findOne({ where: { Id: createChildDto.PadreId } });
 		if (!parentChild) {
-		  throw new NotFoundException('Elemento superior de la jerarquía no encontrado');
+		  throw new BusinessException('Elemento superior de la jerarquía no encontrado', 400);
 		}
 
 		const child = this.childrensRepository.create({
@@ -41,7 +42,7 @@ export class CatalogsService {
 	async updateChild(id: number, updateChildDto: ChildUpdateDto): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
-			throw new NotFoundException('Hijo no encontrado');
+			throw new BusinessException('Hijo no encontrado', 400);
 		}
 
 		const { CodigoCatalogo, ...updateData } = updateChildDto;
@@ -58,7 +59,7 @@ export class CatalogsService {
 	async changeOrder(id: number, order: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
-			throw new NotFoundException('Hijo no encontrado');
+			throw new BusinessException('Hijo no encontrado', 400);
 		}
 		child.Orden = order;
 		return await this.childrensRepository.save(child);
@@ -67,11 +68,11 @@ export class CatalogsService {
 	async changeParent(id: number, parentId: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
-			throw new NotFoundException('Hijo no encontrado');
+			throw new BusinessException('Hijo no encontrado', 400);
 		}
 		const parent = await this.parentsRepository.findOneBy({ Id: parentId });
 		if (!parent) {
-			throw new NotFoundException('Padre no encontrado');
+			throw new BusinessException('Padre no encontrado', 400);
 		}
 		child.PadreId = parentId;
 		child.parent = parent;
@@ -81,7 +82,7 @@ export class CatalogsService {
 	async changeStatus(id: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
-			throw new NotFoundException('Hijo no encontrado');
+			throw new BusinessException('Hijo no encontrado', 400);
 		}
 
 		child.Estado = !child.Estado;
@@ -91,14 +92,14 @@ export class CatalogsService {
 	async deleteChild(id: number): Promise<void> {
 		const result = await this.childrensRepository.delete(id);
 		if (result.affected === 0) {
-			throw new NotFoundException('Hijo no encontrado');
+			throw new BusinessException('Hijo no encontrado', 400);
 		}
 	}
 
 	async getChildById(id: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
-			throw new NotFoundException('Hijo no encontrado');
+			throw new BusinessException('Hijo no encontrado', 400);
 		}
 		return child;
 	}
