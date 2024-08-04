@@ -9,6 +9,7 @@ import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AuditsModule } from './modules/audits/audits.module';
 import { CatalogsModule } from './modules/catalogs/catalogs.module';
+import { CollectionSitesModule } from './modules/collection_sites/collection_sites.module';
 
 @Module({
 	imports: [
@@ -25,6 +26,7 @@ import { CatalogsModule } from './modules/catalogs/catalogs.module';
 		RolesModule,
 		AuditsModule,
 		CatalogsModule,
+		CollectionSitesModule,
 	],
 	controllers: [],
 	providers: [],

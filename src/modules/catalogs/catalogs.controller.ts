@@ -19,37 +19,37 @@ export class CatalogsController {
 	@Put(':id')
 	@ApiOperation({ summary: 'Actualizar catalogo' })
 	async update(@IdParam() id: string, @Body() updateChildDto: ChildUpdateDto): Promise<Child> {
-		return await this.catalogsService.updateChild(id, updateChildDto);
+		return await this.catalogsService.updateChild(+id, updateChildDto);
 	}
 
 	@Put(':id/change-order/:order')
 	@ApiOperation({ summary: 'Cambiar de orden' })
 	async changeOrder(@IdParam() id: string, @IdParam('order') order: number): Promise<Child> {
-		return await this.catalogsService.changeOrder(id, order);
+		return await this.catalogsService.changeOrder(+id, order);
 	}
 
 	@Put(':id/change-parent/:parentId')
 	@ApiOperation({ summary: 'Cambiar de padre' })
 	async changeParent(@IdParam() id: string, @IdParam('parentId') parentId: string): Promise<Child> {
-		return await this.catalogsService.changeParent(id, parentId);
+		return await this.catalogsService.changeParent(+id, +parentId);
 	}
 
 	@Put(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estados' })
 	async changeStatus(@IdParam() id: string): Promise<Child> {
-		return await this.catalogsService.changeStatus(id);
+		return await this.catalogsService.changeStatus(+id);
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Eliminar hijo' })
 	async delete(@IdParam() id: string): Promise<void> {
-		await this.catalogsService.deleteChild(id);
+		await this.catalogsService.deleteChild(+id);
 	}
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener hijo por su ID' })
 	async getById(@IdParam() id: string): Promise<Child> {
-		return await this.catalogsService.getChildById(id);
+		return await this.catalogsService.getChildById(+id);
 	}
 
 	@Get('key/:key')

@@ -21,6 +21,6 @@ export class AuditsController {
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener auditoria por su ID' })
 	async findOneById(@IdParam() id: string) {
-		return this.auditsService.findOneById(id);
+		return this.auditsService.findOneById(+id);
 	}
 }

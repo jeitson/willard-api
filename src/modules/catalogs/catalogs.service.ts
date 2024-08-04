@@ -38,7 +38,7 @@ export class CatalogsService {
 		return await this.childrensRepository.save(child);
 	  }
 
-	async updateChild(id: string, updateChildDto: ChildUpdateDto): Promise<Child> {
+	async updateChild(id: number, updateChildDto: ChildUpdateDto): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
 			throw new NotFoundException('Hijo no encontrado');
@@ -55,7 +55,7 @@ export class CatalogsService {
 		return await this.childrensRepository.save(child);
 	}
 
-	async changeOrder(id: string, order: number): Promise<Child> {
+	async changeOrder(id: number, order: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
 			throw new NotFoundException('Hijo no encontrado');
@@ -64,7 +64,7 @@ export class CatalogsService {
 		return await this.childrensRepository.save(child);
 	}
 
-	async changeParent(id: string, parentId: string): Promise<Child> {
+	async changeParent(id: number, parentId: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
 			throw new NotFoundException('Hijo no encontrado');
@@ -78,7 +78,7 @@ export class CatalogsService {
 		return await this.childrensRepository.save(child);
 	}
 
-	async changeStatus(id: string): Promise<Child> {
+	async changeStatus(id: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
 			throw new NotFoundException('Hijo no encontrado');
@@ -88,14 +88,14 @@ export class CatalogsService {
 		return await this.childrensRepository.save(child);
 	}
 
-	async deleteChild(id: string): Promise<void> {
+	async deleteChild(id: number): Promise<void> {
 		const result = await this.childrensRepository.delete(id);
 		if (result.affected === 0) {
 			throw new NotFoundException('Hijo no encontrado');
 		}
 	}
 
-	async getChildById(id: string): Promise<Child> {
+	async getChildById(id: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
 		if (!child) {
 			throw new NotFoundException('Hijo no encontrado');

@@ -83,7 +83,7 @@ export class UsersService {
 	}
 
 
-	async addRolToUser(userId: string, rolId: string): Promise<UserRol> {
+	async addRolToUser(userId: number, rolId: number): Promise<UserRol> {
 		const user = await this.userRepository.findOneBy({ Id: userId });
 		const rol = await this.rolesRepository.findOneBy({ Id: rolId });
 

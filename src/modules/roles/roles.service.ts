@@ -34,7 +34,7 @@ export class RolesService {
 		});
 	}
 
-	async findOneById(id: string): Promise<Rol | undefined> {
+	async findOneById(id: number): Promise<Rol | undefined> {
 		return this.rolesRepository.findOneBy({
 			Id: id
 		});
@@ -60,7 +60,7 @@ export class RolesService {
 	}
 
 	async update(
-		id: string,
+		id: number,
 		data: RolUpdateDto,
 	): Promise<void> {
 		await this.entityManager.transaction(async (manager) => {

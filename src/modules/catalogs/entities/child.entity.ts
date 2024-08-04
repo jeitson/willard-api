@@ -5,7 +5,7 @@ import { Parent } from "./parent.entity";
 @Entity({ name: 'catalogo_hijo' })
 export class Child extends CompleteEntity {
 	@Column({ type: 'bigint' })
-	PadreId: string;
+	PadreId: number;
 
 	@Column({ type: 'varchar', length: 50 })
 	CodigoCatalogo: string;

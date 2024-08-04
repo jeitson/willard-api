@@ -35,7 +35,7 @@ export class AuditsService {
 		});
 	}
 
-	async findOneById(id: string): Promise<Audit | undefined> {
+	async findOneById(id: number): Promise<Audit | undefined> {
 		return this.auditsRepository.findOneBy({
 			Id: id
 		});

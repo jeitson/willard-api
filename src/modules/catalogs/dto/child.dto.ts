@@ -20,7 +20,7 @@ export class ChildDto {
 	CodigoCatalogo: string;
 
 	@Column({ type: 'bigint' })
-	PadreId: string;
+	PadreId: number;
 
 	@ApiProperty({ description: 'Nombre', example: 'Administrador' })
 	@IsString()

@@ -21,7 +21,7 @@ export class RolesController {
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener rol por su ID' })
 	async findOneById(@IdParam() id: string) {
-		return this.rolesService.findOneById(id);
+		return this.rolesService.findOneById(+id);
 	}
 
 	@Post()
@@ -36,6 +36,6 @@ export class RolesController {
 		@IdParam() id: string,
 		@Body() dto: RolUpdateDto,
 	): Promise<void> {
-		await this.rolesService.update(id, dto);
+		await this.rolesService.update(+id, dto);
 	}
 }
