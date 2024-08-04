@@ -13,14 +13,14 @@ import { PagerDto } from 'src/core/common/dto/pager.dto';
 import { Column } from 'typeorm';
 
 export class ChildDto {
-	@Column({ type: 'bigint' })
-	PadreId: string;
-
 	@ApiProperty({ description: 'Codigo del Padre' })
 	@IsString()
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	CodigoCatalogo: string;
+
+	@Column({ type: 'bigint' })
+	PadreId: string;
 
 	@ApiProperty({ description: 'Nombre', example: 'Administrador' })
 	@IsString()

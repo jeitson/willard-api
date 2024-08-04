@@ -18,19 +18,25 @@ export class CatalogsService {
 
 	async createChild(createChildDto: ChildDto): Promise<Child> {
 		const { CodigoCatalogo, ...childData } = createChildDto;
+
 		const parent = await this.parentsRepository.findOne({ where: { Codigo: CodigoCatalogo } });
 		if (!parent) {
-			throw new NotFoundException('Padre no encontrado');
+		  throw new NotFoundException('Padre no encontrado');
+		}
+
+		const parentChild = await this.childrensRepository.findOne({ where: { Id: createChildDto.PadreId } });
+		if (!parentChild) {
+		  throw new NotFoundException('Elemento superior de la jerarquía no encontrado');
 		}
 
 		const child = this.childrensRepository.create({
-			...childData,
-			parent,
-			PadreId: parent.Id,
+		  ...childData,
+		  CodigoCatalogo,
+		  PadreId: parentChild.Id,
 		});
 
 		return await this.childrensRepository.save(child);
-	}
+	  }
 
 	async updateChild(id: string, updateChildDto: ChildUpdateDto): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ Id: id });
