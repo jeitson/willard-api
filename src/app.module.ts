@@ -13,6 +13,7 @@ import { CollectionSitesModule } from './modules/collection_sites/collection_sit
 import { ClientsModule } from './modules/clients/clients.module';
 import { ProductsModule } from './modules/products/products.module';
 import { TransportersModule } from './modules/transporters/transporters.module';
+import { ConsultantsModule } from './modules/consultants/consultants.module';
 
 @Module({
 	imports: [
@@ -33,6 +34,7 @@ import { TransportersModule } from './modules/transporters/transporters.module';
 		ClientsModule,
 		ProductsModule,
 		TransportersModule,
+		ConsultantsModule,
 	],
 	controllers: [],
 	providers: [],
