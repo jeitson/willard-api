@@ -11,6 +11,7 @@ import { AuditsModule } from './modules/audits/audits.module';
 import { CatalogsModule } from './modules/catalogs/catalogs.module';
 import { CollectionSitesModule } from './modules/collection_sites/collection_sites.module';
 import { ClientsModule } from './modules/clients/clients.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
 	imports: [
@@ -29,6 +30,7 @@ import { ClientsModule } from './modules/clients/clients.module';
 		CatalogsModule,
 		CollectionSitesModule,
 		ClientsModule,
+		ProductsModule,
 	],
 	controllers: [],
 	providers: [],
