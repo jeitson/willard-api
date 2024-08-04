@@ -10,6 +10,7 @@ import { RolesModule } from './modules/roles/roles.module';
 import { AuditsModule } from './modules/audits/audits.module';
 import { CatalogsModule } from './modules/catalogs/catalogs.module';
 import { CollectionSitesModule } from './modules/collection_sites/collection_sites.module';
+import { ClientsModule } from './modules/clients/clients.module';
 
 @Module({
 	imports: [
@@ -27,6 +28,7 @@ import { CollectionSitesModule } from './modules/collection_sites/collection_sit
 		AuditsModule,
 		CatalogsModule,
 		CollectionSitesModule,
+		ClientsModule,
 	],
 	controllers: [],
 	providers: [],
