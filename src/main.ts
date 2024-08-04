@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger'; // Asegúrate de ajustar la ruta correcta
 import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
 import { BadRequestException, HttpStatus, UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
-import { isDev } from './core/global/env';
+import { env, isDev } from './core/global/env';
 import { ValidationError } from 'class-validator';
 
 async function bootstrap() {
@@ -34,6 +34,6 @@ async function bootstrap() {
 
 	setupSwagger(app, configService); // Llama a setupSwagger pasando la app y el ConfigService
 
-	await app.listen(3000);
+	await app.listen(env('PORT'));
 }
 bootstrap();
