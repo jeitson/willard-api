@@ -1,44 +1,45 @@
 import { Entity, Column, ManyToOne, JoinColumn, PrimaryColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Rol } from '../../roles/entities/rol.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsOptional } from 'class-validator';
+import { Role } from 'src/modules/roles/entities/rol.entity';
 
 @Entity('usuario_rol')
-export class UserRol {
-	@PrimaryColumn({ type: 'bigint' })
-	UsuarioId: string;
+export class UserRole {
+	@PrimaryColumn({ type: 'bigint', name: 'UsuarioId' })
+	userId: string;
 
-	@PrimaryColumn({ type: 'bigint' })
-	RolId: string;
+	@PrimaryColumn({ type: 'bigint', name: 'RolId' })
+	roleId: string;
 
 	@ManyToOne(() => User, user => user.roles)
 	@JoinColumn({ name: 'UsuarioId' })
-	usuario: User;
+	user: User;
 
-	@ManyToOne(() => Rol, rol => rol.usuarios)
+	@ManyToOne(() => Role, role => role.users)
 	@JoinColumn({ name: 'RolId' })
-	rol: Rol;
+	role: Role;
 
 	@ApiHideProperty()
 	@Exclude()
-	@Column({ update: false, comment: 'Creador', type: 'bigint', nullable: true })
-	CreadoPor: string;
+	@Column({ update: false, comment: 'Creador', type: 'bigint', nullable: true, name: 'CreadoPor' })
+	createdBy: string;
 
 	@ApiHideProperty()
 	@Exclude()
-	@Column({ comment: 'Actualizador', type: 'bigint', nullable: true })
+	@Column({ comment: 'Actualizador', type: 'bigint', nullable: true, name: 'ModificadoPor' })
 	@IsOptional()
-	ModificadoPor: string;
+	updatedBy: string;
 
 	@ApiHideProperty()
 	@CreateDateColumn({
 		nullable: true,
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',
+		name: 'FechaCreacion'
 	})
-	FechaCreacion: Date;
+	createdAt: Date;
 
 	@ApiHideProperty()
 	@UpdateDateColumn({
@@ -46,6 +47,7 @@ export class UserRol {
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',
 		onUpdate: 'CURRENT_TIMESTAMP(6)',
+		name: 'FechaModificado'
 	})
-	FechaModificado: Date;
+	updatedAt: Date;
 }

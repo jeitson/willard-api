@@ -10,63 +10,62 @@ import {
 } from 'class-validator';
 
 import { PagerDto } from 'src/core/common/dto/pager.dto';
-import { Column } from 'typeorm';
 
 export class ChildDto {
 	@ApiProperty({ description: 'Codigo del Padre' })
 	@IsString()
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
-	CodigoCatalogo: string;
+	catalogCode: string;
 
-	@Column({ type: 'bigint' })
-	PadreId: number;
+	@ApiProperty({ type: 'bigint', description: 'ID del padre' })
+	parentId: number;
 
 	@ApiProperty({ description: 'Nombre', example: 'Administrador' })
 	@IsString()
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
-	Nombre: string;
+	name: string;
 
 	@ApiProperty({ description: 'Descripción', example: 'Descripicón del hijo' })
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	Descripcion: string = '';
+	description: string = '';
 
 	@ApiProperty({ description: 'Orden', example: 'Orden de los items' })
 	@IsOptional()
 	@IsInt()
-	Orden?: number = null;
+	order?: number = null;
 
 	@ApiProperty({ description: 'Extra 1' })
 	@IsOptional()
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	Extra1: string = '';
+	extra1: string = '';
 
 	@ApiProperty({ description: 'Extra 2' })
 	@IsOptional()
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	Extra2: string = '';
+	extra2: string = '';
 
 	@ApiProperty({ description: 'Extra 3' })
 	@IsOptional()
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	Extra3: string = '';
+	extra3: string = '';
 
 	@ApiProperty({ description: 'Extra 4' })
 	@IsOptional()
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	Extra4: string = '';
+	extra4: string = '';
 
 	@ApiProperty({ description: 'Extra 5' })
 	@IsOptional()
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	Extra5: string = '';
+	extra5: string = '';
 }
 
 export class ChildUpdateDto extends PartialType(ChildDto) { }

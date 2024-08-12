@@ -20,7 +20,7 @@ export class ClientsService {
 	}
 
 	async update(id: number, clientUpdateDto: ClientUpdateDto): Promise<Client> {
-		const client = await this.clientsRepository.findOne({ where: { Id: id } });
+		const client = await this.clientsRepository.findOne({ where: { id } });
 		if (!client) {
 			throw new BusinessException('Cliente no encontrado');
 		}
@@ -31,12 +31,12 @@ export class ClientsService {
 	async findAll({
 		page,
 		pageSize,
-		Nombre
+		name
 	}: ClientQueryDto): Promise<Pagination<Client>> {
 		const queryBuilder = this.clientsRepository
 			.createQueryBuilder('cliente')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
 		return paginate<Client>(queryBuilder, {
@@ -46,7 +46,7 @@ export class ClientsService {
 	}
 
 	async findOne(id: number): Promise<Client> {
-		const client = await this.clientsRepository.findOne({ where: { Id: id } });
+		const client = await this.clientsRepository.findOne({ where: { id } });
 		if (!client) {
 			throw new BusinessException('Cliente no encontrado');
 		}
@@ -55,7 +55,7 @@ export class ClientsService {
 
 	async changeStatus(id: number, status: boolean): Promise<Client> {
 		const client = await this.findOne(id);
-		client.Estado = status;
+		client.status = status;
 		return await this.clientsRepository.save(client);
 	}
 

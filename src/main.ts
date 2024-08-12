@@ -2,35 +2,47 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
-import { setupSwagger } from './setup-swagger'; // Asegúrate de ajustar la ruta correcta
-import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
-import { BadRequestException, HttpStatus, UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
+import { setupSwagger } from './setup-swagger';
 import { env, isDev } from './core/global/env';
-import { ValidationError } from 'class-validator';
+import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
+import {
+	HttpStatus,
+	UnprocessableEntityException,
+	ValidationPipe,
+} from '@nestjs/common';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 	const configService = app.get(ConfigService);
 
-	app.enableCors();
 
-	app.useGlobalPipes(new ValidationPipe({
-		whitelist: true, // Remover propiedades no definidas en el DTO
-		forbidNonWhitelisted: true, // Lanza error si se encuentra una propiedad no definida en el DTO
-		transform: true, // Transforma las propiedades a los tipos esperados,
-		exceptionFactory: (errors: ValidationError[]) => {
-			const formattedErrors = errors.map(error => {
-				return {
-					property: error.property,
-					errors: Object.values(error.constraints),
-				};
-			});
-			return new BadRequestException(formattedErrors);
-		},
-	}));
+	app.useGlobalPipes(
+		new ValidationPipe({
+			transform: true,
+			whitelist: true,
+			transformOptions: { enableImplicitConversion: true },
+			errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+			stopAtFirstError: false, // Procesa todos los errores en lugar de detenerse en el primero
+			exceptionFactory: errors => {
+				const errorMessages = errors.map(error => {
+					const constraints = error.constraints
+						? Object.values(error.constraints)
+						: [];
+					return {
+						property: error.property,
+						errors: constraints,
+					};
+				});
 
-	if (isDev)
-		app.useGlobalInterceptors(new LoggingInterceptor())
+				return new UnprocessableEntityException({
+					message: 'Validation failed',
+					errors: errorMessages,
+				});
+			},
+		}),
+	);
+
+	if (isDev) app.useGlobalInterceptors(new LoggingInterceptor());
 
 	setupSwagger(app, configService); // Llama a setupSwagger pasando la app y el ConfigService
 

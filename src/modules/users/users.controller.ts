@@ -20,6 +20,7 @@ export class UsersController {
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener usuario por su ID' })
+	@ApiResult({ type: User })
 	async findOneById(@IdParam() id: string) {
 		return this.usersService.findUserById(id);
 	}

@@ -22,12 +22,12 @@ export class CollectionSitesService {
 	async findAll({
 		page,
 		pageSize,
-		Nombre
+		name
 	}: CollectionSiteQueryDto): Promise<Pagination<CollectionSite>> {
 		const queryBuilder = this.collectionSiteRepository
 			.createQueryBuilder('sedes_acopio')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
 		return paginate<CollectionSite>(queryBuilder, {
@@ -37,7 +37,7 @@ export class CollectionSitesService {
 	}
 
 	async findOne(id: number): Promise<CollectionSite> {
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ Id: id });
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id });
 		if (!collectionSite) {
 			throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
 		}
@@ -46,7 +46,7 @@ export class CollectionSitesService {
 
 	async update(id: number, updateCollectionSiteDto: CollectionSiteUpdateDto): Promise<CollectionSite> {
 		await this.collectionSiteRepository.update(id, updateCollectionSiteDto);
-		const updatedCollectionSite = await this.collectionSiteRepository.findOneBy({ Id: id });
+		const updatedCollectionSite = await this.collectionSiteRepository.findOneBy({ id });
 		if (!updatedCollectionSite) {
 			throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
 
@@ -55,12 +55,12 @@ export class CollectionSitesService {
 	}
 
 	async changeStatus(id: number, status: boolean): Promise<CollectionSite> {
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ Id: id });
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id });
 		if (!collectionSite) {
 			throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
 
 		}
-		collectionSite.Estado = status;
+		collectionSite.status = status;
 		return await this.collectionSiteRepository.save(collectionSite);
 	}
 

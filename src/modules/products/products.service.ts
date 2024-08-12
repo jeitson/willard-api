@@ -20,7 +20,7 @@ export class ProductsService {
 	}
 
 	async update(id: number, productUpdateDto: ProductUpdateDto): Promise<Product> {
-		const product = await this.productsRepository.findOne({ where: { Id: id } });
+		const product = await this.productsRepository.findOne({ where: { id } });
 		if (!product) {
 			throw new BusinessException('Producto no encontrado', 400);
 		}
@@ -31,12 +31,12 @@ export class ProductsService {
 	async findAll({
 		page,
 		pageSize,
-		Nombre
+		name
 	}: ProductQueryDto): Promise<Pagination<Product>> {
 		const queryBuilder = this.productsRepository
 			.createQueryBuilder('producto')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
 		return paginate<Product>(queryBuilder, {
@@ -46,7 +46,7 @@ export class ProductsService {
 	}
 
 	async findOne(id: number): Promise<Product> {
-		const product = await this.productsRepository.findOne({ where: { Id: id } });
+		const product = await this.productsRepository.findOne({ where: { id } });
 		if (!product) {
 			throw new BusinessException('Producto no encontrado', 400);
 		}
@@ -55,7 +55,7 @@ export class ProductsService {
 
 	async changeStatus(id: number, status: boolean): Promise<Product> {
 		const product = await this.findOne(id);
-		product.Estado = status;
+		product.status = status;
 		return await this.productsRepository.save(product);
 	}
 

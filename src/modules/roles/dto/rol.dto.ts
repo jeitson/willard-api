@@ -12,12 +12,12 @@ export class RolDto {
 	@IsString()
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
-	Nombre: string;
+	name: string;
 
 	@ApiProperty({ description: 'Descripción', example: 'Rol aplicado a los usuarios administrativos' })
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	Descripcion: string = '';
+	description: string = '';
 }
 
 export class RolUpdateDto extends PartialType(RolDto) { }

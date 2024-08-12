@@ -20,7 +20,7 @@ export class ConsultantsService {
 	}
 
 	async update(id: number, consultantUpdateDto: ConsultantUpdateDto): Promise<Consultant> {
-		const consultant = await this.consultantsRepository.findOne({ where: { Id: id } });
+		const consultant = await this.consultantsRepository.findOne({ where: { id } });
 		if (!consultant) {
 			throw new BusinessException('Asesor no encontrado', 400);
 		}
@@ -31,12 +31,12 @@ export class ConsultantsService {
 	async findAll({
 		page,
 		pageSize,
-		Nombre
+		name
 	}: ConsultantQueryDto): Promise<Pagination<Consultant>> {
 		const queryBuilder = this.consultantsRepository
 			.createQueryBuilder('asesor')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
 		return paginate<Consultant>(queryBuilder, {
@@ -46,7 +46,7 @@ export class ConsultantsService {
 	}
 
 	async findOne(id: number): Promise<Consultant> {
-		const consultant = await this.consultantsRepository.findOne({ where: { Id: id } });
+		const consultant = await this.consultantsRepository.findOne({ where: { id } });
 		if (!consultant) {
 			throw new BusinessException('Asesor no encontrado', 400);
 		}
@@ -55,7 +55,7 @@ export class ConsultantsService {
 
 	async changeStatus(id: number, status: boolean): Promise<Consultant> {
 		const consultant = await this.findOne(id);
-		consultant.Estado = status;
+		consultant.status = status;
 		return await this.consultantsRepository.save(consultant);
 	}
 

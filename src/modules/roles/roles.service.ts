@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Rol } from './entities/rol.entity';
+import { Role } from './entities/rol.entity';
 import { EntityManager, Like, Repository } from 'typeorm';
 import { RolDto, RolQueryDto, RolUpdateDto } from './dto/rol.dto';
 import { Pagination } from 'src/core/helper/paginate/pagination';
@@ -12,47 +12,47 @@ import { ErrorEnum } from 'src/core/constants/error-code.constant';
 @Injectable()
 export class RolesService {
 	constructor(
-		@InjectRepository(Rol)
-		private readonly rolesRepository: Repository<Rol>,
+		@InjectRepository(Role)
+		private readonly rolesRepository: Repository<Role>,
 		@InjectEntityManager() private entityManager: EntityManager
 	) { }
 
 	async findAll({
 		page,
 		pageSize,
-		Nombre
-	}: RolQueryDto): Promise<Pagination<Rol>> {
+		name
+	}: RolQueryDto): Promise<Pagination<Role>> {
 		const queryBuilder = this.rolesRepository
 			.createQueryBuilder('rol')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
-		return paginate<Rol>(queryBuilder, {
+		return paginate<Role>(queryBuilder, {
 			page,
 			pageSize,
 		});
 	}
 
-	async findOneById(id: number): Promise<Rol | undefined> {
+	async findOneById(id: number): Promise<Role | undefined> {
 		return this.rolesRepository.findOneBy({
-			Id: id
+			id
 		});
 	}
 
 	async create({
-		Nombre,
-		Descripcion
+		name,
+		description
 	}: RolDto): Promise<void> {
-		const exists = await this.rolesRepository.findOneBy({ Nombre });
+		const exists = await this.rolesRepository.findOneBy({ name });
 
 		if (!isEmpty(exists))
 			throw new BusinessException(ErrorEnum.SYSTEM_ROLE_EXISTS);
 
 		await this.entityManager.transaction(async (manager) => {
-			const r = manager.create(Rol, {
-				Nombre,
-				Descripcion
+			const r = manager.create(Role, {
+				name,
+				description
 			});
 
 			await manager.save(r);
@@ -64,7 +64,7 @@ export class RolesService {
 		data: RolUpdateDto,
 	): Promise<void> {
 		await this.entityManager.transaction(async (manager) => {
-			await manager.update(Rol, id, data);
+			await manager.update(Role, id, data);
 		});
 	}
 }

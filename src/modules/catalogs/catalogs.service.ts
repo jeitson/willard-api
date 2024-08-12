@@ -18,38 +18,38 @@ export class CatalogsService {
 	) { }
 
 	async createChild(createChildDto: ChildDto): Promise<Child> {
-		const { CodigoCatalogo, ...childData } = createChildDto;
+		const { catalogCode, ...childData } = createChildDto;
 
-		const parent = await this.parentsRepository.findOne({ where: { Codigo: CodigoCatalogo } });
+		const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
 		if (!parent) {
 		  throw new BusinessException('Padre no encontrado', 400);
 		}
 
-		const parentChild = await this.childrensRepository.findOne({ where: { Id: createChildDto.PadreId } });
+		const parentChild = await this.childrensRepository.findOne({ where: { id: createChildDto.parentId } });
 		if (!parentChild) {
 		  throw new BusinessException('Elemento superior de la jerarquía no encontrado', 400);
 		}
 
 		const child = this.childrensRepository.create({
 		  ...childData,
-		  CodigoCatalogo,
-		  PadreId: parentChild.Id,
+		  catalogCode,
+		  parentId: parentChild.id,
 		});
 
 		return await this.childrensRepository.save(child);
 	  }
 
 	async updateChild(id: number, updateChildDto: ChildUpdateDto): Promise<Child> {
-		const child = await this.childrensRepository.findOneBy({ Id: id });
+		const child = await this.childrensRepository.findOneBy({ id });
 		if (!child) {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
 
-		const { CodigoCatalogo, ...updateData } = updateChildDto;
-		if (CodigoCatalogo) {
-			const parent = await this.parentsRepository.findOne({ where: { Codigo: CodigoCatalogo } });
+		const { catalogCode, ...updateData } = updateChildDto;
+		if (catalogCode) {
+			const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
 			if (parent) {
-				updateData.PadreId = parent.Id;
+				updateData.parentId = parent.id;
 			}
 		}
 		Object.assign(child, updateData);
@@ -57,35 +57,35 @@ export class CatalogsService {
 	}
 
 	async changeOrder(id: number, order: number): Promise<Child> {
-		const child = await this.childrensRepository.findOneBy({ Id: id });
+		const child = await this.childrensRepository.findOneBy({ id });
 		if (!child) {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
-		child.Orden = order;
+		child.order = order;
 		return await this.childrensRepository.save(child);
 	}
 
 	async changeParent(id: number, parentId: number): Promise<Child> {
-		const child = await this.childrensRepository.findOneBy({ Id: id });
+		const child = await this.childrensRepository.findOneBy({ id });
 		if (!child) {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
-		const parent = await this.parentsRepository.findOneBy({ Id: parentId });
+		const parent = await this.parentsRepository.findOneBy({ id: parentId });
 		if (!parent) {
 			throw new BusinessException('Padre no encontrado', 400);
 		}
-		child.PadreId = parentId;
+		child.parentId = parentId;
 		child.parent = parent;
 		return await this.childrensRepository.save(child);
 	}
 
 	async changeStatus(id: number): Promise<Child> {
-		const child = await this.childrensRepository.findOneBy({ Id: id });
+		const child = await this.childrensRepository.findOneBy({ id });
 		if (!child) {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
 
-		child.Estado = !child.Estado;
+		child.status = !child.status;
 		return await this.childrensRepository.save(child);
 	}
 
@@ -97,7 +97,7 @@ export class CatalogsService {
 	}
 
 	async getChildById(id: number): Promise<Child> {
-		const child = await this.childrensRepository.findOneBy({ Id: id });
+		const child = await this.childrensRepository.findOneBy({ id });
 		if (!child) {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
@@ -105,10 +105,10 @@ export class CatalogsService {
 	}
 
 	async getChildrenByKey(key: string): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { CodigoCatalogo: key } });
+		return await this.childrensRepository.find({ where: { catalogCode: key } });
 	}
 
 	async getChildrenByKeys(keys: string[]): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { CodigoCatalogo: In(keys) } });
+		return await this.childrensRepository.find({ where: { catalogCode: In(keys) } });
 	}
 }

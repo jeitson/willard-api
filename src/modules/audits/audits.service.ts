@@ -7,7 +7,6 @@ import { EntityManager, Like, Repository } from 'typeorm';
 import { paginate } from 'src/core/helper/paginate';
 import { isEmpty } from 'class-validator';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
-import { ErrorEnum } from 'src/core/constants/error-code.constant';
 
 @Injectable()
 export class AuditsService {
@@ -21,12 +20,12 @@ export class AuditsService {
 	async findAll({
 		page,
 		pageSize,
-		Nombre
+		name
 	}: AuditQueryDto): Promise<Pagination<Audit>> {
 		const queryBuilder = this.auditsRepository
 			.createQueryBuilder('rol')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
 		return paginate<Audit>(queryBuilder, {
@@ -37,25 +36,25 @@ export class AuditsService {
 
 	async findOneById(id: number): Promise<Audit | undefined> {
 		return this.auditsRepository.findOneBy({
-			Id: id
+			id
 		});
 	}
 
 	async create({
-		Nombre,
-		Descripcion,
-		UsuarioId
+		name,
+		description,
+		userId
 	}: AuditDto): Promise<void> {
-		const exists = await this.auditsRepository.findOneBy({ Nombre });
+		const exists = await this.auditsRepository.findOneBy({ name });
 
 		if (!isEmpty(exists))
 			throw new BusinessException('Ya existe el nombre');
 
 		await this.entityManager.transaction(async (manager) => {
 			const r = manager.create(Audit, {
-				Nombre,
-				Descripcion,
-				UsuarioId
+				name,
+				description,
+				userId
 			});
 
 			await manager.save(r);

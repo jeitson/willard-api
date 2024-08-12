@@ -10,16 +10,17 @@ import {
 } from 'typeorm';
 
 export abstract class CommonEntity extends BaseEntity {
-	@PrimaryGeneratedColumn({ type: 'bigint' })
-	Id: number;
+	@PrimaryGeneratedColumn({ type: 'bigint', name: 'Id' })
+	id: number;
 
 	@ApiHideProperty()
 	@CreateDateColumn({
 		nullable: true,
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',
+		name: 'FechaCreacion',
 	})
-	FechaCreacion: Date;
+	createdAt: Date;
 
 	@ApiHideProperty()
 	@UpdateDateColumn({
@@ -27,24 +28,25 @@ export abstract class CommonEntity extends BaseEntity {
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',
 		onUpdate: 'CURRENT_TIMESTAMP(6)',
+		name: 'FechaModificado',
 	})
-	FechaModificado: Date;
+	updatedAt: Date;
 
 	@ApiHideProperty()
 	@ApiProperty({ description: 'Estado' })
-	@Column({ comment: 'Estado', default: true })
-	Estado: boolean;
+	@Column({ comment: 'Estado', default: true, name: 'Estado' })
+	status: boolean;
 }
 
 export abstract class CompleteEntity extends CommonEntity {
 	@ApiHideProperty()
 	@Exclude()
-	@Column({ update: false, comment: 'Creador', type: 'bigint', nullable: true })
-	CreadoPor: string;
+	@Column({ update: false, comment: 'Creador', type: 'bigint', nullable: true, name: 'CreadoPor' })
+	createdBy: string;
 
 	@ApiHideProperty()
 	@Exclude()
-	@Column({ comment: 'Actualizador', type: 'bigint', nullable: true })
+	@Column({ comment: 'Actualizador', type: 'bigint', nullable: true, name: 'ModificadoPor' })
 	@IsOptional()
-	ModificadoPor: string;
+	modifiedBy: string;
 }

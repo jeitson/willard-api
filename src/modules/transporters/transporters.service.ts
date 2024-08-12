@@ -20,7 +20,7 @@ export class TransportersService {
 	}
 
 	async update(id: number, transporterUpdateDto: TransporterUpdateDto): Promise<Transporter> {
-		const transporter = await this.transportersRepository.findOne({ where: { Id: id } });
+		const transporter = await this.transportersRepository.findOne({ where: { id } });
 		if (!transporter) {
 			throw new BusinessException('Transportador no encontrado', 400);
 		}
@@ -31,12 +31,12 @@ export class TransportersService {
 	async findAll({
 		page,
 		pageSize,
-		Nombre
+		name
 	}: TransporterQueryDto): Promise<Pagination<Transporter>> {
 		const queryBuilder = this.transportersRepository
 			.createQueryBuilder('transportador')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
 		return paginate<Transporter>(queryBuilder, {
@@ -46,7 +46,7 @@ export class TransportersService {
 	}
 
 	async findOne(id: number): Promise<Transporter> {
-		const transporter = await this.transportersRepository.findOne({ where: { Id: id } });
+		const transporter = await this.transportersRepository.findOne({ where: { id } });
 		if (!transporter) {
 			throw new BusinessException('Transportador no encontrado', 400);
 		}
@@ -55,7 +55,7 @@ export class TransportersService {
 
 	async changeStatus(id: number, status: boolean): Promise<Transporter> {
 		const transporter = await this.findOne(id);
-		transporter.Estado = status;
+		transporter.status = status;
 		return await this.transportersRepository.save(transporter);
 	}
 

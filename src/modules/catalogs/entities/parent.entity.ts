@@ -4,14 +4,14 @@ import { Child } from "./child.entity";
 
 @Entity({ name: 'catalogo_padre' })
 export class Parent extends CompleteEntity {
-	@Column({ unique: true, type: 'varchar', length: 50 })
-	Codigo: string;
+	@Column({ unique: true, type: 'varchar', length: 50, name: 'Codigo' })
+	code: string;
 
-	@Column({ type: 'varchar', length: 50 })
-	Nombre: string;
+	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
+	name: string;
 
-	@Column({ type: 'varchar', length: 255, default: null, nullable: true })
-	Descripcion: string;
+	@Column({ type: 'varchar', length: 255, default: null, nullable: true, name: 'Descripcion' })
+	description: string;
 
 	@OneToMany(() => Child, (child) => child.parent)
 	children: Child[];

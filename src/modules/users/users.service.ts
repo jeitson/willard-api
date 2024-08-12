@@ -8,8 +8,8 @@ import { ErrorEnum } from 'src/core/constants/error-code.constant';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
-import { Rol } from '../roles/entities/rol.entity';
-import { UserRol } from './entities/user-rol.entity';
+import { Role } from '../roles/entities/rol.entity';
+import { UserRole } from './entities/user-rol.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,25 +18,25 @@ export class UsersService {
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
 		@InjectEntityManager() private entityManager: EntityManager,
-		@InjectRepository(Rol)
-		private readonly rolesRepository: Repository<Rol>,
-		@InjectRepository(UserRol)
-		private readonly userRolRepository: Repository<UserRol>,
+		@InjectRepository(Role)
+		private readonly rolesRepository: Repository<Role>,
+		@InjectRepository(UserRole)
+		private readonly userRolRepository: Repository<UserRole>,
 	) { }
 
 	async findAll({
 		page,
 		pageSize,
-		Email,
-		Nombre
+		email,
+		name
 	}: UserQueryDto): Promise<Pagination<User>> {
 		const queryBuilder = this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'userRol')
 			.leftJoinAndSelect('userRol.rol', 'rol')
 			.where({
-				...(Nombre ? { Nombre: Like(`%${Nombre}%`) } : null),
-				...(Email ? { Email: Like(`%${Email}%`) } : null),
+				...(name ? { name: Like(`%${name}%`) } : null),
+				...(email ? { email: Like(`%${email}%`) } : null),
 			});
 
 		return paginate<User>(queryBuilder, {
@@ -54,10 +54,10 @@ export class UsersService {
 			.getOne();
 	}
 	async create({
-		Email,
+		email,
 		...data
 	}: UserDto): Promise<void> {
-		const exists = await this.userRepository.findOneBy({ Email });
+		const exists = await this.userRepository.findOneBy({ email });
 
 		if (!isEmpty(exists))
 			throw new BusinessException(ErrorEnum.SYSTEM_USER_EXISTS);
@@ -65,7 +65,7 @@ export class UsersService {
 		await this.entityManager.transaction(async (manager) => {
 
 			const u = manager.create(User, {
-				Email,
+				email,
 				...data
 			});
 
@@ -83,17 +83,17 @@ export class UsersService {
 	}
 
 
-	async addRolToUser(userId: number, rolId: number): Promise<UserRol> {
-		const user = await this.userRepository.findOneBy({ Id: userId });
-		const rol = await this.rolesRepository.findOneBy({ Id: rolId });
+	async addRolToUser(userId: number, rolId: number): Promise<UserRole> {
+		const user = await this.userRepository.findOneBy({ id: userId });
+		const rol = await this.rolesRepository.findOneBy({ id: rolId });
 
 		if (!user || !rol) {
 			throw new Error('Usuario o Rol no encontrado');
 		}
 
-		const userRol = new UserRol();
-		userRol.usuario = user;
-		userRol.rol = rol;
+		const userRol = new UserRole();
+		userRol.user = user;
+		userRol.role = rol;
 
 		return this.userRolRepository.save(userRol);
 	}
