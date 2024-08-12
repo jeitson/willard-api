@@ -18,7 +18,7 @@ export class ChildDto {
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	catalogCode: string;
 
-	@ApiProperty({ type: 'bigint', description: 'ID del padre' })
+	@ApiProperty({ description: 'ID del padre' })
 	parentId: number;
 
 	@ApiProperty({ description: 'Nombre', example: 'Administrador' })

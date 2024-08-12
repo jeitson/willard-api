@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
 import {
-	RESPONSE_CUSTOMER_ERROR_CODE,
 	RESPONSE_SUCCESS_CODE,
 } from 'src/core/constants/response.constant';
 
@@ -16,19 +16,20 @@ export class BusinessException extends HttpException {
 		if (!error.includes(':')) {
 			super(
 				HttpException.createBody({
-					code: RESPONSE_SUCCESS_CODE,
+					code: errorCode,
 					message: error,
 				}),
-				HttpStatus.OK,
+				errorCode,
 			);
 			this.errorCode = RESPONSE_SUCCESS_CODE;
 			return;
 		}
 
+
 		const [code, message] = error.split(':');
 		super(
 			HttpException.createBody({
-				code: RESPONSE_CUSTOMER_ERROR_CODE,
+				code: errorCode,
 				message,
 			}),
 			errorCode,
