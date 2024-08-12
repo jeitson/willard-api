@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import config from './core/config';
 import { SharedModule } from './core/shared/shared.module';
 import { DatabaseModule } from './core/shared/database/database.module';
@@ -14,6 +14,8 @@ import { ClientsModule } from './modules/clients/clients.module';
 import { ProductsModule } from './modules/products/products.module';
 import { TransportersModule } from './modules/transporters/transporters.module';
 import { ConsultantsModule } from './modules/consultants/consultants.module';
+import { TransformInterceptor } from './core/common/interceptors/transform.interceptor';
+import { TimeoutInterceptor } from './core/common/interceptors/timeout.interceptor';
 
 @Module({
 	imports: [
@@ -37,6 +39,9 @@ import { ConsultantsModule } from './modules/consultants/consultants.module';
 		ConsultantsModule,
 	],
 	controllers: [],
-	providers: [],
+	providers: [
+		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
+		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },
+	],
 })
 export class AppModule { }

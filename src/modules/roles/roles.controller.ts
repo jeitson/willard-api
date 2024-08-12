@@ -20,6 +20,7 @@ export class RolesController {
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener rol por su ID' })
+	@ApiResult({ type: Role })
 	async findOneById(@IdParam() id: string) {
 		return this.rolesService.findOneById(+id);
 	}

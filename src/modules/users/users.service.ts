@@ -28,16 +28,21 @@ export class UsersService {
 		page,
 		pageSize,
 		email,
-		name
+		name,
 	}: UserQueryDto): Promise<Pagination<User>> {
 		const queryBuilder = this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'userRol')
-			.leftJoinAndSelect('userRol.rol', 'rol')
-			.where({
-				...(name ? { name: Like(`%${name}%`) } : null),
-				...(email ? { email: Like(`%${email}%`) } : null),
-			});
+			.leftJoinAndSelect('userRol.role', 'role')
+			.where('1=1')
+
+		if (name) {
+			queryBuilder.andWhere('user.name LIKE :name', { name: `%${name}%` });
+		}
+
+		if (email) {
+			queryBuilder.andWhere('user.email LIKE :email', { email: `%${email}%` });
+		}
 
 		return paginate<User>(queryBuilder, {
 			page,
@@ -45,14 +50,16 @@ export class UsersService {
 		});
 	}
 
+
 	async findUserById(id: string): Promise<User | undefined> {
 		return this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'userRol')
-			.leftJoinAndSelect('userRol.rol', 'rol')
-			.where('user.Id = :id', { id })
+			.leftJoinAndSelect('userRol.role', 'role')
+			.where('user.id = :id', { id })
 			.getOne();
 	}
+
 	async create({
 		email,
 		...data
