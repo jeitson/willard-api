@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { EntityManager, Like, Repository } from 'typeorm';
+import { EntityManager, In, Like, Repository } from 'typeorm';
 import { isEmpty } from 'class-validator';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
@@ -80,10 +80,13 @@ export class UsersService {
 			await manager.save(user);
 
 			if (roles && roles.length > 0) {
-				for (const roleId of roles) {
+
+				const _roles = await this.rolesRepository.find({ where: { id: In(roles)} });
+
+				for (const role of _roles) {
 					const userRole = manager.create(UserRole, {
-						userId: user.id.toString(),
-						rolId: roleId
+						user,
+						role
 					});
 					await manager.save(userRole);
 				}
