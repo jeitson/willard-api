@@ -24,12 +24,10 @@ export class UserDto {
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	name: string;
 
-
 	@ApiProperty({ description: 'Descripción', example: 'Jon Doe, usuario de prueba' })
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
-	descripcion: string = '';
-
+	description: string = '';
 
 	@ApiProperty({ description: 'Email', example: 'bqy.dev@qq.com' })
 	@IsEmail()
@@ -46,5 +44,5 @@ export class UserUpdateDto extends PartialType(UserDto) {}
 
 export class UserQueryDto extends IntersectionType(
 	PagerDto<UserDto>,
-	PartialType(OmitType(UserDto, ['descripcion', 'oauthId']), { skipNullProperties: false }),
+	PartialType(OmitType(UserDto, ['description', 'oauthId']), { skipNullProperties: false }),
 ) { }
