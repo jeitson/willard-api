@@ -108,6 +108,10 @@ export class CatalogsService {
 		return await this.childrensRepository.find({ where: { catalogCode: key } });
 	}
 
+	async getChildrenByKeyAndParent(key: string, parentId: number): Promise<Child[]> {
+		return await this.childrensRepository.find({ where: { catalogCode: key, parentId } });
+	}
+
 	async getChildrenByKeys(keys: string[]): Promise<Child[]> {
 		return await this.childrensRepository.find({ where: { catalogCode: In(keys) } });
 	}

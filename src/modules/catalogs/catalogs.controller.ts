@@ -58,6 +58,12 @@ export class CatalogsController {
 		return await this.catalogsService.getChildrenByKey(key);
 	}
 
+	@Get('key/:key/parent/:parentId')
+	@ApiOperation({ summary: 'Obtener hijos por su llave - KEY y su padre' })
+	async getByKeyAndParentId(@Param('key') key: string, @IdParam('parentId') id: string): Promise<Child[]> {
+		return await this.catalogsService.getChildrenByKeyAndParent(key, +id);
+	}
+
 	@Post('search-by-keys')
 	@ApiOperation({ summary: 'Buscar hijos de catalogos por sus padres' })
 	async searchByKeys(@Body() { keys }: ChildSearchDto): Promise<Child[]> {
