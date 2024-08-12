@@ -20,12 +20,6 @@ export function setupSwagger(
 		.setTitle(name)
 		.setDescription(`${name} API document`)
 		.setVersion('1.0')
-	// .addSecurity(API_SECURITY_AUTH, {
-	// 	description: 'Introduzca el token',
-	// 	type: 'http',
-	// 	scheme: 'bearer',
-	// 	bearerFormat: 'JWT',
-	// });
 
 	const document = SwaggerModule.createDocument(app, documentBuilder.build(), {
 		ignoreGlobalPrefix: false,

@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import {
 	BaseEntity,
@@ -11,10 +11,12 @@ import {
 
 export abstract class CommonEntity extends BaseEntity {
 	@ApiProperty()
+	@Expose()
 	@PrimaryGeneratedColumn({ type: 'bigint', name: 'Id' })
 	id: number;
 
 	@ApiProperty()
+	@Expose()
 	@CreateDateColumn({
 		nullable: true,
 		type: 'timestamp',
@@ -24,6 +26,7 @@ export abstract class CommonEntity extends BaseEntity {
 	createdAt: Date;
 
 	@ApiProperty()
+	@Expose()
 	@UpdateDateColumn({
 		nullable: true,
 		type: 'timestamp',
@@ -33,8 +36,8 @@ export abstract class CommonEntity extends BaseEntity {
 	})
 	updatedAt: Date;
 
-	@ApiProperty()
 	@ApiProperty({ description: 'Estado' })
+	@Expose()
 	@Column({ comment: 'Estado', default: true, name: 'Estado' })
 	status: boolean;
 }
