@@ -1,4 +1,4 @@
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType, OmitType, PartialType } from '@nestjs/swagger';
 import {
 	IsNotEmpty,
 	IsString,
@@ -24,5 +24,5 @@ export class RolUpdateDto extends PartialType(RolDto) { }
 
 export class RolQueryDto extends IntersectionType(
 	PagerDto<RolDto>,
-	PartialType(RolDto),
+	PartialType(OmitType(RolDto, ['description'])),
 ) { }

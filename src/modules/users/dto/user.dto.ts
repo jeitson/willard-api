@@ -1,4 +1,4 @@
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType, OmitType, PartialType } from '@nestjs/swagger';
 import {
 	IsEmail,
 	IsInt,
@@ -41,5 +41,5 @@ export class UserUpdateDto extends PartialType(UserDto) { }
 
 export class UserQueryDto extends IntersectionType(
 	PagerDto<UserDto>,
-	PartialType(UserDto),
+	PartialType(OmitType(UserDto, ['descripcion', 'oauthId']), { skipNullProperties: false }),
 ) { }

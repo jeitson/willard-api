@@ -1,4 +1,4 @@
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType, OmitType, PartialType } from '@nestjs/swagger';
 import {
 	IsInt,
 	IsNotEmpty,
@@ -28,5 +28,5 @@ export class AuditDto {
 
 export class AuditQueryDto extends IntersectionType(
 	PagerDto<AuditDto>,
-	PartialType(AuditDto),
+	PartialType(OmitType(AuditDto, ['description'])),
 ) { }

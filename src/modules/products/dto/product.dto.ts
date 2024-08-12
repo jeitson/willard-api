@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString, IsNumber, IsDecimal, IsBoolean } from 'class-validator';
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 
 import { PagerDto } from 'src/core/common/dto/pager.dto';
 
@@ -69,5 +69,5 @@ export class ProductUpdateDto extends PartialType(ProductCreateDto) { }
 
 export class ProductQueryDto extends IntersectionType(
 	PagerDto<ProductCreateDto>,
-	PartialType(ProductCreateDto),
+	PartialType(PickType(ProductCreateDto, ['name', 'productTypeId'])),
 ) { }

@@ -1,4 +1,4 @@
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType, OmitType, PartialType } from '@nestjs/swagger';
 import {
 	ArrayNotEmpty,
 	IsArray,
@@ -72,7 +72,7 @@ export class ChildUpdateDto extends PartialType(ChildDto) { }
 
 export class ChildQueryDto extends IntersectionType(
 	PagerDto<ChildDto>,
-	PartialType(ChildDto),
+	PartialType(OmitType(ChildDto, ['extra1', 'extra2', 'extra3', 'extra4', 'extra5', 'description', 'order'])),
 ) { }
 
 
