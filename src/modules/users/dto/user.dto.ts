@@ -35,9 +35,14 @@ export class UserDto {
 	@IsEmail()
 	@ValidateIf((o) => !isEmpty(o.email))
 	email: string;
+
+	@ApiProperty({ description: 'Roles', type: [Number] })
+	@IsInt({ each: true })
+	@IsOptional()
+	roles: number[] = [];
 }
 
-export class UserUpdateDto extends PartialType(UserDto) { }
+export class UserUpdateDto extends PartialType(UserDto) {}
 
 export class UserQueryDto extends IntersectionType(
 	PagerDto<UserDto>,

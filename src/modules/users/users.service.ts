@@ -62,30 +62,50 @@ export class UsersService {
 
 	async create({
 		email,
+		roles,
 		...data
 	}: UserDto): Promise<void> {
 		const exists = await this.userRepository.findOneBy({ email });
 
-		if (!isEmpty(exists))
+		if (exists) {
 			throw new BusinessException(ErrorEnum.SYSTEM_USER_EXISTS);
+		}
 
 		await this.entityManager.transaction(async (manager) => {
-
-			const u = manager.create(User, {
+			const user = manager.create(User, {
 				email,
 				...data
 			});
 
-			await manager.save(u);
+			await manager.save(user);
+
+			if (roles && roles.length > 0) {
+				for (const roleId of roles) {
+					const userRole = manager.create(UserRole, {
+						userId: user.id.toString(),
+						rolId: roleId
+					});
+					await manager.save(userRole);
+				}
+			}
 		});
 	}
 
-	async update(
-		id: string,
-		data: UserUpdateDto,
-	): Promise<void> {
+	async update(id: string, data: UserUpdateDto): Promise<void> {
 		await this.entityManager.transaction(async (manager) => {
-			await manager.update(User, id, data);
+			const { roles, ...userData } = data;
+
+			await manager.update(User, id, userData);
+
+			if (roles) {
+				await manager.delete(UserRole, { usuarioId: id });
+
+				const userRoles = roles.map(roleId => manager.create(UserRole, {
+					userId: id,
+					rolId: roleId
+				}));
+				await manager.save(UserRole, userRoles);
+			}
 		});
 	}
 
