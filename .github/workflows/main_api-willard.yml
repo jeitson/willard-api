@@ -40,8 +40,8 @@ jobs:
         with:
             name: node-app
             path: |
-              ./dist  # Asegúrate de que esta carpeta existe y tiene contenido
-              README.md  # Archivo adicional para verificar la subida
+              ./dist
+              ./README.md
             if-no-files-found: error
             compression-level: 6
             overwrite: false
