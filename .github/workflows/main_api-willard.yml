@@ -23,16 +23,20 @@ jobs:
           npm install
           npm run build --if-present
 
+      - name: Clean up any existing artifacts
+        run: |
+          if exist artifact rmdir /s /q artifact
+
       - name: Archive production artifacts
         run: |
-          mkdir -p ./artifact
-          tar -czf ./artifact/node-app.tar.gz .
+          mkdir artifact
+          tar -czf artifact/node-app.tar.gz .
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: ./artifact/node-app.tar.gz
+          path: artifact/node-app.tar.gz
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,5 +53,14 @@ jobs:
 
       - name: Extract artifact files
         run: |
-          mkdir -p ./artifact
-          tar -xzf ./artifact/node-app.tar.gz -C ./arti
+          mkdir -p artifact
+          tar -xzf artifact/node-app.tar.gz -C artifact
+
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
+        with:
+          app-name: 'api-willard'
+          slot-name: 'Production'
+          package: artifact
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AD1AFF332A4B48E2810D80C8F1150DDB }}
