@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber, IsDecimal, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber, IsDecimal, IsBoolean, IsInt } from 'class-validator';
 import { ApiProperty, IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 
 import { PagerDto } from 'src/core/common/dto/pager.dto';
@@ -19,15 +19,15 @@ export class ProductCreateDto {
 	@IsString({ message: 'Nombre debe ser un texto.' })
 	name: string;
 
-	@ApiProperty({ description: 'Kg promedio del producto, debe ser un número.' })
-	@IsNotEmpty({ message: 'KgPromedio es obligatorio y debe ser un número.' })
-	@IsNumber({}, { message: 'KgPromedio debe ser un número.' })
+	@ApiProperty({ description: 'Kg promedio del producto, debe ser un número entero.' })
+	@IsNotEmpty({ message: 'KgPromedio es obligatorio y debe ser un número entero.' })
+	@IsInt({ message: 'KgPromedio debe ser un número entero.' })
 	averageKg: number;
 
 	@ApiProperty({ description: 'Porcentaje de recuperación del producto, debe ser un decimal.' })
 	@IsNotEmpty({ message: 'PorcentajeRecuperacion es obligatorio y debe ser un decimal.' })
 	@IsDecimal({}, { message: 'PorcentajeRecuperacion debe ser un decimal.' })
-	recoveryPercentage: number;
+	recoveryPercentage: string;
 
 	@ApiProperty({ description: 'Indicador de si el producto es certificable, debe ser booleano.' })
 	@IsNotEmpty({ message: 'EsCertificable es obligatorio y debe ser booleano.' })

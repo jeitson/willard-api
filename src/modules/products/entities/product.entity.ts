@@ -21,8 +21,8 @@ export class Product extends CompleteEntity {
 	averageKg: number;
 
 	@ApiProperty({ description: 'recoveryPercentage' })
-	@Column({ type: 'decimal', precision: 8, scale: 2, default: 0, name: 'PorcentajeRecuperacion' })
-	recoveryPercentage: number;
+	@Column({ type: 'numeric', precision: 8, scale: 2, default: 0, name: 'PorcentajeRecuperacion' })
+	recoveryPercentage: string;
 
 	@ApiProperty({ description: 'isCertifiable' })
 	@Column({ type: 'boolean', default: false, name: 'EsCertificable' })
