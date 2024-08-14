@@ -38,11 +38,13 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: |
-            ./dist  # Asegúrate de que esta carpeta existe y tiene contenido
-            ./README.md  # Archivo adicional para verificar la subida
-          if-no-files-found: error  # Falla si no encuentra archivos
+            name: node-app
+            path: |
+              ./dist  # Asegúrate de que esta carpeta existe y tiene contenido
+              README.md  # Archivo adicional para verificar la subida
+            if-no-files-found: error
+            compression-level: 6
+            overwrite: false
 
   deploy:
     runs-on: ubuntu-latest
