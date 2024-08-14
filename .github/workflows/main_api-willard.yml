@@ -29,7 +29,7 @@ jobs:
           xcopy .\dist .\artifact\dist /s /e /i
           copy package.json .\artifact\
           copy package-lock.json .\artifact\
-          # Agrega más archivos si es necesario, pero evita incluir node_modules
+          # Crea el archivo comprimido dentro del directorio artifact
           tar -czf artifact/nestjs-app.tar.gz -C artifact .
 
       - name: Upload build artifact
@@ -51,10 +51,22 @@ jobs:
         with:
           name: node-app
 
+      - name: List files in current directory
+        run: ls -R
+
+      - name: List files in node-app directory
+        run: ls -R ./node-app
+
       - name: Extract build artifact
         run: |
           mkdir -p ./artifact
-          tar -xzf ./node-app/nestjs-app.tar.gz -C ./artifact
+          # Verifica si el archivo existe antes de intentar descomprimirlo
+          if [ -f ./node-app/nestjs-app.tar.gz ]; then
+            tar -xzf ./node-app/nestjs-app.tar.gz -C ./artifact
+          else
+            echo "File ./node-app/nestjs-app.tar.gz not found"
+            exit 1
+          fi
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
