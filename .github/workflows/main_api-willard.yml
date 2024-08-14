@@ -31,13 +31,14 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
+          name: node-app  # Verifica que este nombre sea el mismo en la descarga
           path: |
-            ./dist
-            README.md  # Añade un archivo sencillo para verificar la subida y descarga
-            !node_modules/**
-            !.git/**
-            !coverage/**
+            ./dist  # Asegúrate de que esta carpeta existe y tiene contenido
+            README.md  # Archivo adicional para verificar la subida
+          if-no-files-found: error  # Asegura que falle si no encuentra archivos
+
+      - name: Check if artifact was uploaded
+        run: echo "Artifact node-app uploaded successfully."
 
   deploy:
     runs-on: ubuntu-latest
@@ -50,7 +51,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: node-app  # Este nombre debe coincidir con el utilizado en la subida
 
       - name: Verify downloaded contents
         run: ls -R  # Verifica que los archivos se descargaron correctamente
