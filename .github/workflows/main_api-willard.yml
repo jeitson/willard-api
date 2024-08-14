@@ -3,7 +3,7 @@ name: Build and deploy Node.js app to Azure Web App - api-willard
 on:
   push:
     branches:
-      - main
+      - branch-test
   workflow_dispatch:
 
 jobs:
