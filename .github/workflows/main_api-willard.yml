@@ -26,6 +26,9 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      - name: Verify artifact contents
+        run: ls -R  # Imprime la estructura de directorios para asegurarte de que el build esté en la ruta esperada
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
