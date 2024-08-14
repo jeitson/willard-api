@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Solo clona la última confirmación
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
@@ -28,7 +30,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: |
+            ./dist  # Cambia 'dist' por la carpeta donde está el build si es diferente
+            !node_modules/**  # Excluye node_modules para evitar demasiados archivos
+            !.git/**  # Excluye la carpeta .git
+            !coverage/**  # Excluye la carpeta de coverage si existe
 
   deploy:
     runs-on: ubuntu-latest
