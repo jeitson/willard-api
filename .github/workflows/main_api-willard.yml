@@ -54,8 +54,13 @@ jobs:
       - name: List files in current directory
         run: ls -R
 
-      - name: List files in node-app directory
-        run: ls -R ./node-app
+      - name: Verify downloaded artifact
+        run: |
+          if [ -d ./node-app ]; then
+            echo "Directory ./node-app exists."
+          else
+            echo "Directory ./node-app does not exist."
+          fi
 
       - name: Extract build artifact
         run: |
