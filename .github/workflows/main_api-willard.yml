@@ -27,13 +27,13 @@ jobs:
 
       - name: Verify build output
         run: |
-          if [ -d "./dist" ]; then
-            echo "Build output directory exists."
-            ls -R ./dist
-          else
-            echo "Build output directory does not exist."
+          if (Test-Path -Path "./dist") {
+            Write-Host "Build output directory exists."
+            Get-ChildItem -Recurse ./dist
+          } else {
+            Write-Host "Build output directory does not exist."
             exit 1
-          fi
+          }
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
