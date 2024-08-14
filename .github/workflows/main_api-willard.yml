@@ -1,4 +1,4 @@
-name: Build and deploy NestJS app to Azure Web App
+name: Build and deploy Node.js app to Azure Web App - api-willard
 
 on:
   push:
@@ -8,40 +8,26 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build the NestJS app
-        run: npm run build
-
-      - name: Clean up previous builds (if any)
+      - name: Install dependencies and build
         run: |
-          if [ -d "./artifact" ]; then rm -rf ./artifact; fi
-          mkdir -p ./artifact
+          npm install
+          npm run build --if-present
 
-      - name: Archive build artifacts
-        run: |
-          cp -r ./dist ./artifact/
-          cp package.json ./artifact/
-          cp -r ./node_modules ./artifact/
-          tar -czf ./artifact/nestjs-app.tar.gz -C ./artifact .
-
-      - name: Upload build artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nestjs-app
-          path: ./artifact/nestjs-app.tar.gz
+          name: node-app
+          path: .  # Incluye la ruta de la carpeta que contiene el build (e.g., ./dist)
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,21 +37,16 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Download build artifact
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: nestjs-app
+          name: node-app
 
-      - name: Extract build artifact
-        run: |
-          mkdir -p ./artifact
-          tar -xzf ./artifact/nestjs-app.tar.gz -C ./artifact
-
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'api-willard'
           slot-name: 'Production'
-          package: artifact
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AD1AFF332A4B48E2810D80C8F1150DDB }}
