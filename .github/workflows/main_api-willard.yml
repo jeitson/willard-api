@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1  # Solo clona la última confirmación
+          fetch-depth: 1
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
@@ -34,10 +34,11 @@ jobs:
         with:
           name: node-app
           path: |
-            ./dist  # Cambia 'dist' por la carpeta donde está el build si es diferente
-            !node_modules/**  # Excluye node_modules para evitar demasiados archivos
-            !.git/**  # Excluye la carpeta .git
-            !coverage/**  # Excluye la carpeta de coverage si existe
+            ./dist
+            README.md  # Añade un archivo sencillo para verificar la subida y descarga
+            !node_modules/**
+            !.git/**
+            !coverage/**
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,6 +52,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+
+      - name: Verify downloaded contents
+        run: ls -R  # Verifica que los archivos se descargaron correctamente
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
