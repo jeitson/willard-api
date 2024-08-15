@@ -20,14 +20,15 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: npm install and verify
+      - name: npm install and build
         run: |
           npm install
-          if (Test-Path -Path "./src") {
-            Write-Host "Source directory exists."
-            Get-ChildItem -Recurse ./src
+          npm run build
+          if (Test-Path -Path "./dist") {
+            Write-Host "Build directory exists."
+            Get-ChildItem -Recurse ./dist
           } else {
-            Write-Host "Source directory does not exist."
+            Write-Host "Build directory does not exist."
             exit 1
           }
 
@@ -36,7 +37,7 @@ jobs:
         with:
           name: node-app
           path: |
-            ./src
+            ./dist
             README.md
           if-no-files-found: error
 
@@ -62,5 +63,5 @@ jobs:
         with:
           app-name: 'api-willard'
           slot-name: 'Production'
-          package: .
+          package: ./dist
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AD1AFF332A4B48E2810D80C8F1150DDB }}
