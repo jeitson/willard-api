@@ -19,10 +19,11 @@ export class UserDto {
 	oauthId?: string;
 
 	@ApiProperty({ description: 'Nombre', example: 'Jon Doe' })
+	@IsOptional()
 	@IsString()
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
-	name: string;
+	name: string = null;
 
 	@ApiProperty({ description: 'Descripción', example: 'Jon Doe, usuario de prueba' })
 	@IsString()
@@ -47,10 +48,11 @@ export class UserOAuthDto {
 	user_id?: string;
 
 	@ApiProperty({ description: 'Nombre' })
+	@IsOptional()
 	@IsString()
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
-	name: string;
+	name: string = null;
 
 	@ApiProperty({ description: 'Email' })
 	@IsEmail()

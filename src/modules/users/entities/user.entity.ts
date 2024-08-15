@@ -11,7 +11,7 @@ export class User extends CompleteEntity {
 	oauthId: string;
 
 	@ApiProperty({ description: 'name' })
-	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
+	@Column({ type: 'varchar', length: 50, name: 'Nombre', default: null })
 	name: string;
 
 	@ApiProperty({ description: 'description' })
