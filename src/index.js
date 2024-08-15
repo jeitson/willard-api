@@ -1,5 +1,5 @@
-import express from 'express';
-import dotenv from 'dotenv';
+const express = require('express');
+const dotenv = require('dotenv');
 
 // Configurar dotenv para cargar las variables de entorno
 dotenv.config();
