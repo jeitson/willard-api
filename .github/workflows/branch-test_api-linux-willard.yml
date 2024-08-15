@@ -32,6 +32,10 @@ jobs:
             exit 1
           }
 
+      - name: Copy node_modules to dist
+        run: |
+          Copy-Item -Recurse -Path "node_modules" -Destination "./dist/node_modules"
+
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
