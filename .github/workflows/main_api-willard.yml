@@ -35,7 +35,7 @@ jobs:
           name: node-app
           path: |
             ./dist
-            README.md  # Añade un archivo sencillo para verificar la subida y descarga
+            README.md
             !node_modules/**
             !.git/**
             !coverage/**
