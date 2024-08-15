@@ -21,7 +21,7 @@ export class CatalogsService {
 		const { catalogCode, name, ...childData } = createChildDto;
 
 		const existChild = await this.childrensRepository.findOne({ where: { name  } });
-		if (!existChild) {
+		if (existChild) {
 		  throw new BusinessException('Ya existe el catálogo', 400);
 		}
 
