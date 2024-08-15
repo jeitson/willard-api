@@ -7,7 +7,7 @@ import { Expose } from 'class-transformer';
 @Entity({ name: 'usuario' })
 export class User extends CompleteEntity {
 	@ApiProperty({ description: 'oauthId' })
-	@Column({ unique: true, type: 'bigint', default: null, nullable: true, name: 'OauthId' })
+	@Column({ unique: true, type: 'varchar', length: 255, default: null, nullable: true, name: 'OauthId' })
 	oauthId: string;
 
 	@ApiProperty({ description: 'name' })
