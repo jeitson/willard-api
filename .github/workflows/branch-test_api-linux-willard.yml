@@ -36,13 +36,15 @@ jobs:
         run: |
           Copy-Item -Recurse -Path "node_modules" -Destination "./dist/node_modules"
 
+      - name: Create artifact archive
+        run: |
+          Compress-Archive -Path "./dist/*" -DestinationPath "./dist.zip"
+
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            ./dist
-            README.md
+          path: ./dist.zip
           if-no-files-found: error
 
   deploy:
@@ -58,8 +60,11 @@ jobs:
         with:
           name: node-app
 
+      - name: Extract artifact
+        run: unzip ./dist.zip -d ./dist
+
       - name: Verify downloaded contents
-        run: ls -R
+        run: ls -R ./dist
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
