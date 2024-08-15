@@ -53,9 +53,9 @@ export class ConsultantsService {
 		return consultant;
 	}
 
-	async changeStatus(id: number, status: boolean): Promise<Consultant> {
+	async changeStatus(id: number): Promise<Consultant> {
 		const consultant = await this.findOne(id);
-		consultant.status = status;
+		consultant.status = !consultant.status;
 		return await this.consultantsRepository.save(consultant);
 	}
 

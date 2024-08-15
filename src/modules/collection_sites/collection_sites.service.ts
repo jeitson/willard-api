@@ -54,13 +54,13 @@ export class CollectionSitesService {
 		return updatedCollectionSite;
 	}
 
-	async changeStatus(id: number, status: boolean): Promise<CollectionSite> {
+	async changeStatus(id: number): Promise<CollectionSite> {
 		const collectionSite = await this.collectionSiteRepository.findOneBy({ id });
 		if (!collectionSite) {
 			throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
 
 		}
-		collectionSite.status = status;
+		collectionSite.status = !collectionSite.status;
 		return await this.collectionSiteRepository.save(collectionSite);
 	}
 

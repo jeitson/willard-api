@@ -53,9 +53,9 @@ export class ProductsService {
 		return product;
 	}
 
-	async changeStatus(id: number, status: boolean): Promise<Product> {
+	async changeStatus(id: number): Promise<Product> {
 		const product = await this.findOne(id);
-		product.status = status;
+		product.status = !product.status;
 		return await this.productsRepository.save(product);
 	}
 

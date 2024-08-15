@@ -38,8 +38,8 @@ export class TransportersController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado transportador' })
-	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<Transporter> {
-		return this.transportersService.changeStatus(+id, status);
+	changeStatus(@Param('id') id: string): Promise<Transporter> {
+		return this.transportersService.changeStatus(+id);
 	}
 
 	@Delete(':id')

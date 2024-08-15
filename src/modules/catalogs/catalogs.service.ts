@@ -85,13 +85,13 @@ export class CatalogsService {
 		return await this.childrensRepository.save(child);
 	}
 
-	async changeStatus(id: number, status: boolean): Promise<Child> {
+	async changeStatus(id: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ id });
 		if (!child) {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
 
-		child.status = status;
+		child.status = !child.status;
 		return await this.childrensRepository.save(child);
 	}
 

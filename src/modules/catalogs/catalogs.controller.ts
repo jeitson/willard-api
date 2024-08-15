@@ -37,8 +37,8 @@ export class CatalogsController {
 
 	@Put(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estados' })
-	async changeStatus(@IdParam() id: string, @Body() { status }: StatusDto): Promise<Child> {
-		return await this.catalogsService.changeStatus(+id, status);
+	async changeStatus(@IdParam() id: string): Promise<Child> {
+		return await this.catalogsService.changeStatus(+id);
 	}
 
 	@Delete(':id')

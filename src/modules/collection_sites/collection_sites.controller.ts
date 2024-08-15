@@ -38,8 +38,8 @@ export class CollectionSitesController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado centro de acopio' })
-	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<CollectionSite> {
-		return this.collectionSitesService.changeStatus(+id, status);
+	changeStatus(@Param('id') id: string): Promise<CollectionSite> {
+		return this.collectionSitesService.changeStatus(+id);
 	}
 
 	@Delete(':id')

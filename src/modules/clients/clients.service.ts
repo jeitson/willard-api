@@ -53,9 +53,9 @@ export class ClientsService {
 		return client;
 	}
 
-	async changeStatus(id: number, status: boolean): Promise<Client> {
+	async changeStatus(id: number): Promise<Client> {
 		const client = await this.findOne(id);
-		client.status = status;
+		client.status = !client.status;
 		return await this.clientsRepository.save(client);
 	}
 

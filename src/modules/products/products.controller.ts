@@ -38,8 +38,8 @@ export class ProductsController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado producto' })
-	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<Product> {
-		return this.productsService.changeStatus(+id, status);
+	changeStatus(@Param('id') id: string): Promise<Product> {
+		return this.productsService.changeStatus(+id);
 	}
 
 	@Delete(':id')

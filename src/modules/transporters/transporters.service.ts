@@ -53,9 +53,9 @@ export class TransportersService {
 		return transporter;
 	}
 
-	async changeStatus(id: number, status: boolean): Promise<Transporter> {
+	async changeStatus(id: number): Promise<Transporter> {
 		const transporter = await this.findOne(id);
-		transporter.status = status;
+		transporter.status = !transporter.status;
 		return await this.transportersRepository.save(transporter);
 	}
 

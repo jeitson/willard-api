@@ -37,8 +37,8 @@ export class ClientsController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado cliente' })
-	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<Client> {
-		return this.clientsService.changeStatus(+id, status);
+	changeStatus(@Param('id') id: string): Promise<Client> {
+		return this.clientsService.changeStatus(+id);
 	}
 
 	@Delete(':id')

@@ -38,8 +38,8 @@ export class ConsultantsController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado asesor' })
-	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<Consultant> {
-		return this.consultantsService.changeStatus(+id, status);
+	changeStatus(@Param('id') id: string): Promise<Consultant> {
+		return this.consultantsService.changeStatus(+id);
 	}
 
 	@Delete(':id')
