@@ -16,33 +16,32 @@ import { TransportersModule } from './modules/transporters/transporters.module';
 import { ConsultantsModule } from './modules/consultants/consultants.module';
 import { TransformInterceptor } from './core/common/interceptors/transform.interceptor';
 import { TimeoutInterceptor } from './core/common/interceptors/timeout.interceptor';
-import { CatsModule } from './modules/cats/cats.module';
 
 @Module({
 	imports: [
-		// ConfigModule.forRoot({
-		// 	isGlobal: true,
-		// 	expandVariables: true,
-		// 	// Cuando se especifican varios archivos env, el primero tiene la prioridad más alta.
-		// 	envFilePath: ['.env'],
-		// 	load: [...Object.values(config)],
-		// }),
-		// SharedModule,
-		// DatabaseModule,
-		// UsersModule,
-		// RolesModule,
-		// AuditsModule,
-		// CatalogsModule,
-		// CollectionSitesModule,
-		// ClientsModule,
-		// ProductsModule,
-		// TransportersModule,
-		// ConsultantsModule,
-	CatsModule],
+		ConfigModule.forRoot({
+			isGlobal: true,
+			expandVariables: true,
+			// Cuando se especifican varios archivos env, el primero tiene la prioridad más alta.
+			envFilePath: ['.env'],
+			load: [...Object.values(config)],
+		}),
+		SharedModule,
+		DatabaseModule,
+		UsersModule,
+		RolesModule,
+		AuditsModule,
+		CatalogsModule,
+		CollectionSitesModule,
+		ClientsModule,
+		ProductsModule,
+		TransportersModule,
+		ConsultantsModule,
+	],
 	controllers: [],
 	providers: [
-		// { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
-		// { provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },
+		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
+		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },
 	],
 })
 export class AppModule { }

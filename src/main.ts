@@ -13,40 +13,40 @@ import {
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
-	// const configService = app.get(ConfigService);
+	const configService = app.get(ConfigService);
 
-	// app.enableCors();
+	app.enableCors();
 
-	// app.useGlobalPipes(
-	// 	new ValidationPipe({
-	// 		transform: true,
-	// 		whitelist: true,
-	// 		transformOptions: { enableImplicitConversion: true },
-	// 		errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-	// 		stopAtFirstError: false, // Procesa todos los errores en lugar de detenerse en el primero
-	// 		exceptionFactory: errors => {
-	// 			const errorMessages = errors.map(error => {
-	// 				const constraints = error.constraints
-	// 					? Object.values(error.constraints)
-	// 					: [];
-	// 				return {
-	// 					property: error.property,
-	// 					errors: constraints,
-	// 				};
-	// 			});
+	app.useGlobalPipes(
+		new ValidationPipe({
+			transform: true,
+			whitelist: true,
+			transformOptions: { enableImplicitConversion: true },
+			errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+			stopAtFirstError: false, // Procesa todos los errores en lugar de detenerse en el primero
+			exceptionFactory: errors => {
+				const errorMessages = errors.map(error => {
+					const constraints = error.constraints
+						? Object.values(error.constraints)
+						: [];
+					return {
+						property: error.property,
+						errors: constraints,
+					};
+				});
 
-	// 			return new UnprocessableEntityException({
-	// 				message: 'Validation failed',
-	// 				errors: errorMessages,
-	// 			});
-	// 		},
-	// 	}),
-	// );
+				return new UnprocessableEntityException({
+					message: 'Validation failed',
+					errors: errorMessages,
+				});
+			},
+		}),
+	);
 
-	// if (isDev) app.useGlobalInterceptors(new LoggingInterceptor());
+	if (isDev) app.useGlobalInterceptors(new LoggingInterceptor());
 
-	// setupSwagger(app, configService); // Llama a setupSwagger pasando la app y el ConfigService
+	setupSwagger(app, configService); // Llama a setupSwagger pasando la app y el ConfigService
 
-	await app.listen(80);
+	await app.listen(env('PORT'));
 }
 bootstrap();
