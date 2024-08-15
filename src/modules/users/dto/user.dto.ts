@@ -15,7 +15,7 @@ import { PagerDto } from 'src/core/common/dto/pager.dto';
 export class UserDto {
 	@ApiProperty({ description: 'OauthId', example: '123...' })
 	@IsOptional()
-	@IsInt()
+	@IsString()
 	oauthId?: string;
 
 	@ApiProperty({ description: 'Nombre', example: 'Jon Doe' })
@@ -43,7 +43,7 @@ export class UserDto {
 export class UserOAuthDto {
 	@ApiProperty({ description: 'OauthId' })
 	@IsOptional()
-	@IsInt()
+	@IsString()
 	user_id?: string;
 
 	@ApiProperty({ description: 'Nombre' })
