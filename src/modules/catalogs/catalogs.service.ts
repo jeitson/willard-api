@@ -18,7 +18,12 @@ export class CatalogsService {
 	) { }
 
 	async createChild(createChildDto: ChildDto): Promise<Child> {
-		const { catalogCode, ...childData } = createChildDto;
+		const { catalogCode, name, ...childData } = createChildDto;
+
+		const existChild = await this.childrensRepository.findOne({ where: { name  } });
+		if (!existChild) {
+		  throw new BusinessException('Ya existe el catálogo', 400);
+		}
 
 		const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
 		if (!parent) {
@@ -32,6 +37,7 @@ export class CatalogsService {
 
 		const child = this.childrensRepository.create({
 		  ...childData,
+		  name,
 		  catalogCode,
 		  parentId: parentChild.id,
 		});
