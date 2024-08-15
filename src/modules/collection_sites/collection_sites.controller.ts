@@ -4,6 +4,7 @@ import { CollectionSiteCreateDto, CollectionSiteQueryDto, CollectionSiteUpdateDt
 import { CollectionSite } from './entities/collection_site.entity';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
+import { StatusDto } from 'src/core/common/dto/status.dto';
 
 @ApiTags('Negocio - Centro de acopios')
 @Controller('collection-sites')
@@ -37,7 +38,7 @@ export class CollectionSitesController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado centro de acopio' })
-	changeStatus(@Param('id') id: string, @Body('status') status: boolean): Promise<CollectionSite> {
+	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<CollectionSite> {
 		return this.collectionSitesService.changeStatus(+id, status);
 	}
 

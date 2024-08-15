@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ChildDto, ChildSearchDto, ChildUpdateDto } from './dto/child.dto';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { Child } from './entities/child.entity';
+import { StatusDto } from 'src/core/common/dto/status.dto';
 
 @ApiTags('Sistema - Catalogos')
 @Controller('catalogs')
@@ -36,8 +37,8 @@ export class CatalogsController {
 
 	@Put(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estados' })
-	async changeStatus(@IdParam() id: string): Promise<Child> {
-		return await this.catalogsService.changeStatus(+id);
+	async changeStatus(@IdParam() id: string, @Body() { status }: StatusDto): Promise<Child> {
+		return await this.catalogsService.changeStatus(+id, status);
 	}
 
 	@Delete(':id')

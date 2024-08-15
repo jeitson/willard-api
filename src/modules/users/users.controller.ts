@@ -4,7 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { User } from './entities/user.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
+import { UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
 
 @ApiTags('Sistema - Usuarios')
 @Controller('users')
@@ -29,6 +29,12 @@ export class UsersController {
 	@ApiOperation({ summary: 'Crear usuario' })
 	async create(@Body() dto: UserDto): Promise<void> {
 		await this.usersService.create(dto);
+	}
+
+	@Post('oauth')
+	@ApiOperation({ summary: 'Crear usuario por medio de OAuth0' })
+	async createByOAuth0(@Body() dto: UserOAuthDto): Promise<void> {
+		await this.usersService.createByOAuth0(dto);
 	}
 
 	@Put(':id')

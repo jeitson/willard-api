@@ -4,6 +4,7 @@ import { ClientCreateDto, ClientQueryDto, ClientUpdateDto } from './dto/client.d
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Client } from './entities/client.entity';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
+import { StatusDto } from 'src/core/common/dto/status.dto';
 
 @ApiTags('Negocio - Clientes')
 @Controller('clients')
@@ -36,7 +37,7 @@ export class ClientsController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado cliente' })
-	changeStatus(@Param('id') id: string, @Body('status') status: boolean): Promise<Client> {
+	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<Client> {
 		return this.clientsService.changeStatus(+id, status);
 	}
 

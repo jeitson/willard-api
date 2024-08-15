@@ -7,7 +7,7 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
-import { UserDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
+import { UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
 import { Role } from '../roles/entities/rol.entity';
 import { UserRole } from './entities/user-rol.entity';
 
@@ -91,6 +91,15 @@ export class UsersService {
 					await manager.save(userRole);
 				}
 			}
+		});
+	}
+
+	async createByOAuth0({ user_id: oauthId, ...data }: UserOAuthDto): Promise<void> {
+		return this.create({
+			description: 'CREATED BY OAUTH0',
+			oauthId,
+			...data,
+			roles: []
 		});
 	}
 

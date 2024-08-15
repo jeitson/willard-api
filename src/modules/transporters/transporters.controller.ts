@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { TransporterCreateDto, TransporterQueryDto, TransporterUpdateDto } from './dto/transporter.dto';
 import { Transporter } from './entities/transporter.entity';
+import { StatusDto } from 'src/core/common/dto/status.dto';
 
 @ApiTags('Negocio - Transportadores')
 @Controller('transporters')
@@ -37,7 +38,7 @@ export class TransportersController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado transportador' })
-	changeStatus(@Param('id') id: string, @Body('status') status: boolean): Promise<Transporter> {
+	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<Transporter> {
 		return this.transportersService.changeStatus(+id, status);
 	}
 

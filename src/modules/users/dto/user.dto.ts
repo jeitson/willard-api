@@ -40,6 +40,24 @@ export class UserDto {
 	roles: number[] = [];
 }
 
+export class UserOAuthDto {
+	@ApiProperty({ description: 'OauthId' })
+	@IsOptional()
+	@IsInt()
+	user_id?: string;
+
+	@ApiProperty({ description: 'Nombre' })
+	@IsString()
+	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
+	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
+	name: string;
+
+	@ApiProperty({ description: 'Email' })
+	@IsEmail()
+	@ValidateIf((o) => !isEmpty(o.email))
+	email: string;
+}
+
 export class UserUpdateDto extends PartialType(UserDto) {}
 
 export class UserQueryDto extends IntersectionType(

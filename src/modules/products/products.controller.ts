@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { ProductCreateDto, ProductQueryDto, ProductUpdateDto } from './dto/product.dto';
 import { Product } from './entities/product.entity';
+import { StatusDto } from 'src/core/common/dto/status.dto';
 
 @ApiTags('Negocio - Productos')
 @Controller('products')
@@ -37,7 +38,7 @@ export class ProductsController {
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado producto' })
-	changeStatus(@Param('id') id: string, @Body('status') status: boolean): Promise<Product> {
+	changeStatus(@Param('id') id: string, @Body() { status }: StatusDto): Promise<Product> {
 		return this.productsService.changeStatus(+id, status);
 	}
 
