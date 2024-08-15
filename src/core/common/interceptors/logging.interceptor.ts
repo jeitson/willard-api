@@ -21,7 +21,7 @@ export class LoggingInterceptor implements NestInterceptor {
 		const isSse = request.headers.accept === 'text/event-stream';
 		this.logger.debug(`+++ Request:${content}`);
 		const now = Date.now();
-		console.log('Hola', now);
+		console.log(request.body);
 
 		return call$.pipe(
 			tap(() => {
