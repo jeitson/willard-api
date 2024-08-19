@@ -18,6 +18,7 @@ import { TransformInterceptor } from './core/common/interceptors/transform.inter
 import { TimeoutInterceptor } from './core/common/interceptors/timeout.interceptor';
 import { PickUpLocationModule } from './modules/pick_up_location/pick_up_location.module';
 import { CollectionRequestModule } from './modules/collection_request/collection_request.module';
+import { CollectionRequestAuditsModule } from './modules/collection_request_audits/collection_request_audits.module';
 
 @Module({
 	imports: [
@@ -41,6 +42,7 @@ import { CollectionRequestModule } from './modules/collection_request/collection
 		ConsultantsModule,
 		PickUpLocationModule,
 		CollectionRequestModule,
+		CollectionRequestAuditsModule,
 	],
 	controllers: [],
 	providers: [

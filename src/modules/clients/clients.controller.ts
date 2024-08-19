@@ -4,6 +4,7 @@ import { ClientCreateDto, ClientQueryDto, ClientUpdateDto } from './dto/client.d
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Client } from './entities/client.entity';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Clientes')
 @Controller('clients')
@@ -24,25 +25,25 @@ export class ClientsController {
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener cliente por su ID' })
-	findOne(@Param('id') id: string): Promise<Client> {
+	findOne(@IdParam('id') id: string): Promise<Client> {
 		return this.clientsService.findOne(+id);
 	}
 
 	@Put(':id')
 	@ApiOperation({ summary: 'Actualizar cliente' })
-	update(@Param('id') id: string, @Body() updateClientDto: ClientUpdateDto): Promise<Client> {
+	update(@IdParam('id') id: string, @Body() updateClientDto: ClientUpdateDto): Promise<Client> {
 		return this.clientsService.update(+id, updateClientDto);
 	}
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado cliente' })
-	changeStatus(@Param('id') id: string, @Body('status') status: boolean): Promise<Client> {
+	changeStatus(@IdParam('id') id: string, @Body('status') status: boolean): Promise<Client> {
 		return this.clientsService.changeStatus(+id, status);
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Eliminar cliente' })
-	remove(@Param('id') id: string): Promise<void> {
+	remove(@IdParam('id') id: string): Promise<void> {
 		return this.clientsService.remove(+id);
 	}
 }

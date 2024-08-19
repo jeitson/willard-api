@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { ProductCreateDto, ProductQueryDto, ProductUpdateDto } from './dto/product.dto';
 import { Product } from './entities/product.entity';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Productos')
 @Controller('products')
@@ -25,25 +26,25 @@ export class ProductsController {
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener producto por su ID' })
-	findOne(@Param('id') id: string): Promise<Product> {
+	findOne(@IdParam('id') id: string): Promise<Product> {
 		return this.productsService.findOne(+id);
 	}
 
 	@Put(':id')
 	@ApiOperation({ summary: 'Actualizar producto' })
-	update(@Param('id') id: string, @Body() updateProductDto: ProductUpdateDto): Promise<Product> {
+	update(@IdParam('id') id: string, @Body() updateProductDto: ProductUpdateDto): Promise<Product> {
 		return this.productsService.update(+id, updateProductDto);
 	}
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado producto' })
-	changeStatus(@Param('id') id: string, @Body('status') status: boolean): Promise<Product> {
+	changeStatus(@IdParam('id') id: string, @Body('status') status: boolean): Promise<Product> {
 		return this.productsService.changeStatus(+id, status);
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Eliminar producto' })
-	remove(@Param('id') id: string): Promise<void> {
+	remove(@IdParam('id') id: string): Promise<void> {
 		return this.productsService.remove(+id);
 	}
 }

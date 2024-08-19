@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { Consultant } from './entities/consultant.entity';
 import { ConsultantCreateDto, ConsultantQueryDto, ConsultantUpdateDto } from './dto/consultant.dto';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Asesores')
 @Controller('consultants')
@@ -25,25 +26,25 @@ export class ConsultantsController {
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener asesor por su ID' })
-	findOne(@Param('id') id: string): Promise<Consultant> {
+	findOne(@IdParam('id') id: string): Promise<Consultant> {
 		return this.consultantsService.findOne(+id);
 	}
 
 	@Put(':id')
 	@ApiOperation({ summary: 'Actualizar asesor' })
-	update(@Param('id') id: string, @Body() updateConsultantDto: ConsultantUpdateDto): Promise<Consultant> {
+	update(@IdParam('id') id: string, @Body() updateConsultantDto: ConsultantUpdateDto): Promise<Consultant> {
 		return this.consultantsService.update(+id, updateConsultantDto);
 	}
 
 	@Patch(':id/change-status')
 	@ApiOperation({ summary: 'Cambiar de estado asesor' })
-	changeStatus(@Param('id') id: string, @Body('status') status: boolean): Promise<Consultant> {
+	changeStatus(@IdParam('id') id: string, @Body('status') status: boolean): Promise<Consultant> {
 		return this.consultantsService.changeStatus(+id, status);
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Eliminar asesor' })
-	remove(@Param('id') id: string): Promise<void> {
+	remove(@IdParam('id') id: string): Promise<void> {
 		return this.consultantsService.remove(+id);
 	}
 }
