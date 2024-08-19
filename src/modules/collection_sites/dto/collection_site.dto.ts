@@ -31,7 +31,7 @@ export class CollectionSiteCreateDto {
 	@ApiProperty({ description: 'NIT de la sede, debe ser un texto.' })
 	@IsNotEmpty({ message: 'Nit es obligatorio y debe ser un texto.' })
 	@IsString({ message: 'Nit debe ser un texto.' })
-	taxId: string;
+	nit: string;
 
 	@ApiProperty({ description: 'Razón social de la sede, debe ser un texto.' })
 	@IsNotEmpty({ message: 'RazonSocial es obligatorio y debe ser un texto.' })
@@ -88,5 +88,5 @@ export class CollectionSiteUpdateDto extends PartialType(CollectionSiteCreateDto
 
 export class CollectionSiteQueryDto extends IntersectionType(
 	PagerDto<CollectionSiteCreateDto>,
-	PartialType(PickType(CollectionSiteCreateDto, ['siteTypeId', 'countryId', 'cityId', 'name', 'taxId'])),
+	PartialType(PickType(CollectionSiteCreateDto, ['siteTypeId', 'countryId', 'cityId', 'name', 'nit'])),
 ) { }

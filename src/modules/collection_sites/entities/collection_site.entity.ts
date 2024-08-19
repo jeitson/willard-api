@@ -8,10 +8,6 @@ export class CollectionSite extends CompleteEntity {
 	@Column({ type: 'bigint', name: 'TipoSedeId' })
 	siteTypeId: number;
 
-	@ApiProperty({ description: 'countryId' })
-	@Column({ type: 'bigint', name: 'PaisId' })
-	countryId: number;
-
 	@ApiProperty({ description: 'cityId' })
 	@Column({ type: 'bigint', name: 'CiudadId' })
 	cityId: number;
@@ -24,9 +20,9 @@ export class CollectionSite extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, nullable: true, default: null, name: 'Descripcion' })
 	description: string;
 
-	@ApiProperty({ description: 'taxId' })
+	@ApiProperty({ description: 'nit' })
 	@Column({ type: 'varchar', length: 20, name: 'Nit' })
-	taxId: string;
+	nit: string;
 
 	@ApiProperty({ description: 'businessName' })
 	@Column({ type: 'varchar', length: 255, name: 'RazonSocial' })
