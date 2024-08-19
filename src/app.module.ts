@@ -16,6 +16,7 @@ import { TransportersModule } from './modules/transporters/transporters.module';
 import { ConsultantsModule } from './modules/consultants/consultants.module';
 import { TransformInterceptor } from './core/common/interceptors/transform.interceptor';
 import { TimeoutInterceptor } from './core/common/interceptors/timeout.interceptor';
+import { PickUpLocationModule } from './modules/pick_up_location/pick_up_location.module';
 
 @Module({
 	imports: [
@@ -37,6 +38,7 @@ import { TimeoutInterceptor } from './core/common/interceptors/timeout.intercept
 		ProductsModule,
 		TransportersModule,
 		ConsultantsModule,
+		PickUpLocationModule,
 	],
 	controllers: [],
 	providers: [

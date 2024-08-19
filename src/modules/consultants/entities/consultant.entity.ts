@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity } from "typeorm";
+import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
+import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity({ name: 'asesor' })
 export class Consultant extends CompleteEntity {
@@ -23,4 +24,7 @@ export class Consultant extends CompleteEntity {
 	@ApiProperty({ description: 'referencePH' })
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
+
+	@OneToMany(() => PickUpLocation, pickUpLocation => pickUpLocation.consultant)
+    pickUpLocations: PickUpLocation[];
 }
