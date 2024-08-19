@@ -19,6 +19,7 @@ import { TimeoutInterceptor } from './core/common/interceptors/timeout.intercept
 import { PickUpLocationModule } from './modules/pick_up_location/pick_up_location.module';
 import { CollectionRequestModule } from './modules/collection_request/collection_request.module';
 import { CollectionRequestAuditsModule } from './modules/collection_request_audits/collection_request_audits.module';
+import { RoutesModule } from './modules/routes/routes.module';
 
 @Module({
 	imports: [
@@ -43,6 +44,7 @@ import { CollectionRequestAuditsModule } from './modules/collection_request_audi
 		PickUpLocationModule,
 		CollectionRequestModule,
 		CollectionRequestAuditsModule,
+		RoutesModule,
 	],
 	controllers: [],
 	providers: [

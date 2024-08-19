@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
@@ -20,7 +20,7 @@ export class CollectionRequestAuditsService {
 	async findOne(id: number): Promise<CollectionRequestAudit> {
 		const entity = await this.repository.findOne({ where: { id } });
 		if (!entity) {
-			throw new NotFoundException('Auditoría de solicitud de recogida no encontrada');
+			throw new BusinessException('Auditoría de solicitud de recogida no encontrada');
 		}
 		return entity;
 	}
@@ -32,7 +32,7 @@ export class CollectionRequestAuditsService {
 		});
 
 		if (!entity) {
-			throw new NotFoundException('Auditoría de solicitud de recogida no encontrada');
+			throw new BusinessException('Auditoría de solicitud de recogida no encontrada');
 		}
 
 		return await this.repository.save(entity);

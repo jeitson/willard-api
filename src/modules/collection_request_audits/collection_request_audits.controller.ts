@@ -3,6 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CollectionRequestAuditsService } from './collection_request_audits.service';
 import { CollectionRequestAuditCreateDto, CollectionRequestAuditUpdateDto } from './dto/collection_request_audit.dto';
 import { CollectionRequestAudit } from './entities/collection_request_audit.entity';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Auditoría de Solicitudes de Recogida')
 @Controller('collection-request-audits')
@@ -17,13 +18,13 @@ export class CollectionRequestAuditsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener auditoría de solicitud de recogida por ID' })
-  findOne(@Param('id') id: number): Promise<CollectionRequestAudit> {
+  findOne(@IdParam('id') id: number): Promise<CollectionRequestAudit> {
     return this.service.findOne(id);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Actualizar auditoría de solicitud de recogida' })
-  update(@Param('id') id: number, @Body() dto: CollectionRequestAuditUpdateDto): Promise<CollectionRequestAudit> {
+  update(@IdParam('id') id: number, @Body() dto: CollectionRequestAuditUpdateDto): Promise<CollectionRequestAudit> {
     return this.service.update(id, dto);
   }
 
