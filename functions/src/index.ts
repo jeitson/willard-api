@@ -17,3 +17,17 @@ import * as logger from "firebase-functions/logger";
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+
+import * as functions from 'firebase-functions';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './../../src/app.module';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import * as express from 'express';
+
+const server = express();
+
+export const api = functions.https.onRequest(async (req, res) => {
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+  await app.init();
+  app.getHttpAdapter().getInstance().use(req, res);
+});
