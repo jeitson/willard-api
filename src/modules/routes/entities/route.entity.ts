@@ -5,7 +5,6 @@ import { Column, Entity, OneToOne, JoinColumn } from "typeorm";
 
 @Entity({ name: 'ruta' })
 export class Route extends CompleteEntity {
-    @ApiProperty({ description: 'Collection Request' })
     @OneToOne(() => CollectionRequest, request => request.route)
     @JoinColumn({ name: 'SolicitudRecogidaId' })
     collectionRequest: CollectionRequest;
@@ -50,6 +49,7 @@ export class Route extends CompleteEntity {
     @Column({ type: 'bigint', name: 'TipoCamionId' })
     truckTypeId: bigint;
 
+	@ApiProperty({ description: 'Fecha de entrega en el sitio de acopio' })
     @Column({ type: 'date', name: 'FechaEntregaSitioAcopio', nullable: true })
     deliveryDateToCollectionSite: Date;
 }
