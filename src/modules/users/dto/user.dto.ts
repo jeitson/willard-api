@@ -29,6 +29,11 @@ export class UserDto {
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	description: string = '';
 
+	@ApiProperty({ description: 'Celular' })
+	@IsString()
+	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
+	cellphone: string = '';
+
 	@ApiProperty({ description: 'Email', example: 'bqy.dev@qq.com' })
 	@IsEmail()
 	@ValidateIf((o) => !isEmpty(o.email))
