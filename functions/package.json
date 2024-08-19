@@ -2,7 +2,7 @@
 	"name": "functions",
 	"scripts": {
 		"lint": "eslint --ext .js,.ts .",
-		"build": "nest build",
+		"build": "npx nest build",
 		"build:watch": "tsc --watch",
 		"serve": "npm run install && npm run build && firebase emulators:start --only functions",
 		"shell": "npm run install && npm run build && firebase functions:shell",
