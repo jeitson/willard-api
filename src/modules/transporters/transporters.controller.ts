@@ -4,7 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { TransporterCreateDto, TransporterQueryDto, TransporterUpdateDto } from './dto/transporter.dto';
 import { Transporter } from './entities/transporter.entity';
-import { StatusDto } from 'src/core/common/dto/status.dto';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Transportadores')
 @Controller('transporters')
@@ -26,13 +26,13 @@ export class TransportersController {
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener transportador por su ID' })
-	findOne(@Param('id') id: string): Promise<Transporter> {
+	findOne(@IdParam('id') id: string): Promise<Transporter> {
 		return this.transportersService.findOne(+id);
 	}
 
 	@Put(':id')
 	@ApiOperation({ summary: 'Actualizar transportador' })
-	update(@Param('id') id: string, @Body() updateTransporterDto: TransporterUpdateDto): Promise<Transporter> {
+	update(@IdParam('id') id: string, @Body() updateTransporterDto: TransporterUpdateDto): Promise<Transporter> {
 		return this.transportersService.update(+id, updateTransporterDto);
 	}
 
@@ -44,7 +44,7 @@ export class TransportersController {
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Eliminar transportador' })
-	remove(@Param('id') id: string): Promise<void> {
+	remove(@IdParam('id') id: string): Promise<void> {
 		return this.transportersService.remove(+id);
 	}
 }

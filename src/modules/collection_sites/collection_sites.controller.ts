@@ -4,7 +4,7 @@ import { CollectionSiteCreateDto, CollectionSiteQueryDto, CollectionSiteUpdateDt
 import { CollectionSite } from './entities/collection_site.entity';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
-import { StatusDto } from 'src/core/common/dto/status.dto';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Centro de acopios')
 @Controller('collection-sites')
@@ -26,13 +26,13 @@ export class CollectionSitesController {
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener centro de acopio por su ID' })
-	findOne(@Param('id') id: string): Promise<CollectionSite> {
+	findOne(@IdParam('id') id: string): Promise<CollectionSite> {
 		return this.collectionSitesService.findOne(+id);
 	}
 
 	@Put(':id')
 	@ApiOperation({ summary: 'Actualizar centro de acopio' })
-	update(@Param('id') id: string, @Body() updateCollectionSiteDto: CollectionSiteUpdateDto): Promise<CollectionSite> {
+	update(@IdParam('id') id: string, @Body() updateCollectionSiteDto: CollectionSiteUpdateDto): Promise<CollectionSite> {
 		return this.collectionSitesService.update(+id, updateCollectionSiteDto);
 	}
 
@@ -40,11 +40,11 @@ export class CollectionSitesController {
 	@ApiOperation({ summary: 'Cambiar de estado centro de acopio' })
 	changeStatus(@Param('id') id: string): Promise<CollectionSite> {
 		return this.collectionSitesService.changeStatus(+id);
+
 	}
 
 	@Delete(':id')
-	@ApiOperation({ summary: 'Eliminar centro de acopio' })
-	remove(@Param('id') id: string): Promise<void> {
+	remove(@IdParam('id') id: string): Promise<void> {
 		return this.collectionSitesService.remove(+id);
 	}
 }

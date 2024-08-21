@@ -1,35 +1,45 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
+import { Client } from "src/modules/clients/entities/client.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
-import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
-import { Column, Entity, OneToMany } from "typeorm";
+import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
+import { Consultant } from "src/modules/consultants/entities/consultant.entity";
+import { Column, Entity, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 
-@Entity({ name: 'sedes_acopio' })
-export class CollectionSite extends CompleteEntity {
+@Entity({ name: 'lugar_recogida' })
+export class PickUpLocation extends CompleteEntity {
 
-	@ApiProperty({ description: 'Tipo de Sede' })
-	@Column({ type: 'bigint', name: 'TipoSedeId' })
-	siteTypeId: number;
+	@ApiProperty({ description: 'Tipo de Lugar' })
+	@Column({ type: 'bigint', name: 'TipoLugarId' })
+	placeTypeId: number;
+
+	@ManyToOne(() => Client, client => client.pickUpLocations)
+	@JoinColumn({ name: 'ClienteId' })
+	client: Client;
+
+	@ManyToOne(() => CollectionSite, collectionSite => collectionSite.pickUpLocations)
+	@JoinColumn({ name: 'SedeAcopioId' })
+	collectionSite: CollectionSite;
+
+	@ManyToOne(() => Consultant, consultant => consultant.pickUpLocations)
+	@JoinColumn({ name: 'AsesorId' })
+	consultant: Consultant;
 
 	@ApiProperty({ description: 'Ciudad' })
 	@Column({ type: 'bigint', name: 'CiudadId' })
 	cityId: number;
+
+	@ApiProperty({ description: 'Zona' })
+	@Column({ type: 'bigint', name: 'ZonaId' })
+	zoneId: number;
 
 	@ApiProperty({ description: 'Nombre' })
 	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
 	name: string;
 
 	@ApiProperty({ description: 'Descripción' })
-	@Column({ type: 'varchar', length: 255, nullable: true, default: null, name: 'Descripcion' })
+	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Descripcion' })
 	description: string;
-
-	@ApiProperty({ description: 'Nit' })
-	@Column({ type: 'varchar', length: 20, name: 'Nit' })
-	nit: string;
-
-	@ApiProperty({ description: 'Razón Social' })
-	@Column({ type: 'varchar', length: 255, name: 'RazonSocial' })
-	businessName: string;
 
 	@ApiProperty({ description: 'Barrio' })
 	@Column({ type: 'varchar', length: 100, name: 'Barrio' })
@@ -40,11 +50,11 @@ export class CollectionSite extends CompleteEntity {
 	address: string;
 
 	@ApiProperty({ description: 'Latitud' })
-	@Column({ type: 'varchar', length: 100, nullable: true, default: null, name: 'Latitud' })
+	@Column({ type: 'varchar', length: 100, nullable: true, name: 'Latitud' })
 	latitude: string;
 
 	@ApiProperty({ description: 'Longitud' })
-	@Column({ type: 'varchar', length: 100, nullable: true, default: null, name: 'Longitud' })
+	@Column({ type: 'varchar', length: 100, nullable: true, name: 'Longitud' })
 	longitude: string;
 
 	@ApiProperty({ description: 'Nombre del contacto' })
@@ -67,9 +77,6 @@ export class CollectionSite extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
 
-	@OneToMany(() => PickUpLocation, pickUpLocation => pickUpLocation.collectionSite)
-	pickUpLocations: PickUpLocation[];
-
-	@OneToMany(() => CollectionRequest, collectionsRequests => collectionsRequests.collectionSite)
-	collectionsRequests: CollectionRequest[];
+	@OneToMany(() => CollectionRequest, collectionsRequests => collectionsRequests.pickUpLocation)
+    collectionsRequests: CollectionRequest[];
 }
