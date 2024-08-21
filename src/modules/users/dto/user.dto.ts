@@ -63,6 +63,11 @@ export class UserOAuthDto {
 	@IsEmail()
 	@ValidateIf((o) => !isEmpty(o.email))
 	email: string;
+
+	@ApiProperty({ description: 'Celular' })
+	@IsString()
+	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
+	cellphone: string = '';
 }
 
 export class UserUpdateDto extends PartialType(UserDto) {}
