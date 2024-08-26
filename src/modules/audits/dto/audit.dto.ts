@@ -29,6 +29,11 @@ export class AuditDto {
 	@IsString()
 	@MaxLength(8000, { message: 'El tamaño máximo de caracteres es de 8000' })
 	response: string = null;
+
+	@ApiProperty({ description: 'Peticion', example: 'Petición de la auditoría' })
+	@IsString()
+	@MaxLength(8000, { message: 'El tamaño máximo de caracteres es de 8000' })
+	request: string = null;
 }
 
 export class AuditQueryDto extends IntersectionType(

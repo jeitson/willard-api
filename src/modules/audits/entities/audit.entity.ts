@@ -19,4 +19,8 @@ export class Audit extends CompleteEntity {
 	@ApiProperty({ description: 'response' })
 	@Column({ type: 'varchar', length: 8000, default: null, nullable: true, name: 'Respuesta' })
 	response: string;
+
+	@ApiProperty({ description: 'request' })
+	@Column({ type: 'varchar', length: 8000, default: null, nullable: true, name: 'Peticion' })
+	request: string;
 }

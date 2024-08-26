@@ -20,6 +20,7 @@ import { PickUpLocationModule } from './modules/pick_up_location/pick_up_locatio
 import { CollectionRequestModule } from './modules/collection_request/collection_request.module';
 import { CollectionRequestAuditsModule } from './modules/collection_request_audits/collection_request_audits.module';
 import { RoutesModule } from './modules/routes/routes.module';
+import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
 
 @Module({
 	imports: [
@@ -48,6 +49,7 @@ import { RoutesModule } from './modules/routes/routes.module';
 	],
 	controllers: [],
 	providers: [
+		{ provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
 		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },
 	],
