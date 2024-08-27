@@ -33,13 +33,15 @@ export class LoggingInterceptor implements NestInterceptor {
 
 			  this.logger.debug(consoleResponse);
 
-			  await this.auditsService.create({
-				name: content,
-				description: `Request made to ${content}`,
-				userId: '283',
-				request: consoleRequest,
-				response: consoleResponse
-			  });
+			  if (request.method !== 'GET') {
+				  await this.auditsService.create({
+					name: content,
+					description: `Request made to ${content}`,
+					userId: '283',
+					request: consoleRequest,
+					response: consoleResponse
+				  });
+			  }
 			}),
 		  );
 	}
