@@ -7,42 +7,42 @@ export class PickUpLocationCreateDto {
 	@ApiProperty({ description: 'Tipo de Lugar' })
 	@IsNotEmpty({ message: 'El TipoLugarId no puede estar vacío.' })
 	@IsInt({ message: 'El TipoLugarId debe ser un número entero.' })
-	tipoLugarId: bigint;
+	placeTypeId: number;
 
 	@ApiProperty({ description: 'Cliente asociado' })
 	@IsNotEmpty({ message: 'El ClienteId no puede estar vacío.' })
 	@IsInt({ message: 'El ClienteId debe ser un número entero.' })
-	clienteId: bigint;
+	clientId: number;
 
 	@ApiProperty({ description: 'Sede de Acopio asociada' })
 	@IsNotEmpty({ message: 'El SedeAcopioId no puede estar vacío.' })
 	@IsInt({ message: 'El SedeAcopioId debe ser un número entero.' })
-	sedeAcopioId: bigint;
+	collectionSiteId: number;
 
 	@ApiProperty({ description: 'Asesor asociado' })
 	@IsNotEmpty({ message: 'El AsesorId no puede estar vacío.' })
 	@IsInt({ message: 'El AsesorId debe ser un número entero.' })
-	asesorId: bigint;
+	consultantId: number;
 
 	@ApiProperty({ description: 'Ciudad' })
 	@IsNotEmpty({ message: 'El CiudadId no puede estar vacío.' })
 	@IsInt({ message: 'El CiudadId debe ser un número entero.' })
-	ciudadId: bigint;
+	cityId: number;
 
 	@ApiProperty({ description: 'Zona' })
 	@IsNotEmpty({ message: 'El ZonaId no puede estar vacío.' })
 	@IsInt({ message: 'El ZonaId debe ser un número entero.' })
-	zonaId: bigint;
+	zoneId: number;
 
 	@ApiProperty({ description: 'Nombre' })
 	@IsNotEmpty({ message: 'El Nombre no puede estar vacío.' })
 	@IsString({ message: 'El Nombre debe ser una cadena de texto.' })
-	nombre: string;
+	name: string;
 
 	@ApiProperty({ description: 'Descripción' })
 	@IsOptional()
 	@IsString({ message: 'La Descripcion debe ser una cadena de texto.' })
-	descripcion?: string;
+	description?: string;
 
 	@ApiProperty({ description: 'Barrio' })
 	@IsNotEmpty({ message: 'El Barrio no puede estar vacío.' })
