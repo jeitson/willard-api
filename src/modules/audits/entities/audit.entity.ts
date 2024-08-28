@@ -20,7 +20,15 @@ export class Audit extends CompleteEntity {
 	@Column({ type: 'varchar', length: 8000, default: null, nullable: true, name: 'Respuesta' })
 	response: string;
 
-	@ApiProperty({ description: 'request' })
+	@ApiProperty({ description: 'payload' })
 	@Column({ type: 'varchar', length: 8000, default: null, nullable: true, name: 'Peticion' })
-	request: string;
+	payload: string;
+
+	@ApiProperty({ description: 'statusCode' })
+	@Column({ type: 'varchar', length: 10, default: null, nullable: true, name: 'CodigoEstado' })
+	statusCode: string;
+
+	@ApiProperty({ description: 'method' })
+	@Column({ type: 'varchar', length: 10, default: null, nullable: true, name: 'Metodo' })
+	method: string;
 }

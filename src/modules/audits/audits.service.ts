@@ -23,10 +23,13 @@ export class AuditsService {
 		name
 	}: AuditQueryDto): Promise<Pagination<Audit>> {
 		const queryBuilder = this.auditsRepository
-			.createQueryBuilder('rol')
-			.where({
-				...(name ? { name: Like(`%${name}%`) } : null),
-			});
+			.createQueryBuilder('auditoria')
+			.leftJoinAndSelect('usuario', 'usuario', 'usuario.id = auditoria.UsuarioId')
+			.addSelect('usuario.Nombre', 'usuarioNombre');
+
+		if (name) {
+			queryBuilder.andWhere('auditoria.name LIKE :name', { name: `%${name}%` });
+		}
 
 		return paginate<Audit>(queryBuilder, {
 			page,
@@ -34,28 +37,21 @@ export class AuditsService {
 		});
 	}
 
+
+
+
 	async findOneById(id: number): Promise<Audit | undefined> {
-		return this.auditsRepository.findOneBy({
-			id
-		});
+		return this.auditsRepository
+			.createQueryBuilder('auditoria')
+			.leftJoinAndSelect('usuario', 'usuario', 'usuario.id = auditoria.userId')
+			.where('auditoria.id = :id', { id })
+			.getOne();
 	}
 
-	async create({
-		name,
-		description,
-		userId
-	}: AuditDto): Promise<void> {
-		const exists = await this.auditsRepository.findOneBy({ name });
-
-		if (!isEmpty(exists))
-			throw new BusinessException('Ya existe el nombre');
-
+	async create(content: AuditDto): Promise<void> {
+		console.log(content);
 		await this.entityManager.transaction(async (manager) => {
-			const r = manager.create(Audit, {
-				name,
-				description,
-				userId
-			});
+			const r = manager.create(Audit, content);
 
 			await manager.save(r);
 		});
