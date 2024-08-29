@@ -15,9 +15,7 @@ export class AuditsController {
 	@ApiOperation({ summary: 'Obtener listado de auditorias - Paginación' })
 	@ApiResult({ type: [Audit], isPage: true })
 	async findAll(@Query() dto: AuditQueryDto) {
-		 const t = await this.auditsService.findAll(dto);
-		 console.log(t);
-		 return t;
+		 return this.auditsService.findAll(dto);
 	}
 
 	@Get(':id')

@@ -5,9 +5,9 @@ import { Audit } from './entities/audit.entity';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Like, Repository } from 'typeorm';
 import { paginate } from 'src/core/helper/paginate';
-import { isEmpty } from 'class-validator';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { User } from '../users/entities/user.entity';
+import { Role } from '../roles/entities/rol.entity';
 
 @Injectable()
 export class AuditsService {
@@ -19,15 +19,21 @@ export class AuditsService {
 		private dataSource: DataSource,
 	) { }
 
+	private createBaseQueryBuilder() {
+		return this.dataSource
+			.getRepository(Audit)
+			.createQueryBuilder('audit')
+			.leftJoinAndMapOne('audit.user', User, 'user', 'user.id = audit.userId')
+			.leftJoinAndSelect('user.roles', 'userRoles')
+			.leftJoinAndSelect('userRoles.role', 'role');
+	}
+
 	async findAll({
 		page,
 		pageSize,
 		name
 	}: AuditQueryDto): Promise<Pagination<Audit>> {
-		const queryBuilder = this.dataSource
-			.getRepository(Audit)
-			.createQueryBuilder('audit')
-			.leftJoinAndSelect(User, 'user', 'user.id = audit.userId');
+		const queryBuilder = this.createBaseQueryBuilder();
 
 		if (name) {
 			queryBuilder.andWhere('audit.name LIKE :name', { name: `%${name}%` });
@@ -39,17 +45,14 @@ export class AuditsService {
 		});
 	}
 
-
 	async findOneById(id: number): Promise<Audit | undefined> {
-		return this.auditsRepository
-			.createQueryBuilder('auditoria')
-			.leftJoinAndSelect('usuario', 'usuario', 'usuario.id = auditoria.userId')
-			.where('auditoria.id = :id', { id })
-			.getOne();
+		const queryBuilder = this.createBaseQueryBuilder()
+			.where('audit.id = :id', { id });
+
+		return queryBuilder.getOne();
 	}
 
 	async create(content: AuditDto): Promise<void> {
-		console.log(content);
 		await this.entityManager.transaction(async (manager) => {
 			const r = manager.create(Audit, content);
 
