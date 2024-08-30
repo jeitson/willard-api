@@ -18,7 +18,7 @@ export class AuditDto {
 	@IsString()
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
-	name: string;
+	title: string;
 
 	@ApiProperty({ description: 'Descripción', example: 'Descripción de la auditoría' })
 	@IsString()

@@ -36,7 +36,7 @@ export class LoggingInterceptor implements NestInterceptor {
 
 				if (request.method !== 'GET') {
 					await this.auditsService.create({
-						name: `${request.url.replaceAll('/', '-').toUpperCase()}::${request.method}`,
+						title: `${request.url.replaceAll('/', '-').toUpperCase()}::${request.method}`,
 						description: `Request made to ${request.url}::${request.method}`,
 						userId: userId,
 						payload: JSON.stringify(request.body),

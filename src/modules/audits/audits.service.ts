@@ -6,6 +6,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { paginate } from 'src/core/helper/paginate';
 import { User } from '../users/entities/user.entity';
+import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 
 @Injectable()
 export class AuditsService {
@@ -21,19 +22,18 @@ export class AuditsService {
 			.getRepository(Audit)
 			.createQueryBuilder('audit')
 			.leftJoinAndMapOne('audit.user', User, 'user', 'user.id = audit.userId')
-			.leftJoinAndSelect('user.roles', 'userRoles')
-			.leftJoinAndSelect('userRoles.role', 'role');
+			.leftJoinAndSelect('user.roles', 'userRoles');
 	}
 
 	async findAll({
 		page,
 		pageSize,
-		name
-	}: AuditQueryDto): Promise<Pagination<Audit>> {
+		title
+	}: AuditQueryDto): Promise<Pagination<Partial<Audit>>> {
 		const queryBuilder = this.createBaseQueryBuilder();
 
-		if (name) {
-			queryBuilder.andWhere('audit.name LIKE :name', { name: `%${name}%` });
+		if (title) {
+			queryBuilder.andWhere('audit.title LIKE :title', { title: `%${title}%` });
 		}
 
 		const result = await paginate<Audit>(queryBuilder, {
@@ -43,33 +43,48 @@ export class AuditsService {
 
 		return {
 			...result,
-			items: result.items.map(audit => {
+			items: result.items.map((audit: any) => {
 				if (audit.response) {
 					audit.response = JSON.parse(audit.response);
 				}
 				if (audit.payload) {
 					audit.payload = JSON.parse(audit.payload);
 				}
-				return audit;
+
+				const { user, ...content } = audit;
+
+				return {
+					...content,
+					userName: audit.user ? audit.user.name : null,
+					role: audit.user?.roles && audit.user.roles.length > 0 ? [audit.user.roles[0].name] : null,
+				};
 			})
 		};
 	}
 
-	async findOneById(id: number): Promise<Audit | undefined> {
-		const audit = await this.createBaseQueryBuilder()
+	async findOneById(id: number): Promise<Partial<Audit> | undefined> {
+		const audit: any = await this.createBaseQueryBuilder()
 			.where('audit.id = :id', { id })
 			.getOne();
 
-		if (audit) {
-			if (audit.response) {
-				audit.response = JSON.parse(audit.response);
-			}
-			if (audit.payload) {
-				audit.payload = JSON.parse(audit.payload);
-			}
+		if (!audit) {
+			throw new BusinessException('Petición no encontrada', 404);
 		}
 
-		return audit;
+		if (audit.response) {
+			audit.response = JSON.parse(audit.response);
+		}
+		if (audit.payload) {
+			audit.payload = JSON.parse(audit.payload);
+		}
+
+		const { user, ...content } = audit;
+
+		return {
+			...content,
+			userName: audit.user ? audit.user.name : null,
+			role: audit.user?.roles && audit.user.roles.length > 0 ? [audit.user.roles[0].name] : null,
+		};
 	}
 
 	async create(content: AuditDto): Promise<void> {
