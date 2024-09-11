@@ -7,27 +7,14 @@ import { Route } from './entities/route.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Rutas')
-@Controller('routes')
+@Controller('collection-request/:id/routes')
 export class RoutesController {
 	constructor(private readonly routesServices: RoutesService) { }
 
 	@Post()
 	@ApiOperation({ summary: 'Crear una nueva ruta' })
-	create(@Body() createRutaDto: CreateRouteDto): Promise<Route> {
-		return this.routesServices.create(createRutaDto);
-	}
-
-	@Get()
-	@ApiOperation({ summary: 'Obtener todas las rutas' })
-	@ApiResult({ type: [Route], isPage: true })
-	findAll(@Query() query): Promise<Route[]> {
-		return this.routesServices.findAll(query);
-	}
-
-	@Get(':id')
-	@ApiOperation({ summary: 'Obtener una ruta por su ID' })
-	findOne(@IdParam('id') id: string): Promise<Route> {
-		return this.routesServices.findOne(+id);
+	create(@IdParam('id') id: string, @Body() createRutaDto: CreateRouteDto): Promise<Route> {
+		return this.routesServices.create(+id, createRutaDto);
 	}
 
 	@Put(':id')

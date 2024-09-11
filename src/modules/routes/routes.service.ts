@@ -4,17 +4,45 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Route } from './entities/route.entity';
 import { Repository } from 'typeorm';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { CollectionRequest } from '../collection_request/entities/collection_request.entity';
+import { CollectionRequestAudit } from '../collection_request_audits/entities/collection_request_audit.entity';
+import { Transporter } from '../transporters/entities/transporter.entity';
 
 @Injectable()
 export class RoutesService {
 	constructor(
 		@InjectRepository(Route)
 		private readonly repository: Repository<Route>,
+		@InjectRepository(CollectionRequest)
+		private readonly collectionRequestRepository: Repository<CollectionRequest>,
+		@InjectRepository(CollectionRequestAudit)
+		private readonly collectionRequestAuditRepository: Repository<CollectionRequestAudit>,
+		@InjectRepository(Transporter)
+		private readonly transporterRepository: Repository<Transporter>,
 	) { }
 
-	async create(dto: CreateRouteDto): Promise<Route> {
-		const entity = this.repository.create(dto);
-		return await this.repository.save(entity);
+	async create(id: number, dto: CreateRouteDto): Promise<Route> {
+		const collectionRequest = await this.collectionRequestRepository.findOne({
+			where: { id, status: true }
+		});
+
+		if (!collectionRequest) {
+			throw new BusinessException('Solicitud no encontrada', 404);
+		}
+
+		const route = this.repository.create({ collectionRequest, ...dto });
+		const routeSaved = await this.repository.save(route);
+
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({
+			collectionRequest,
+			name: 'CREATED',
+			description: 'IMPLEMENTED ROUTE',
+			statusId: collectionRequest.requestStatusId || 1,
+		});
+
+		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
+
+		return routeSaved;
 	}
 
 	async findOne(id: number): Promise<Route> {

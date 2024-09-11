@@ -2,10 +2,6 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional, IsString, IsDateString, IsBoolean } from "class-validator";
 
 export class CreateRouteDto {
-	@ApiProperty({ description: 'Solicitud de recogida' })
-	@IsNotEmpty()
-	collectionRequestId: number;
-
 	@ApiProperty({ description: 'Estado de la ruta' })
 	@IsNotEmpty()
 	routeStatusId: bigint;

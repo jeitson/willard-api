@@ -87,7 +87,6 @@ export class CollectionRequestService {
 		return collectionRequestSaved;
 	}
 
-
 	async update(id: number, updateDto: CollectionRequestUpdateDto): Promise<void> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
