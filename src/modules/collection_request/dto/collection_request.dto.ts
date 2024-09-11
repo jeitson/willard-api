@@ -13,12 +13,6 @@ export class CollectionRequestCreateDto {
 	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
-	@ApiProperty({ description: 'Transportadora asociada' })
-	@ValidateIf(o => o.isSpecial === false)
-	@IsInt()
-	@Min(1, { message: 'El ID de la transportadora no puede ser 0' })
-	transporterId: number;
-
 	@ApiProperty({ description: 'Nombre' })
 	@IsString()
 	@MaxLength(50)

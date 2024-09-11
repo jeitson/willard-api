@@ -49,12 +49,6 @@ export class CollectionRequestService {
 				throw new BusinessException('No existe el lugar de recogida', 400);
 			}
 
-			const transporter = await this.transporterRepository.findOneBy({ id: createDto.transporterId, status: true });
-
-			if (!transporter) {
-				throw new BusinessException('No existe la transportadora', 400);
-			}
-
 			requestStatusId = 6;
 
 			collectionRequest = this.collectionRequestRepository.create({
@@ -63,10 +57,7 @@ export class CollectionRequestService {
 				collectionSite: pickUpLocation.collectionSite,
 				consultant: pickUpLocation.consultant,
 				requestStatusId,
-				transporter
 			});
-		} else {
-			collectionRequest.transporter = null;
 		}
 
 		const collectionRequestSaved = await this.collectionRequestRepository.save(collectionRequest);
