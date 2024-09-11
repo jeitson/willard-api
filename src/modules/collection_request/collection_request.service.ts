@@ -16,6 +16,7 @@ import { Transporter } from "../transporters/entities/transporter.entity";
  * 3 = Rechazado
  * 4 = Cancelado
  * 5 = Seguimiento
+ * 6 = Incompleta
  *  **/
 
 
@@ -33,7 +34,7 @@ export class CollectionRequestService {
 	) { }
 
 	async create(createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
-		let requestStatusId = 2;
+		let requestStatusId = 1;
 		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId });
 
 		const { isSpecial, pickUpLocationId, ...content } = createDto;
@@ -54,12 +55,14 @@ export class CollectionRequestService {
 				throw new BusinessException('No existe la transportadora', 400);
 			}
 
+			requestStatusId = 6;
+
 			collectionRequest = this.collectionRequestRepository.create({
 				...content,
 				isSpecial,
 				collectionSite: pickUpLocation.collectionSite,
 				consultant: pickUpLocation.consultant,
-				requestStatusId: 1,
+				requestStatusId,
 				transporter
 			});
 		} else {
@@ -96,10 +99,14 @@ export class CollectionRequestService {
 			throw new BusinessException('La configuración de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'UPDATE COMPLETE DATA', statusId: 2 });
+		if (collectionRequest.requestStatusId !== 6) {
+			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
+		}
+
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', statusId: 1 });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { ...collectionRequest, ...updateDto, requestStatusId: 2 });
+		await this.collectionRequestRepository.update(id, { ...collectionRequest, ...updateDto, requestStatusId: 1 });
 	}
 
 	async findAll(query: any): Promise<Pagination<CollectionRequest>> {
@@ -145,6 +152,10 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
+		if (collectionRequest.requestStatusId !== 1) {
+			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
+		}
+
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: 3 });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
@@ -155,6 +166,10 @@ export class CollectionRequestService {
 		const collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 		if (!collectionRequest) {
 			throw new BusinessException('Solicitud no encontrada', 404);
+		}
+
+		if (collectionRequest.requestStatusId !== 1) {
+			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'APPROVED', description: '', statusId: 2 });
