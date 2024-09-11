@@ -36,13 +36,33 @@ export class CollectionRequestController {
 	@Patch(':id')
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
-	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<CollectionRequest> {
-		return this.collectionsRequestervice.update(id, updateDto);
+	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
+		await this.collectionsRequestervice.update(id, updateDto);
+	}
+
+	@Post(':id/reject')
+	@ApiOperation({ summary: 'Rechazar solicitud' })
+	@ApiResult({ type: CollectionRequest })
+	async reject(@IdParam('id') id: number): Promise<void> {
+		await this.collectionsRequestervice.reject(id);
+	}
+
+	@Post(':id/approve')
+	@ApiOperation({ summary: 'Aprobar solicitud' })
+	@ApiResult({ type: CollectionRequest })
+	async approve(@IdParam('id') id: number): Promise<void> {
+		await this.collectionsRequestervice.approve(id);
+	}
+
+	@Post(':id/cancel')
+	@ApiOperation({ summary: 'Cancelar solicitud' })
+	async cancel(@IdParam('id') id: number): Promise<void> {
+		return this.collectionsRequestervice.cancel(id);
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Eliminar solicitud' })
-	async remove(@IdParam('id') id: number): Promise<void> {
-		return this.collectionsRequestervice.remove(id);
+	async delete(@IdParam('id') id: number): Promise<void> {
+		return this.collectionsRequestervice.delete(id);
 	}
 }

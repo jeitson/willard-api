@@ -88,7 +88,7 @@ export class AuditsService {
 	}
 
 	async create(content: AuditDto): Promise<void> {
-		await this.entityManager.transaction(async (manager) => {
+		await this.dataSource.transaction(async (manager) => {
 			const r = manager.create(Audit, content);
 
 			await manager.save(r);

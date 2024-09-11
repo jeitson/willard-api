@@ -1,27 +1,23 @@
 import { ApiProperty, IntersectionType, PartialType } from "@nestjs/swagger";
-import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsNumber, MaxLength } from "class-validator";
+import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsNumber, MaxLength, ValidateIf, Min } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
 
 export class CollectionRequestCreateDto {
 	@ApiProperty({ description: 'Cliente asociado' })
 	@IsInt()
+	@Min(1, { message: 'El ID del cliente no puede ser 0' })
 	clientId: number;
 
 	@ApiProperty({ description: 'Lugar de recogida asociado' })
 	@IsInt()
+	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
-	@ApiProperty({ description: 'Sede de Acopio asociada' })
-	@IsInt()
-	collectionSiteId: number;
-
 	@ApiProperty({ description: 'Transportadora asociada' })
+	@ValidateIf(o => o.isSpecial === false)
 	@IsInt()
-	transportadoraId: number;
-
-	@ApiProperty({ description: 'Asesor asociado' })
-	@IsInt()
-	consultantId: number;
+	@Min(1, { message: 'El ID de la transportadora no puede ser 0' })
+	transporterId: number;
 
 	@ApiProperty({ description: 'Nombre' })
 	@IsString()
@@ -54,9 +50,10 @@ export class CollectionRequestCreateDto {
 	@IsBoolean()
 	isSpecial: boolean;
 
-	@ApiProperty({ description: 'Estado de la solicitud' })
-	@IsInt()
-	requestStatusId: number;
+	// @ApiProperty({ description: 'Estado de la solicitud' })
+	// @IsInt()
+	// @Min(1, { message: 'El ID del estado de solicitud no puede ser 0' })
+	// requestStatusId: number;
 
 	@ApiProperty({ description: 'Fecha estimada de recogida' })
 	@IsOptional()
@@ -81,7 +78,23 @@ export class CollectionRequestCreateDto {
 	recommendations?: string;
 }
 
-export class CollectionRequestUpdateDto extends CollectionRequestCreateDto { }
+
+export class CollectionRequestUpdateDto {
+	@ApiProperty({ description: 'Sede de acopio' })
+	@IsInt()
+	@Min(1, { message: 'El ID de la sede de acopio no puede ser 0' })
+	collectionSiteId: number;
+
+	@ApiProperty({ description: 'Asesor' })
+	@IsInt()
+	@Min(1, { message: 'El ID del asesor no puede ser 0' })
+	consultantId: number;
+
+	@ApiProperty({ description: 'Transportadora asociada' })
+	@IsInt()
+	@Min(1, { message: 'El ID de la transportadora no puede ser 0' })
+	transporterId: number;
+}
 
 export class CollectionRequestQueryDto extends IntersectionType(
 	PagerDto<CollectionRequestCreateDto>,

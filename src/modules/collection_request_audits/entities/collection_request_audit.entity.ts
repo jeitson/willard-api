@@ -12,7 +12,7 @@ export class CollectionRequestAudit extends CompleteEntity {
 
 	@ApiProperty({ description: 'Estado de solicitud' })
 	@Column({ type: 'bigint', name: 'EstadoSolicitudId' })
-	statusId: bigint;
+	statusId: number;
 
 	@ApiProperty({ description: 'Nombre' })
 	@Column({ type: 'varchar', length: 255, name: 'Nombre' })
