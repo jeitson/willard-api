@@ -3,11 +3,16 @@ import { RoutesService } from './routes.service';
 import { RoutesController } from './routes.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Route } from './entities/route.entity';
+import { CollectionRequestModule } from '../collection_request/collection_request.module';
+import { TransportersModule } from '../transporters/transporters.module';
+import { CollectionRequestAuditsModule } from '../collection_request_audits/collection_request_audits.module';
+
+const providers = [RoutesService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Route])],
+	imports: [TypeOrmModule.forFeature([Route]), CollectionRequestModule, CollectionRequestAuditsModule, TransportersModule],
 	controllers: [RoutesController],
-	providers: [RoutesService],
-	exports: [RoutesService],
+	providers,
+	exports: [TypeOrmModule, ...providers],
 })
 export class RoutesModule { }

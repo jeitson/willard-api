@@ -17,15 +17,15 @@ export class RoutesController {
 		return this.routesServices.create(+id, createRutaDto);
 	}
 
-	@Put(':id')
-	@ApiOperation({ summary: 'Actualizar una ruta' })
-	update(@IdParam('id') id: string, @Body() updateRutaDto: UpdateRouteDto): Promise<Route> {
-		return this.routesServices.update(+id, updateRutaDto);
-	}
+	// @Put(':id')
+	// @ApiOperation({ summary: 'Actualizar una ruta' })
+	// update(@IdParam('id') id: string, @Body() updateRutaDto: UpdateRouteDto): Promise<Route> {
+	// 	return this.routesServices.update(+id, updateRutaDto);
+	// }
 
-	@Delete(':id')
-	@ApiOperation({ summary: 'Eliminar una ruta' })
-	remove(@IdParam('id') id: string): Promise<void> {
-		return this.routesServices.remove(+id);
-	}
+	// @Delete(':id')
+	// @ApiOperation({ summary: 'Eliminar una ruta' })
+	// remove(@IdParam('id') id: string): Promise<void> {
+	// 	return this.routesServices.remove(+id);
+	// }
 }

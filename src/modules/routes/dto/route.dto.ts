@@ -54,6 +54,10 @@ export class CreateRouteDto {
 	@IsOptional()
 	@IsDateString()
 	deliveryDateToCollectionSite?: string;
+
+	@ApiProperty({ description: 'ID del transportador' })
+	@IsNotEmpty()
+	transporterId: number;
 }
 
 export class UpdateRouteDto {

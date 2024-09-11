@@ -27,15 +27,25 @@ export class RoutesService {
 		});
 
 		if (!collectionRequest) {
-			throw new BusinessException('Solicitud no encontrada', 404);
+			throw new BusinessException('Solicitud no encontrada', 400);
+		}
+
+		const transporter = await this.transporterRepository.findOne({
+			where: { id: dto.transporterId, status: true }
+		});
+
+		if (!transporter) {
+			throw new BusinessException('Transportador no encontrada', 400);
 		}
 
 		const route = this.repository.create({ collectionRequest, ...dto });
 		const routeSaved = await this.repository.save(route);
 
+		await this.collectionRequestRepository.update(id, { transporter });
+
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({
 			collectionRequest,
-			name: 'CREATED',
+			name: 'ROUTE_ASSIGNMENT',
 			description: 'IMPLEMENTED ROUTE',
 			statusId: collectionRequest.requestStatusId || 1,
 		});

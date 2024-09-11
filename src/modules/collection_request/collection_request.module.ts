@@ -7,10 +7,12 @@ import { PickUpLocationModule } from '../pick_up_location/pick_up_location.modul
 import { CollectionRequestAuditsModule } from '../collection_request_audits/collection_request_audits.module';
 import { TransportersModule } from '../transporters/transporters.module';
 
+const providers = [CollectionRequestService]
+
 @Module({
     imports: [TypeOrmModule.forFeature([CollectionRequest]), PickUpLocationModule, CollectionRequestAuditsModule, TransportersModule],
-    providers: [CollectionRequestService],
     controllers: [CollectionRequestController],
-    exports: [CollectionRequestService],
+    providers,
+    exports: [TypeOrmModule, ...providers],
 })
 export class CollectionRequestModule {}
