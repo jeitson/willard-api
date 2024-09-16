@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import config from './core/config';
 import { SharedModule } from './core/shared/shared.module';
 import { DatabaseModule } from './core/shared/database/database.module';
-import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AuditsModule } from './modules/audits/audits.module';
@@ -21,6 +20,8 @@ import { CollectionRequestModule } from './modules/collection_request/collection
 import { CollectionRequestAuditsModule } from './modules/collection_request_audits/collection_request_audits.module';
 import { RoutesModule } from './modules/routes/routes.module';
 import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
+import { AuthModule } from './modules/auth/auth.module';
+import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 
 @Module({
 	imports: [
@@ -46,9 +47,11 @@ import { LoggingInterceptor } from './core/common/interceptors/logging.intercept
 		CollectionRequestModule,
 		CollectionRequestAuditsModule,
 		RoutesModule,
+		AuthModule,
 	],
 	controllers: [],
 	providers: [
+		// { provide: APP_GUARD, useClass: JwtAuthGuard },
 		{ provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
 		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },

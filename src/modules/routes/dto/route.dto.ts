@@ -7,14 +7,14 @@ export class CreateRouteDto {
 	routeStatusId: bigint;
 
 	@ApiProperty({ description: 'Nombre' })
-	@IsNotEmpty()
+	@IsOptional()
 	@IsString()
-	name: string;
+	name: string = null;
 
 	@ApiProperty({ description: 'Descripción', required: false })
 	@IsOptional()
 	@IsString()
-	description?: string;
+	description?: string = null;
 
 	@ApiProperty({ description: 'Fecha de confirmación de recogida', required: false })
 	@IsOptional()
