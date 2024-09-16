@@ -4,42 +4,42 @@ import { IsNotEmpty, IsOptional, IsString, IsDateString, IsBoolean } from "class
 export class CreateRouteDto {
 	@ApiProperty({ description: 'Estado de la ruta' })
 	@IsNotEmpty()
-	routeStatusId: bigint;
+	routeStatusId: number;
 
 	@ApiProperty({ description: 'Nombre' })
 	@IsOptional()
 	@IsString()
-	name: string = null;
+	name: string = '';
 
 	@ApiProperty({ description: 'Descripción', required: false })
 	@IsOptional()
 	@IsString()
-	description?: string = null;
+	description?: string = '';
 
-	@ApiProperty({ description: 'Fecha de confirmación de recogida', required: false })
+	@ApiProperty({ description: 'Fecha de confirmación de recogida', required: true })
 	@IsOptional()
 	@IsDateString()
-	confirmedPickUpDate?: string;
+	confirmedPickUpDate: string;
 
-	@ApiProperty({ description: 'Fecha de apertura del viaje', required: false })
+	@ApiProperty({ description: 'Fecha de apertura del viaje', required: true })
 	@IsOptional()
 	@IsDateString()
-	tripStartDate?: string;
+	tripStartDate: string;
 
-	@ApiProperty({ description: 'Hora de apertura del viaje', required: false })
+	@ApiProperty({ description: 'Hora de apertura del viaje', required: true })
 	@IsOptional()
 	@IsString()
-	tripStartTime?: string;
+	tripStartTime: string;
 
-	@ApiProperty({ description: 'Fecha de cierre del viaje', required: false })
+	@ApiProperty({ description: 'Fecha de cierre del viaje', required: true })
 	@IsOptional()
 	@IsDateString()
-	tripEndDate?: string;
+	tripEndDate: string;
 
-	@ApiProperty({ description: 'Hora de cierre del viaje', required: false })
+	@ApiProperty({ description: 'Hora de cierre del viaje', required: true })
 	@IsOptional()
 	@IsString()
-	tripEndTime?: string;
+	tripEndTime: string;
 
 	@ApiProperty({ description: 'Placa' })
 	@IsNotEmpty()
@@ -48,12 +48,12 @@ export class CreateRouteDto {
 
 	@ApiProperty({ description: 'Tipo de camión' })
 	@IsNotEmpty()
-	truckTypeId: bigint;
+	truckTypeId: number;
 
-	@ApiProperty({ description: 'Fecha de entrega en el sitio de acopio', required: false })
+	@ApiProperty({ description: 'Fecha de entrega en el sitio de acopio', required: true })
 	@IsOptional()
 	@IsDateString()
-	deliveryDateToCollectionSite?: string;
+	deliveryDateToCollectionSite: string;
 
 	@ApiProperty({ description: 'ID del transportador' })
 	@IsNotEmpty()
@@ -103,7 +103,7 @@ export class UpdateRouteDto {
 
 	@ApiProperty({ description: 'Tipo de camión', required: false })
 	@IsOptional()
-	truckTypeId?: bigint;
+	truckTypeId?: number;
 
 	@ApiProperty({ description: 'Fecha de entrega en el sitio de acopio', required: false })
 	@IsOptional()

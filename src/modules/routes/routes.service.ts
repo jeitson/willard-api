@@ -37,7 +37,6 @@ export class RoutesService {
 		if (!transporter) {
 			throw new BusinessException('Transportador no encontrada', 400);
 		}
-
 		const route = this.repository.create({ collectionRequest, ...dto });
 		const routeSaved = await this.repository.save(route);
 

@@ -11,7 +11,7 @@ export class Route extends CompleteEntity {
 
     @ApiProperty({ description: 'Route Status ID' })
     @Column({ type: 'bigint', name: 'EstadoRutaId' })
-    routeStatusId: bigint;
+    routeStatusId: number;
 
     @ApiProperty({ description: 'Name' })
     @Column({ type: 'varchar', length: 100, name: 'Nombre' })
@@ -23,23 +23,23 @@ export class Route extends CompleteEntity {
 
     @ApiProperty({ description: 'Confirmed Pickup Date' })
     @Column({ type: 'date', name: 'FechaConfirmadaRecogida' })
-    confirmedPickupDate: Date;
+    confirmedPickUpDate: string;
 
     @ApiProperty({ description: 'Trip Opening Date' })
     @Column({ type: 'date', name: 'FechaAperturaViaje' })
-    tripOpeningDate: Date;
+    tripStartDate: string;
 
     @ApiProperty({ description: 'Trip Opening Time' })
     @Column({ type: 'time', name: 'HoraAperturaViaje' })
-    tripOpeningTime: string;
+    tripStartTime: string;
 
     @ApiProperty({ description: 'Trip Closing Date' })
     @Column({ type: 'date', name: 'FechaCierreViaje', nullable: true })
-    tripClosingDate: Date;
+    tripEndDate: string;
 
     @ApiProperty({ description: 'Trip Closing Time' })
     @Column({ type: 'time', name: 'HoraCierreViaje', nullable: true })
-    tripClosingTime: string;
+    tripEndTime: string;
 
     @ApiProperty({ description: 'Truck Plate' })
     @Column({ type: 'varchar', length: 20, name: 'Placa' })
@@ -47,9 +47,9 @@ export class Route extends CompleteEntity {
 
     @ApiProperty({ description: 'Truck Type ID' })
     @Column({ type: 'bigint', name: 'TipoCamionId' })
-    truckTypeId: bigint;
+    truckTypeId: number;
 
 	@ApiProperty({ description: 'Fecha de entrega en el sitio de acopio' })
     @Column({ type: 'date', name: 'FechaEntregaSitioAcopio', nullable: true })
-    deliveryDateToCollectionSite: Date;
+    deliveryDateToCollectionSite: string;
 }
