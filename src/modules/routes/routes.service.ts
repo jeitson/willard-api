@@ -30,6 +30,10 @@ export class RoutesService {
 			throw new BusinessException('Solicitud no encontrada', 400);
 		}
 
+		if (collectionRequest.requestStatusId !== 1 || collectionRequest.route) {
+			throw new BusinessException('La solicitud, no aplica para la acción a ejecutar', 400);
+		}
+
 		const transporter = await this.transporterRepository.findOne({
 			where: { id: dto.transporterId, status: true }
 		});
@@ -37,6 +41,7 @@ export class RoutesService {
 		if (!transporter) {
 			throw new BusinessException('Transportador no encontrada', 400);
 		}
+
 		const route = this.repository.create({ collectionRequest, ...dto });
 		const routeSaved = await this.repository.save(route);
 
