@@ -109,6 +109,10 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
 			.leftJoinAndSelect('collectionRequest.route', 'route');
 
+		if (query.status) {
+			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: query.status });
+		}
+
 		return paginate<CollectionRequest>(queryBuilder, {
 			page: query.page,
 			pageSize: query.pageSize,
