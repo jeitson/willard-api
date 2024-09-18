@@ -23,7 +23,8 @@ export class RoutesService {
 
 	async create(id: number, dto: CreateRouteDto): Promise<Route> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({
-			where: { id, status: true }
+			where: { id, status: true },
+			relations: ['route']
 		});
 
 		if (!collectionRequest) {
