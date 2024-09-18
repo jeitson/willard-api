@@ -109,8 +109,8 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
 			.leftJoinAndSelect('collectionRequest.route', 'route');
 
-		if (query.status) {
-			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: query.status });
+		if (query.status && !isNaN(query.status)) {
+			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: +query.status });
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
