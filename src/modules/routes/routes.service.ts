@@ -45,7 +45,7 @@ export class RoutesService {
 		const route = this.repository.create({ collectionRequest, ...dto });
 		const routeSaved = await this.repository.save(route);
 
-		await this.collectionRequestRepository.update(id, { transporter });
+		await this.collectionRequestRepository.update(id, { transporter, requestStatusId: 2 });
 
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({
 			collectionRequest,
