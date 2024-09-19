@@ -21,7 +21,8 @@ import { CollectionRequestAuditsModule } from './modules/collection_request_audi
 import { RoutesModule } from './modules/routes/routes.module';
 import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
-import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
+import { RolesGuard } from './core/guards/roles.guard';
 
 @Module({
 	imports: [
@@ -51,7 +52,8 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 	],
 	controllers: [],
 	providers: [
-		// { provide: APP_GUARD, useClass: JwtAuthGuard },
+		{ provide: APP_GUARD, useClass: JwtAuthGuard },
+		{ provide: APP_GUARD, useClass: RolesGuard },
 		{ provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
 		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },

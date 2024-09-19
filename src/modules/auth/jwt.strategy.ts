@@ -1,4 +1,3 @@
-// src/modules/auth/jwt.strategy.ts
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -12,15 +11,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 			secretOrKeyProvider: passportJwtSecret({
 				cache: true,
 				rateLimit: true,
-				jwksUri: `${process.env.AUTH0_DOMAIN}.well-known/jwks.json`,
+				jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
 			}),
-			audience: process.env.AUTH0_AUDIENCE,
-			issuer: process.env.AUTH0_DOMAIN,
+			issuer: `https://${process.env.AUTH0_DOMAIN}/`,
 			algorithms: ['RS256'],
 		});
 	}
 
 	async validate(payload: any) {
-		return payload;
+		return { userId: payload.sub, ...payload };
 	}
 }

@@ -81,7 +81,7 @@ export class UsersService {
 
 			if (roles && roles.length > 0) {
 
-				const _roles = await this.rolesRepository.find({ where: { id: In(roles)} });
+				const _roles = await this.rolesRepository.find({ where: { id: In(roles) } });
 
 				for (const role of _roles) {
 					const userRole = manager.create(UserRole, {
@@ -135,5 +135,19 @@ export class UsersService {
 		userRol.role = rol;
 
 		return this.userRolRepository.save(userRol);
+	}
+
+	async getUserRoles(id: string): Promise<string[]> {
+		const user = await this.userRepository
+			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.roles', 'role')
+			.where('user.oauthId = :id', { id })
+			.getOne();
+
+		if (!user) {
+			throw new Error('Usuario no encontrado');
+		}
+
+		return user.roles.map(({ role }) => role.name)
 	}
 }
