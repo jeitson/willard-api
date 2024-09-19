@@ -12,7 +12,7 @@ export class RolesGuard implements CanActivate {
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		try {
-			const roles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+			const roles = this.reflector.getAllAndOverride<number[]>(ROLES_KEY, [
 				context.getHandler(),
 				context.getClass(),
 			]);
@@ -34,7 +34,7 @@ export class RolesGuard implements CanActivate {
 				return true;
 			}
 
-			const hasRole = () => userRoles.some(role => roles.includes(role));
+			const hasRole = () => userRoles.some(role => roles.includes(+role));
 
 			if (!hasRole()) {
 				throw new ForbiddenException('No tienes permisos para acceder a este recurso.');

@@ -9,6 +9,22 @@ import { isEmpty } from 'class-validator';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
 
+/**
+ *
+ * Roles
+ *
+    - PH ASESOR \ PH AGENCIA => 13
+	- PLANEADOR DE TRANSPORTE => 14
+	- WILLARD LOGISTICA => 15
+	- FABRICA BW => 16
+	- CONDUCTOR => 17
+	- AGENCIA PH => 18
+	- PH AUDITORIA => 19
+	- RECUPERADOR => 20
+	- AUDITORIA WILLARD => 21
+*/
+
+
 @Injectable()
 export class RolesService {
 	constructor(
