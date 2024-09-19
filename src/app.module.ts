@@ -48,7 +48,7 @@ import { RolesGuard } from './core/guards/roles.guard';
 		CollectionRequestModule,
 		CollectionRequestAuditsModule,
 		RoutesModule,
-		AuthModule,
+		// AuthModule,
 	],
 	controllers: [],
 	providers: [
