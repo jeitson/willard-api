@@ -5,8 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UserRole } from './entities/user-rol.entity';
 import { RolesModule } from '../roles/roles.module';
+import { UserContextService } from './user-context.service';
 
-const providers = [UsersService]
+const providers = [UsersService, UserContextService]
 
 @Module({
 	imports: [TypeOrmModule.forFeature([User, UserRole]), RolesModule],

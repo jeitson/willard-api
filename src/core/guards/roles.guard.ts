@@ -24,7 +24,7 @@ export class RolesGuard implements CanActivate {
 				throw new ForbiddenException('No se encontró un usuario autenticado.');
 			}
 
-			const userRoles = await this.usersService.getUserRoles(user.sub);
+			const userRoles = await this.usersService.getUserRoles(user);
 
 			if (!userRoles || userRoles.length === 0) {
 				throw new ForbiddenException('El usuario no tiene roles asignados.');

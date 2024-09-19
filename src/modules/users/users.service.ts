@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { EntityManager, In, Like, Repository } from 'typeorm';
-import { isEmpty } from 'class-validator';
+import { EntityManager, In, Repository } from 'typeorm';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
 import { Pagination } from 'src/core/helper/paginate/pagination';
@@ -10,6 +9,7 @@ import { paginate } from 'src/core/helper/paginate';
 import { UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
 import { Role } from '../roles/entities/rol.entity';
 import { UserRole } from './entities/user-rol.entity';
+import { UserContextService } from './user-context.service';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +22,7 @@ export class UsersService {
 		private readonly rolesRepository: Repository<Role>,
 		@InjectRepository(UserRole)
 		private readonly userRolRepository: Repository<UserRole>,
+		private userContextService: UserContextService
 	) { }
 
 	async findAll({
@@ -137,7 +138,7 @@ export class UsersService {
 		return this.userRolRepository.save(userRol);
 	}
 
-	async getUserRoles(id: string): Promise<string[]> {
+	async getUserRoles({ sub: id, ...content }): Promise<string[]> {
 		const user = await this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'role')
@@ -147,6 +148,9 @@ export class UsersService {
 		if (!user) {
 			throw new Error('Usuario no encontrado');
 		}
+
+		this.userContextService.setUserDetails(user);
+		this.userContextService.setUser({ sub: id, ...content });
 
 		return user.roles.map(({ role }) => role.name)
 	}
