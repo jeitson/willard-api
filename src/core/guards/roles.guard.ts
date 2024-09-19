@@ -17,10 +17,6 @@ export class RolesGuard implements CanActivate {
 				context.getClass(),
 			]);
 
-			if (!roles) {
-				return true;
-			}
-
 			const request = context.switchToHttp().getRequest();
 			const user = request.user;
 
@@ -29,6 +25,14 @@ export class RolesGuard implements CanActivate {
 			}
 
 			const userRoles = await this.usersService.getUserRoles(user.sub);
+
+			if (!userRoles || userRoles.length === 0) {
+				throw new ForbiddenException('El usuario no tiene roles asignados.');
+			}
+
+			if (!roles || roles.length === 0) {
+				return true;
+			}
 
 			const hasRole = () => userRoles.some(role => roles.includes(role));
 
