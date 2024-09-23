@@ -107,10 +107,32 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.transporter', 'transporter')
 			.leftJoinAndSelect('collectionRequest.consultant', 'consultant')
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
-			.leftJoinAndSelect('collectionRequest.route', 'route');
+			.leftJoinAndSelect('collectionRequest.route', 'route')
+			.leftJoin('usuario', 'user', 'user.email = consultant.email');
 
-		if (query.status && !isNaN(query.status)) {
-			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: +query.status });
+
+		// 1 => ROL PH Asesor
+		// 2 => ROL Planeador
+		// 3 => ROL Willard Logistica
+		if (!query.rol || isNaN(query.rol)) {
+			throw new BusinessException('Ingrese el rol', 400);
+		}
+
+		const role = +query.rol;
+
+		if (role === 1) {
+			// Usuario ID 1 usado para simular un creador de solicitudes
+			queryBuilder.where('collectionRequest.createdBy = 1');
+		}
+
+		if (role === 2) {
+			queryBuilder.where('collectionRequest.requestStatusId IN (1, 2)');
+		}
+
+		if (role === 3) {
+			// Usuario ID 22 usado para simular un asesor - usuario
+			queryBuilder.where('collectionRequest.requestStatusId = 6');
+			queryBuilder.where('user.id = 21');
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {

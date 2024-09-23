@@ -47,12 +47,12 @@ export class CollectionRequestController {
 		await this.collectionsRequestervice.reject(id);
 	}
 
-	@Post(':id/approve')
-	@ApiOperation({ summary: 'Aprobar solicitud' })
-	@ApiResult({ type: CollectionRequest })
-	async approve(@IdParam('id') id: number): Promise<void> {
-		await this.collectionsRequestervice.approve(id);
-	}
+	// @Post(':id/approve')
+	// @ApiOperation({ summary: 'Aprobar solicitud' })
+	// @ApiResult({ type: CollectionRequest })
+	// async approve(@IdParam('id') id: number): Promise<void> {
+	// 	await this.collectionsRequestervice.approve(id);
+	// }
 
 	@Post(':id/cancel')
 	@ApiOperation({ summary: 'Cancelar solicitud' })
