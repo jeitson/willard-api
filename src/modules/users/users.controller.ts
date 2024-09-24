@@ -13,6 +13,7 @@ export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
 	@Get()
+	@Roles(1)
 	@ApiOperation({ summary: 'Obtener listado de todos los usuarios - Paginación' })
 	@ApiResult({ type: [User], isPage: true })
 	async findAll(@Query() dto: UserQueryDto) {

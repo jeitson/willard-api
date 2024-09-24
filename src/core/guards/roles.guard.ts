@@ -7,7 +7,7 @@ import { ROLES_KEY } from '../common/decorators/role.decorator';
 export class RolesGuard implements CanActivate {
 	constructor(
 		private reflector: Reflector,
-		private readonly usersService: UsersService,
+		private usersService: UsersService,
 	) { }
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -24,7 +24,9 @@ export class RolesGuard implements CanActivate {
 				throw new ForbiddenException('No se encontró un usuario autenticado.');
 			}
 
-			const userRoles = await this.usersService.getUserRoles(user);
+			const { sub } = user;
+
+			const userRoles = await this.usersService.getUserRoles(sub);
 
 			if (!userRoles || userRoles.length === 0) {
 				throw new ForbiddenException('El usuario no tiene roles asignados.');
@@ -42,6 +44,7 @@ export class RolesGuard implements CanActivate {
 
 			return true;
 		} catch (error) {
+			console.log(error);
 			return false;
 		}
 	}
