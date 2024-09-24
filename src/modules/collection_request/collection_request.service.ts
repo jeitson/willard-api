@@ -121,8 +121,8 @@ export class CollectionRequestService {
 		const role = +query.rol;
 
 		if (role === 1) {
-			// Usuario ID 1 usado para simular un creador de solicitudes
-			queryBuilder.where('collectionRequest.createdBy = 1');
+			// Usuario ID 42 usado para simular un creador de solicitudes
+			queryBuilder.where('collectionRequest.createdBy = 42');
 		}
 
 		if (role === 2) {
@@ -130,9 +130,9 @@ export class CollectionRequestService {
 		}
 
 		if (role === 3) {
-			// Usuario ID 22 usado para simular un asesor - usuario
+			// Usuario ID 43 usado para simular un asesor - usuario
 			queryBuilder.where('collectionRequest.requestStatusId = 6');
-			queryBuilder.where('user.id = 21');
+			queryBuilder.where('user.id = 43');
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
