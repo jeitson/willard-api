@@ -22,7 +22,6 @@ import { RoutesModule } from './modules/routes/routes.module';
 import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
-import { RolesGuard } from './core/guards/roles.guard';
 
 @Module({
 	imports: [
