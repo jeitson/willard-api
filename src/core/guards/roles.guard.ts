@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, ForbiddenException, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UsersService } from 'src/modules/users/users.service';
 import { ROLES_KEY } from '../common/decorators/role.decorator';
@@ -8,7 +8,7 @@ export class RolesGuard implements CanActivate {
 	constructor(
 		private reflector: Reflector,
 		private usersService: UsersService,
-	) { }
+	  ) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		try {
@@ -24,9 +24,7 @@ export class RolesGuard implements CanActivate {
 				throw new ForbiddenException('No se encontró un usuario autenticado.');
 			}
 
-			const { sub } = user;
-
-			const userRoles = await this.usersService.getUserRoles(sub);
+			const userRoles = await this.usersService.getUserRoles(user);
 
 			if (!userRoles || userRoles.length === 0) {
 				throw new ForbiddenException('El usuario no tiene roles asignados.');

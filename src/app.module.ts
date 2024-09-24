@@ -53,7 +53,6 @@ import { RolesGuard } from './core/guards/roles.guard';
 	controllers: [],
 	providers: [
 		{ provide: APP_GUARD, useClass: JwtAuthGuard },
-		{ provide: APP_GUARD, useClass: RolesGuard },
 		{ provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
 		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },

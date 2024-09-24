@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
@@ -6,9 +6,11 @@ import { User } from './entities/user.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
 import { Roles } from 'src/core/common/decorators/role.decorator';
+import { RolesGuard } from 'src/core/guards/roles.guard';
 
 @ApiTags('Sistema - Usuarios')
 @Controller('users')
+@UseGuards(RolesGuard)
 export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
