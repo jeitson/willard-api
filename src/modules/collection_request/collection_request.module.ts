@@ -7,11 +7,12 @@ import { PickUpLocationModule } from '../pick_up_location/pick_up_location.modul
 import { CollectionRequestAuditsModule } from '../collection_request_audits/collection_request_audits.module';
 import { TransportersModule } from '../transporters/transporters.module';
 import { CollectionSitesModule } from '../collection_sites/collection_sites.module';
+import { ConsultantsModule } from '../consultants/consultants.module';
 
 const providers = [CollectionRequestService]
 
 @Module({
-    imports: [TypeOrmModule.forFeature([CollectionRequest]), PickUpLocationModule, CollectionRequestAuditsModule, CollectionSitesModule],
+    imports: [TypeOrmModule.forFeature([CollectionRequest]), PickUpLocationModule, CollectionRequestAuditsModule, CollectionSitesModule, ConsultantsModule, TransportersModule],
     controllers: [CollectionRequestController],
     providers,
     exports: [TypeOrmModule, ...providers],

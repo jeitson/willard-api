@@ -22,6 +22,7 @@ import { RoutesModule } from './modules/routes/routes.module';
 import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
+import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 
 @Module({
 	imports: [
@@ -55,6 +56,7 @@ import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 		{ provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
 		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },
+		{ provide: APP_INTERCEPTOR, useClass: AllExceptionsFilter },
 	],
 })
 export class AppModule { }
