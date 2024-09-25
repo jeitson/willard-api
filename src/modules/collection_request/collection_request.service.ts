@@ -10,6 +10,7 @@ import { PickUpLocation } from "../pick_up_location/entities/pick_up_location.en
 import { CollectionRequestAudit } from "../collection_request_audits/entities/collection_request_audit.entity";
 import { Transporter } from "../transporters/entities/transporter.entity";
 import { CollectionSite } from "../collection_sites/entities/collection_site.entity";
+import { Consultant } from "../consultants/entities/consultant.entity";
 
 /** Estados ID
  * 1 = Pendiente
@@ -32,6 +33,10 @@ export class CollectionRequestService {
 		private readonly collectionRequestAuditRepository: Repository<CollectionRequestAudit>,
 		@InjectRepository(CollectionSite)
 		private readonly collectionSiteRepository: Repository<CollectionSite>,
+		@InjectRepository(Consultant)
+		private readonly consultantRepository: Repository<Consultant>,
+		@InjectRepository(Transporter)
+		private readonly transporterRepository: Repository<Transporter>,
 	) { }
 
 	async create(createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -129,7 +134,7 @@ export class CollectionRequestService {
 		return collectionRequest;
 	}
 
-	async completeInfo(id: number, { collectionSiteId, ...content }: CollectionRequestUpdateDto): Promise<void> {
+	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId }: CollectionRequestUpdateDto): Promise<void> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
 		if (!collectionRequest) {
@@ -150,7 +155,19 @@ export class CollectionRequestService {
 			throw new BusinessException(`Centro de acopio no encontrado`, 400);
 		}
 
-		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, ...content, requestStatusId: 1 });
+		const consultant = await this.consultantRepository.findOneBy({ id: +consultantId });
+
+		if (!consultant) {
+			throw new BusinessException(`Asesor no encontrado`, 400);
+		}
+
+		const transporter = await this.transporterRepository.findOneBy({ id: +transporterId });
+
+		if (!transporter) {
+			throw new BusinessException(`Transportadora no encontrado`, 400);
+		}
+
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, consultant, transporter, requestStatusId: 1 });
 
 		if (!updated) {
 			throw new BusinessException('No se pudó actualizar la información', 400);
