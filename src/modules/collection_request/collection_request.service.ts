@@ -11,6 +11,7 @@ import { CollectionRequestAudit } from "../collection_request_audits/entities/co
 import { Transporter } from "../transporters/entities/transporter.entity";
 import { CollectionSite } from "../collection_sites/entities/collection_site.entity";
 import { Consultant } from "../consultants/entities/consultant.entity";
+import { Client } from "../clients/entities/client.entity";
 
 /** Estados ID
  * 1 = Pendiente
@@ -37,32 +38,42 @@ export class CollectionRequestService {
 		private readonly consultantRepository: Repository<Consultant>,
 		@InjectRepository(Transporter)
 		private readonly transporterRepository: Repository<Transporter>,
+		@InjectRepository(Client)
+		private readonly clientRepository: Repository<Client>,
 	) { }
 
 	async create(createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
-		let requestStatusId = 1;
-		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId });
-
 		const { isSpecial, pickUpLocationId, ...content } = createDto;
+
+		const client = await this.clientRepository.findOneBy({ id: createDto.clientId })
+
+		if (!client) {
+			throw new BusinessException('El cliente no existe', 400);
+		}
+
+		const pickUpLocation = await this.pickUpLocationRepository.findOne({
+			where: { id: pickUpLocationId, status: true },
+			relations: ['collectionSite', 'consultant'],
+		});
+
+		if (!pickUpLocation) {
+			throw new BusinessException('No existe el lugar de recogida', 400);
+		}
+
+		let requestStatusId = 1;
+		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation });
 
 		if (isSpecial) {
 			requestStatusId = 6;
 		} else {
-			const pickUpLocation = await this.pickUpLocationRepository.findOne({
-				where: { id: pickUpLocationId, status: true },
-				relations: ['collectionSite', 'consultant'],
-			});
-
-			if (!pickUpLocation) {
-				throw new BusinessException('No existe el lugar de recogida', 400);
-			}
-
 			collectionRequest = this.collectionRequestRepository.create({
 				...content,
 				isSpecial,
 				collectionSite: pickUpLocation.collectionSite,
 				consultant: pickUpLocation.consultant,
 				requestStatusId,
+				pickUpLocation,
+				client,
 			});
 		}
 
