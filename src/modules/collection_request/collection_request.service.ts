@@ -118,22 +118,22 @@ export class CollectionRequestService {
 			throw new BusinessException('Ingrese el rol', 400);
 		}
 
-		const role = +query.rol;
+		// const role = +query.rol;
 
-		if (role === 1) {
-			// Usuario ID 42 usado para simular un creador de solicitudes
-			queryBuilder.where('collectionRequest.createdBy = 42');
-		}
+		// if (role === 1) {
+		// 	// Usuario ID 33 usado para simular un creador de solicitudes
+		// 	queryBuilder.where('collectionRequest.createdBy = 33');
+		// }
 
-		if (role === 2) {
-			queryBuilder.where('collectionRequest.requestStatusId IN (1, 2)');
-		}
+		// if (role === 2) {
+		// 	queryBuilder.where('collectionRequest.requestStatusId IN (1, 2)');
+		// }
 
-		if (role === 3) {
-			// Usuario ID 43 usado para simular un asesor - usuario
-			queryBuilder.where('collectionRequest.requestStatusId = 6');
-			queryBuilder.where('user.id = 43');
-		}
+		// if (role === 3) {
+		// 	// Usuario ID 34 usado para simular un asesor - usuario
+		// 	queryBuilder.where('collectionRequest.requestStatusId = 6');
+		// 	queryBuilder.where('user.id = 34');
+		// }
 
 		return paginate<CollectionRequest>(queryBuilder, {
 			page: query.page,
