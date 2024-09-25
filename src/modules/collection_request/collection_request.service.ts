@@ -9,6 +9,7 @@ import { CollectionRequestCreateDto, CollectionRequestUpdateDto } from "./dto/co
 import { PickUpLocation } from "../pick_up_location/entities/pick_up_location.entity";
 import { CollectionRequestAudit } from "../collection_request_audits/entities/collection_request_audit.entity";
 import { Transporter } from "../transporters/entities/transporter.entity";
+import { CollectionSite } from "../collection_sites/entities/collection_site.entity";
 
 /** Estados ID
  * 1 = Pendiente
@@ -29,8 +30,8 @@ export class CollectionRequestService {
 		private readonly pickUpLocationRepository: Repository<PickUpLocation>,
 		@InjectRepository(CollectionRequestAudit)
 		private readonly collectionRequestAuditRepository: Repository<CollectionRequestAudit>,
-		@InjectRepository(Transporter)
-		private readonly transporterRepository: Repository<Transporter>,
+		@InjectRepository(CollectionSite)
+		private readonly collectionSiteRepository: Repository<CollectionSite>,
 	) { }
 
 	async create(createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -78,7 +79,57 @@ export class CollectionRequestService {
 		return collectionRequestSaved;
 	}
 
-	async update(id: number, updateDto: CollectionRequestUpdateDto): Promise<void> {
+	async update(id: number, createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
+		let collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
+
+		if (!collectionRequest) {
+			throw new BusinessException('Solicitud no encontrada', 404);
+		}
+
+		let requestStatusId = 1;
+
+		const { isSpecial, pickUpLocationId, ...content } = createDto;
+
+		if (!isSpecial) {
+			const pickUpLocation = await this.pickUpLocationRepository.findOne({
+				where: { id: pickUpLocationId, status: true },
+				relations: ['collectionSite', 'consultant'],
+			});
+
+			if (!pickUpLocation) {
+				throw new BusinessException('No existe el lugar de recogida', 400);
+			}
+
+			collectionRequest = this.collectionRequestRepository.create({
+				...content,
+				isSpecial,
+				collectionSite: pickUpLocation.collectionSite,
+				consultant: pickUpLocation.consultant,
+				requestStatusId,
+			});
+		} else {
+			requestStatusId = 6;
+		}
+
+		const collectionRequestSaved = await this.collectionRequestRepository.update(id, collectionRequest);
+
+		if (!collectionRequestSaved) {
+			throw new BusinessException('Error en el guardado de la solicitud', 400);
+		}
+
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({
+			collectionRequest,
+			name: 'UPDATED',
+			description: `UPDATED - ${createDto.isSpecial ? 'SPECIAL' : 'NORMAL'}`,
+			statusId: requestStatusId || 1,
+		});
+
+		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
+
+		return collectionRequest;
+	}
+
+	async completeInfo(id: number, { collectionSiteId, ...content }: CollectionRequestUpdateDto): Promise<void> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
 		if (!collectionRequest) {
@@ -93,10 +144,20 @@ export class CollectionRequestService {
 			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: +collectionSiteId });
+
+		if (!collectionSite) {
+			throw new BusinessException(`Centro de acopio no encontrado`, 400);
+		}
+
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, ...content, requestStatusId: 1 });
+
+		if (!updated) {
+			throw new BusinessException('No se pudó actualizar la información', 400);
+		}
+
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', statusId: 1 });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
-
-		await this.collectionRequestRepository.update(id, { ...collectionRequest, ...updateDto, requestStatusId: 1 });
 	}
 
 	async findAll(query: any): Promise<Pagination<CollectionRequest>> {

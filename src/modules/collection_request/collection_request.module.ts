@@ -6,11 +6,12 @@ import { CollectionRequest } from './entities/collection_request.entity';
 import { PickUpLocationModule } from '../pick_up_location/pick_up_location.module';
 import { CollectionRequestAuditsModule } from '../collection_request_audits/collection_request_audits.module';
 import { TransportersModule } from '../transporters/transporters.module';
+import { CollectionSitesModule } from '../collection_sites/collection_sites.module';
 
 const providers = [CollectionRequestService]
 
 @Module({
-    imports: [TypeOrmModule.forFeature([CollectionRequest]), PickUpLocationModule, CollectionRequestAuditsModule, TransportersModule],
+    imports: [TypeOrmModule.forFeature([CollectionRequest]), PickUpLocationModule, CollectionRequestAuditsModule, CollectionSitesModule],
     controllers: [CollectionRequestController],
     providers,
     exports: [TypeOrmModule, ...providers],

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
 import { CollectionRequestService } from './collection_request.service';
 
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -34,10 +34,10 @@ export class CollectionRequestController {
 	}
 
 	@Patch(':id')
-	@ApiOperation({ summary: 'Actualizar solicitud' })
+	@ApiOperation({ summary: 'Completar información de la solicitud' })
 	@ApiResult({ type: CollectionRequest })
-	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
-		await this.collectionsRequestervice.update(id, updateDto);
+	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
+		await this.collectionsRequestervice.completeInfo(id, updateDto);
 	}
 
 	@Post(':id/reject')
@@ -45,6 +45,13 @@ export class CollectionRequestController {
 	@ApiResult({ type: CollectionRequest })
 	async reject(@IdParam('id') id: number): Promise<void> {
 		await this.collectionsRequestervice.reject(id);
+	}
+
+	@Put(':id')
+	@ApiOperation({ summary: 'Actualizar solicitud' })
+	@ApiResult({ type: CollectionRequest })
+	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCreateDto): Promise<void> {
+		await this.collectionsRequestervice.update(id, updateDto);
 	}
 
 	// @Post(':id/approve')

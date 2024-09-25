@@ -10,7 +10,7 @@ export class CollectionRequestAuditCreateDto {
 	@ApiProperty({ description: 'ID del estado de la solicitud', example: 1 })
 	@IsNotEmpty()
 	@IsNumber()
-	readonly requestStatusId: bigint;
+	readonly requestStatusId: number;
 
 	@ApiProperty({ description: 'Nombre del estado', example: 'Estado inicial' })
 	@IsNotEmpty()
