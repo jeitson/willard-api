@@ -49,8 +49,6 @@ export class CollectionRequestService {
 				throw new BusinessException('No existe el lugar de recogida', 400);
 			}
 
-			requestStatusId = 6;
-
 			collectionRequest = this.collectionRequestRepository.create({
 				...content,
 				isSpecial,
@@ -58,6 +56,8 @@ export class CollectionRequestService {
 				consultant: pickUpLocation.consultant,
 				requestStatusId,
 			});
+		} else {
+			requestStatusId = 6;
 		}
 
 		const collectionRequestSaved = await this.collectionRequestRepository.save(collectionRequest);
