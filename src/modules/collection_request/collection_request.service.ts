@@ -45,7 +45,9 @@ export class CollectionRequestService {
 
 		const { isSpecial, pickUpLocationId, ...content } = createDto;
 
-		if (!isSpecial) {
+		if (isSpecial) {
+			requestStatusId = 6;
+		} else {
 			const pickUpLocation = await this.pickUpLocationRepository.findOne({
 				where: { id: pickUpLocationId, status: true },
 				relations: ['collectionSite', 'consultant'],
@@ -62,11 +64,9 @@ export class CollectionRequestService {
 				consultant: pickUpLocation.consultant,
 				requestStatusId,
 			});
-		} else {
-			requestStatusId = 6;
 		}
 
-		const collectionRequestSaved = await this.collectionRequestRepository.save(collectionRequest);
+		const collectionRequestSaved = await this.collectionRequestRepository.save({ requestStatusId, ...collectionRequest });
 
 		if (!collectionRequestSaved) {
 			throw new BusinessException('Error en el guardado de la solicitud', 400);

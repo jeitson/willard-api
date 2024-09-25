@@ -10,7 +10,7 @@ import { RolesGuard } from 'src/core/guards/roles.guard';
 
 @ApiTags('Sistema - Usuarios')
 @Controller('users')
-// @UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
