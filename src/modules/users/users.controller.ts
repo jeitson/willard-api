@@ -23,6 +23,7 @@ export class UsersController {
 	}
 
 	@Get(':id')
+	@Roles(22)
 	@ApiOperation({ summary: 'Obtener usuario por su ID' })
 	@ApiResult({ type: User })
 	async findOneById(@IdParam() id: string) {
@@ -30,18 +31,21 @@ export class UsersController {
 	}
 
 	@Post()
+	@Roles(22)
 	@ApiOperation({ summary: 'Crear usuario' })
 	async create(@Body() dto: UserDto): Promise<void> {
 		await this.usersService.create(dto);
 	}
 
 	@Post('oauth')
+	@Roles(22)
 	@ApiOperation({ summary: 'Crear usuario por medio de OAuth0' })
 	async createByOAuth0(@Body() dto: UserOAuthDto): Promise<void> {
 		await this.usersService.createByOAuth0(dto);
 	}
 
 	@Put(':id')
+	@Roles(22)
 	@ApiOperation({ summary: 'Actualizar usuario' })
 	async update(
 		@IdParam() id: string,
@@ -51,6 +55,7 @@ export class UsersController {
 	}
 
 	@Post(':id/role/:rol_id')
+	@Roles(22)
 	@ApiOperation({ summary: 'Asignar role a usuario' })
 	async addRolToUser(@IdParam('id') id: string, @IdParam('rol_id') rol_id: string): Promise<void> {
 		await this.usersService.addRolToUser(+id, +rol_id);
