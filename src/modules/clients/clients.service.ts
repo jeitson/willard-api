@@ -6,26 +6,34 @@ import { ClientCreateDto, ClientQueryDto, ClientUpdateDto } from './dto/client.d
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
+import { UserContextService } from '../users/user-context.service';
 
 @Injectable()
 export class ClientsService {
 	constructor(
 		@InjectRepository(Client)
 		private readonly clientsRepository: Repository<Client>,
+		private readonly userContextService: UserContextService
 	) { }
 
 	async create(clientCreateDto: ClientCreateDto): Promise<Client> {
-		const client = this.clientsRepository.create(clientCreateDto);
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const client = this.clientsRepository.create({ ...clientCreateDto, createdBy: user_id, modifiedBy: user_id });
 		return await this.clientsRepository.save(client);
 	}
 
-	async update(id: number, clientUpdateDto: ClientUpdateDto): Promise<Client> {
+	async update(id: number, updatedData: ClientUpdateDto): Promise<Client> {
 		const client = await this.clientsRepository.findOne({ where: { id } });
+
 		if (!client) {
 			throw new BusinessException('Cliente no encontrado');
 		}
-		Object.assign(client, clientUpdateDto);
-		return await this.clientsRepository.save(client);
+
+		updatedData = Object.assign(client, updatedData);
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.clientsRepository.save({ ...updatedData, modifiedBy });
 	}
 
 	async findAll({
@@ -56,7 +64,10 @@ export class ClientsService {
 	async changeStatus(id: number): Promise<Client> {
 		const client = await this.findOne(id);
 		client.status = !client.status;
-		return await this.clientsRepository.save(client);
+
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.clientsRepository.save({ ...client, modifiedBy });
 	}
 
 	async remove(id: number): Promise<void> {

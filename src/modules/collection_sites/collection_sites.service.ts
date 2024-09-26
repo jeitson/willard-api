@@ -6,16 +6,20 @@ import { CollectionSiteCreateDto, CollectionSiteQueryDto, CollectionSiteUpdateDt
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
+import { UserContextService } from '../users/user-context.service';
 
 @Injectable()
 export class CollectionSitesService {
 	constructor(
 		@InjectRepository(CollectionSite)
 		private collectionSiteRepository: Repository<CollectionSite>,
+		private readonly userContextService: UserContextService
 	) { }
 
 	async create(createCollectionSiteDto: CollectionSiteCreateDto): Promise<CollectionSite> {
-		const collectionSite = this.collectionSiteRepository.create(createCollectionSiteDto);
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const collectionSite = this.collectionSiteRepository.create({ ...createCollectionSiteDto, createdBy: user_id, modifiedBy: user_id });
 		return await this.collectionSiteRepository.save(collectionSite);
 	}
 
@@ -44,31 +48,30 @@ export class CollectionSitesService {
 		return collectionSite;
 	}
 
-	async update(id: number, updateCollectionSiteDto: CollectionSiteUpdateDto): Promise<CollectionSite> {
-		await this.collectionSiteRepository.update(id, updateCollectionSiteDto);
+	async update(id: number, updatedData: CollectionSiteUpdateDto): Promise<CollectionSite> {
 		const updatedCollectionSite = await this.collectionSiteRepository.findOneBy({ id });
+
 		if (!updatedCollectionSite) {
 			throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
-
 		}
-		return updatedCollectionSite;
+
+		updatedData = Object.assign(updatedCollectionSite, updatedData);
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.collectionSiteRepository.save({ ...updatedData, modifiedBy });
 	}
 
 	async changeStatus(id: number): Promise<CollectionSite> {
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ id });
-		if (!collectionSite) {
-			throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
-
-		}
+		const collectionSite = await this.findOne(id);
 		collectionSite.status = !collectionSite.status;
-		return await this.collectionSiteRepository.save(collectionSite);
+
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.collectionSiteRepository.save({ ...collectionSite, modifiedBy });
 	}
 
 	async remove(id: number): Promise<void> {
-		const result = await this.collectionSiteRepository.delete(id);
-		if (result.affected === 0) {
-			throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
-
-		}
+		const consultant = await this.findOne(id);
+		await this.collectionSiteRepository.remove(consultant);
 	}
 }

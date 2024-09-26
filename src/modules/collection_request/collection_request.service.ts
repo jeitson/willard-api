@@ -12,6 +12,7 @@ import { Transporter } from "../transporters/entities/transporter.entity";
 import { CollectionSite } from "../collection_sites/entities/collection_site.entity";
 import { Consultant } from "../consultants/entities/consultant.entity";
 import { Client } from "../clients/entities/client.entity";
+import { UserContextService } from "../users/user-context.service";
 
 /** Estados ID
  * 1 = Pendiente
@@ -40,6 +41,7 @@ export class CollectionRequestService {
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Client)
 		private readonly clientRepository: Repository<Client>,
+		private readonly userContextService: UserContextService
 	) { }
 
 	async create(createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -77,7 +79,9 @@ export class CollectionRequestService {
 			});
 		}
 
-		const collectionRequestSaved = await this.collectionRequestRepository.save({ requestStatusId, ...collectionRequest });
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const collectionRequestSaved = await this.collectionRequestRepository.save({ requestStatusId, ...collectionRequest, createdBy: user_id, modifiedBy: user_id });
 
 		if (!collectionRequestSaved) {
 			throw new BusinessException('Error en el guardado de la solicitud', 400);
@@ -88,6 +92,7 @@ export class CollectionRequestService {
 			name: 'CREATED',
 			description: `CREATION - ${createDto.isSpecial ? 'SPECIAL' : 'NORMAL'}`,
 			statusId: requestStatusId || 1,
+			createdBy: user_id, modifiedBy: user_id
 		});
 
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
@@ -127,7 +132,9 @@ export class CollectionRequestService {
 			requestStatusId = 6;
 		}
 
-		const collectionRequestSaved = await this.collectionRequestRepository.update(id, collectionRequest);
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const collectionRequestSaved = await this.collectionRequestRepository.update(id, { ...collectionRequest, modifiedBy: user_id });
 
 		if (!collectionRequestSaved) {
 			throw new BusinessException('Error en el guardado de la solicitud', 400);
@@ -138,6 +145,7 @@ export class CollectionRequestService {
 			name: 'UPDATED',
 			description: `UPDATED - ${createDto.isSpecial ? 'SPECIAL' : 'NORMAL'}`,
 			statusId: requestStatusId || 1,
+			createdBy: user_id, modifiedBy: user_id
 		});
 
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
@@ -178,13 +186,15 @@ export class CollectionRequestService {
 			throw new BusinessException(`Transportadora no encontrado`, 400);
 		}
 
-		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, consultant, transporter, requestStatusId: 1 });
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, consultant, transporter, requestStatusId: 1, modifiedBy: user_id });
 
 		if (!updated) {
 			throw new BusinessException('No se pudó actualizar la información', 400);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', statusId: 1 });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', statusId: 1, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 	}
 
@@ -261,10 +271,12 @@ export class CollectionRequestService {
 			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: 3 });
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: 3, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { requestStatusId: 3, collectionSite: null, consultant: null, transporter: null, isSpecial: true });
+		await this.collectionRequestRepository.update(id, { requestStatusId: 3, collectionSite: null, consultant: null, transporter: null, isSpecial: true, modifiedBy: user_id });
 	}
 
 	async approve(id: number): Promise<void> {
@@ -277,10 +289,12 @@ export class CollectionRequestService {
 			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'APPROVED', description: '', statusId: 2 });
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'APPROVED', description: '', statusId: 2, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { requestStatusId: 2 });
+		await this.collectionRequestRepository.update(id, { requestStatusId: 2, modifiedBy: user_id });
 	}
 
 	async cancel(id: number): Promise<void> {
@@ -289,10 +303,12 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'CANCELLED', description: '', statusId: 4 });
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'CANCELLED', description: '', statusId: 4, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { requestStatusId: 4 });
+		await this.collectionRequestRepository.update(id, { requestStatusId: 4, modifiedBy: user_id });
 	}
 
 	async delete(id: number): Promise<void> {
@@ -301,9 +317,11 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'DELETED', description: '', statusId: 5 });
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'DELETED', description: '', statusId: 5, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { status: false });
+		await this.collectionRequestRepository.update(id, { status: false, modifiedBy: user_id });
 	}
 }

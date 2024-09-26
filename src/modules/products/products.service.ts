@@ -6,26 +6,35 @@ import { ProductCreateDto, ProductQueryDto, ProductUpdateDto } from './dto/produ
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { UserContextService } from '../users/user-context.service';
 
 @Injectable()
 export class ProductsService {
+
 	constructor(
 		@InjectRepository(Product)
 		private readonly productsRepository: Repository<Product>,
+		private readonly userContextService: UserContextService
 	) { }
 
 	async create(productCreateDto: ProductCreateDto): Promise<Product> {
-		const product = this.productsRepository.create(productCreateDto);
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const product = this.productsRepository.create({ ...productCreateDto, createdBy: user_id, modifiedBy: user_id });
 		return await this.productsRepository.save(product);
 	}
 
-	async update(id: number, productUpdateDto: ProductUpdateDto): Promise<Product> {
+	async update(id: number, updatedData: ProductUpdateDto): Promise<Product> {
 		const product = await this.productsRepository.findOne({ where: { id } });
+
 		if (!product) {
 			throw new BusinessException('Producto no encontrado', 400);
 		}
-		Object.assign(product, productUpdateDto);
-		return await this.productsRepository.save(product);
+
+		updatedData = Object.assign(product, updatedData);
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.productsRepository.save({ ...updatedData, modifiedBy });
 	}
 
 	async findAll({
@@ -56,7 +65,10 @@ export class ProductsService {
 	async changeStatus(id: number): Promise<Product> {
 		const product = await this.findOne(id);
 		product.status = !product.status;
-		return await this.productsRepository.save(product);
+
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.productsRepository.save({ ...product, modifiedBy });
 	}
 
 	async remove(id: number): Promise<void> {

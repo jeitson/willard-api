@@ -13,7 +13,6 @@ import { UserContextService } from './user-context.service';
 
 @Injectable()
 export class UsersService {
-
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
@@ -73,9 +72,13 @@ export class UsersService {
 		}
 
 		await this.entityManager.transaction(async (manager) => {
+			const user_id = this.userContextService.getUserDetails().id;
+
 			const user = manager.create(User, {
 				email,
-				...data
+				...data,
+				createdBy: user_id,
+				modifiedBy: user_id,
 			});
 
 			await manager.save(user);
@@ -87,7 +90,9 @@ export class UsersService {
 				for (const role of _roles) {
 					const userRole = manager.create(UserRole, {
 						user,
-						role
+						role,
+						createdBy: user_id,
+						modifiedBy: user_id,
 					});
 					await manager.save(userRole);
 				}
@@ -105,18 +110,31 @@ export class UsersService {
 	}
 
 	async update(id: string, data: UserUpdateDto): Promise<void> {
-		await this.entityManager.transaction(async (manager) => {
-			const { roles, ...userData } = data;
+		const user = await this.userRepository.findOneBy({ id: +id });
 
-			await manager.update(User, id, userData);
+		if (!user) {
+			throw new BusinessException('No existe el usuario', 400);
+		}
+
+		await this.entityManager.transaction(async (manager) => {
+			let { roles, ...updatedData } = data;
+
+			updatedData = Object.assign(user, updatedData);
+
+			const user_id = this.userContextService.getUserDetails().id;
+
+			await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
 
 			if (roles) {
 				await manager.delete(UserRole, { usuarioId: id });
 
 				const userRoles = roles.map(roleId => manager.create(UserRole, {
 					userId: id,
-					rolId: roleId
+					rolId: roleId,
+					createdBy: user_id,
+					modifiedBy: user_id,
 				}));
+
 				await manager.save(UserRole, userRoles);
 			}
 		});
@@ -131,9 +149,13 @@ export class UsersService {
 			throw new Error('Usuario o Rol no encontrado');
 		}
 
+		const user_id = this.userContextService.getUserDetails().id;
+
 		const userRol = new UserRole();
 		userRol.user = user;
 		userRol.role = rol;
+		userRol.createdBy = user_id;
+		userRol.updatedBy = user_id;
 
 		return this.userRolRepository.save(userRol);
 	}

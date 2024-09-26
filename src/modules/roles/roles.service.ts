@@ -8,12 +8,13 @@ import { paginate } from 'src/core/helper/paginate';
 import { isEmpty } from 'class-validator';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
+import { UserContextService } from '../users/user-context.service';
 
 /**
  *
  * Roles
  *
-    - PH ASESOR \ PH AGENCIA => 13
+	- PH ASESOR \ PH AGENCIA => 13
 	- PLANEADOR DE TRANSPORTE => 14
 	- WILLARD LOGISTICA => 15
 	- FABRICA BW => 16
@@ -22,6 +23,7 @@ import { ErrorEnum } from 'src/core/constants/error-code.constant';
 	- PH AUDITORIA => 19
 	- RECUPERADOR => 20
 	- AUDITORIA WILLARD => 21
+	- ADMINSTRATOR => 22
 */
 
 
@@ -30,7 +32,8 @@ export class RolesService {
 	constructor(
 		@InjectRepository(Role)
 		private readonly rolesRepository: Repository<Role>,
-		@InjectEntityManager() private entityManager: EntityManager
+		@InjectEntityManager() private entityManager: EntityManager,
+		private readonly userContextService: UserContextService
 	) { }
 
 	async findAll({
@@ -66,9 +69,13 @@ export class RolesService {
 			throw new BusinessException(ErrorEnum.SYSTEM_ROLE_EXISTS);
 
 		await this.entityManager.transaction(async (manager) => {
+			const user_id = this.userContextService.getUserDetails().id;
+
 			const r = manager.create(Role, {
 				name,
-				description
+				description,
+				createdBy: user_id,
+				modifiedBy: user_id,
 			});
 
 			await manager.save(r);
@@ -77,10 +84,18 @@ export class RolesService {
 
 	async update(
 		id: number,
-		data: RolUpdateDto,
+		updatedData: RolUpdateDto,
 	): Promise<void> {
-		await this.entityManager.transaction(async (manager) => {
-			await manager.update(Role, id, data);
-		});
+		const rol = await this.rolesRepository.findOneBy({ id });
+
+		if (!rol) {
+			throw new BusinessException('No existe el rol', 400);
+		}
+
+		updatedData = Object.assign(rol, updatedData);
+
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		await this.rolesRepository.save({ ...updatedData, modifiedBy });
 	}
 }

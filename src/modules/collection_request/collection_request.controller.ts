@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, UseGuards } from '@nestjs/common';
 import { CollectionRequestService } from './collection_request.service';
 
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -6,13 +6,17 @@ import { ApiResult } from "src/core/common/decorators/api-result.decorator";
 import { CollectionRequestCreateDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
 import { CollectionRequest } from './entities/collection_request.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
+import { RolesGuard } from 'src/core/guards/roles.guard';
+import { Roles } from 'src/core/common/decorators/role.decorator';
 
 @ApiTags('Negocio - Solicitudes')
 @Controller('collection-request')
+@UseGuards(RolesGuard)
 export class CollectionRequestController {
 	constructor(private readonly collectionsRequestervice: CollectionRequestService) { }
 
 	@Post()
+	@Roles(0)
 	@ApiOperation({ summary: 'Crear solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async create(@Body() createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -20,6 +24,7 @@ export class CollectionRequestController {
 	}
 
 	@Get()
+	@Roles(0)
 	@ApiOperation({ summary: 'Listar solicitudes' })
 	@ApiResult({ type: [CollectionRequest] })
 	async findAll(@Query() query: any): Promise<any> {
@@ -27,6 +32,7 @@ export class CollectionRequestController {
 	}
 
 	@Get(':id')
+	@Roles(0)
 	@ApiOperation({ summary: 'Obtener solicitud por ID' })
 	@ApiResult({ type: CollectionRequest })
 	async findOne(@IdParam('id') id: number): Promise<CollectionRequest> {
@@ -34,6 +40,7 @@ export class CollectionRequestController {
 	}
 
 	@Patch(':id')
+	@Roles(0)
 	@ApiOperation({ summary: 'Completar información de la solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
@@ -41,6 +48,7 @@ export class CollectionRequestController {
 	}
 
 	@Post(':id/reject')
+	@Roles(0)
 	@ApiOperation({ summary: 'Rechazar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async reject(@IdParam('id') id: number): Promise<void> {
@@ -48,6 +56,7 @@ export class CollectionRequestController {
 	}
 
 	@Put(':id')
+	@Roles(0)
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCreateDto): Promise<void> {
@@ -62,12 +71,14 @@ export class CollectionRequestController {
 	// }
 
 	@Post(':id/cancel')
+	@Roles(0)
 	@ApiOperation({ summary: 'Cancelar solicitud' })
 	async cancel(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.cancel(id);
 	}
 
 	@Delete(':id')
+	@Roles(0)
 	@ApiOperation({ summary: 'Eliminar solicitud' })
 	async delete(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.delete(id);

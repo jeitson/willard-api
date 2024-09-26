@@ -6,26 +6,34 @@ import { ConsultantCreateDto, ConsultantQueryDto, ConsultantUpdateDto } from './
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
+import { UserContextService } from '../users/user-context.service';
 
 @Injectable()
 export class ConsultantsService {
 	constructor(
 		@InjectRepository(Consultant)
 		private readonly consultantsRepository: Repository<Consultant>,
+		private readonly userContextService: UserContextService
 	) { }
 
 	async create(consultantCreateDto: ConsultantCreateDto): Promise<Consultant> {
-		const consultant = this.consultantsRepository.create(consultantCreateDto);
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const consultant = this.consultantsRepository.create({ ...consultantCreateDto, createdBy: user_id, modifiedBy: user_id });
 		return await this.consultantsRepository.save(consultant);
 	}
 
-	async update(id: number, consultantUpdateDto: ConsultantUpdateDto): Promise<Consultant> {
+	async update(id: number, updatedData: ConsultantUpdateDto): Promise<Consultant> {
 		const consultant = await this.consultantsRepository.findOne({ where: { id } });
+
 		if (!consultant) {
 			throw new BusinessException('Asesor no encontrado', 400);
 		}
-		Object.assign(consultant, consultantUpdateDto);
-		return await this.consultantsRepository.save(consultant);
+
+		updatedData = Object.assign(consultant, updatedData);
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.consultantsRepository.save({ ...updatedData, modifiedBy });
 	}
 
 	async findAll({
@@ -56,7 +64,10 @@ export class ConsultantsService {
 	async changeStatus(id: number): Promise<Consultant> {
 		const consultant = await this.findOne(id);
 		consultant.status = !consultant.status;
-		return await this.consultantsRepository.save(consultant);
+
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.consultantsRepository.save({ ...consultant, modifiedBy });
 	}
 
 	async remove(id: number): Promise<void> {

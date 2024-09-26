@@ -25,19 +25,6 @@ export class CollectionRequestAuditsService {
 		return entity;
 	}
 
-	async update(id: number, dto: CollectionRequestAuditUpdateDto): Promise<CollectionRequestAudit> {
-		const entity = await this.repository.preload({
-			id,
-			...dto,
-		});
-
-		if (!entity) {
-			throw new BusinessException('Auditoría de solicitud de recogida no encontrada');
-		}
-
-		return await this.repository.save(entity);
-	}
-
 	async findAll(query): Promise<CollectionRequestAudit[]> {
 		return await this.repository.find({
 			where: query,

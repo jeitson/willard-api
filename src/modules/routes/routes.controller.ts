@@ -1,17 +1,21 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto, UpdateRouteDto } from './dto/route.dto';
 import { Route } from './entities/route.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
+import { RolesGuard } from 'src/core/guards/roles.guard';
+import { Roles } from 'src/core/common/decorators/role.decorator';
 
 @ApiTags('Negocio - Rutas')
+@UseGuards(RolesGuard)
 @Controller('collection-request/:id/routes')
 export class RoutesController {
 	constructor(private readonly routesServices: RoutesService) { }
 
 	@Post()
+	@Roles(0)
 	@ApiOperation({ summary: 'Crear una nueva ruta' })
 	create(@IdParam('id') id: string, @Body() createRutaDto: CreateRouteDto): Promise<Route> {
 		return this.routesServices.create(+id, createRutaDto);
