@@ -8,7 +8,7 @@ export class RolesGuard implements CanActivate {
 	constructor(
 		private reflector: Reflector,
 		private usersService: UsersService,
-	  ) {}
+	) { }
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		try {
@@ -16,6 +16,8 @@ export class RolesGuard implements CanActivate {
 				context.getHandler(),
 				context.getClass(),
 			]);
+
+			if (roles.includes(0)) return true;
 
 			const request = context.switchToHttp().getRequest();
 			const user = request.user;

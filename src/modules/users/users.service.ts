@@ -138,7 +138,7 @@ export class UsersService {
 		return this.userRolRepository.save(userRol);
 	}
 
-	async getUserRoles({ sub: id, ...content }): Promise<number[]> {
+	async getUserRoles({ sub: id, ...content }): Promise<string[]> {
 		const user = await this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'role')
@@ -152,6 +152,6 @@ export class UsersService {
 		this.userContextService.setUserDetails(user);
 		this.userContextService.setUser({ sub: id, ...content });
 
-		return user.roles.map(({ role }) => role.id)
+		return user.roles.map(({ roleId }) => roleId)
 	}
 }
