@@ -16,7 +16,7 @@ export class CollectionRequestController {
 	constructor(private readonly collectionsRequestervice: CollectionRequestService) { }
 
 	@Post()
-	@Roles(0)
+	@Roles(13)
 	@ApiOperation({ summary: 'Crear solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async create(@Body() createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -24,7 +24,7 @@ export class CollectionRequestController {
 	}
 
 	@Get()
-	@Roles(0)
+	@Roles(13, 14, 15)
 	@ApiOperation({ summary: 'Listar solicitudes' })
 	@ApiResult({ type: [CollectionRequest] })
 	async findAll(@Query() query: any): Promise<any> {
@@ -40,7 +40,7 @@ export class CollectionRequestController {
 	}
 
 	@Patch(':id')
-	@Roles(0)
+	@Roles(15)
 	@ApiOperation({ summary: 'Completar información de la solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
@@ -48,7 +48,7 @@ export class CollectionRequestController {
 	}
 
 	@Post(':id/reject')
-	@Roles(0)
+	@Roles(14)
 	@ApiOperation({ summary: 'Rechazar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async reject(@IdParam('id') id: number): Promise<void> {
@@ -56,29 +56,22 @@ export class CollectionRequestController {
 	}
 
 	@Put(':id')
-	@Roles(0)
+	@Roles(13)
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCreateDto): Promise<void> {
 		await this.collectionsRequestervice.update(id, updateDto);
 	}
 
-	// @Post(':id/approve')
-	// @ApiOperation({ summary: 'Aprobar solicitud' })
-	// @ApiResult({ type: CollectionRequest })
-	// async approve(@IdParam('id') id: number): Promise<void> {
-	// 	await this.collectionsRequestervice.approve(id);
-	// }
-
 	@Post(':id/cancel')
-	@Roles(0)
+	@Roles(13)
 	@ApiOperation({ summary: 'Cancelar solicitud' })
 	async cancel(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.cancel(id);
 	}
 
 	@Delete(':id')
-	@Roles(0)
+	@Roles(13)
 	@ApiOperation({ summary: 'Eliminar solicitud' })
 	async delete(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.delete(id);

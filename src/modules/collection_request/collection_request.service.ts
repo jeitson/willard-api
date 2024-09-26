@@ -210,29 +210,24 @@ export class CollectionRequestService {
 			.leftJoin('usuario', 'user', 'user.email = consultant.email');
 
 
-		// 1 => ROL PH Asesor
-		// 2 => ROL Planeador
-		// 3 => ROL Willard Logistica
-		if (!query.rol || isNaN(query.rol)) {
-			throw new BusinessException('Ingrese el rol', 400);
+		// 13 => ROL PH Asesor
+		// 14 => ROL Planeador
+		// 15 => ROL Willard Logistica
+		let { roles, id } = this.userContextService.getUserDetails();
+		roles = roles.map(({ roleId }) => +roleId)
+
+		if (roles.includes(13)) {
+			queryBuilder.where('collectionRequest.createdBy = :id', { id });
 		}
 
-		// const role = +query.rol;
+		if (roles.includes(14)) {
+			queryBuilder.where('collectionRequest.requestStatusId IN (1, 2)');
+		}
 
-		// if (role === 1) {
-		// 	// Usuario ID 33 usado para simular un creador de solicitudes
-		// 	queryBuilder.where('collectionRequest.createdBy = 33');
-		// }
-
-		// if (role === 2) {
-		// 	queryBuilder.where('collectionRequest.requestStatusId IN (1, 2)');
-		// }
-
-		// if (role === 3) {
-		// 	// Usuario ID 34 usado para simular un asesor - usuario
-		// 	queryBuilder.where('collectionRequest.requestStatusId = 6');
-		// 	queryBuilder.where('user.id = 34');
-		// }
+		if (roles.includes(15)) {
+			queryBuilder.where('collectionRequest.requestStatusId = 6');
+			queryBuilder.where('user.id = :id', { id });
+		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
 			page: query.page,
