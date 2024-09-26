@@ -5,7 +5,7 @@ import { Column, Entity } from "typeorm";
 @Entity({ name: 'auditoria' })
 export class Audit extends CompleteEntity {
 	@ApiProperty({ description: 'userId' })
-	@Column({ type: 'bigint', name: 'UsuarioId' })
+	@Column({ type: 'varchar', name: 'UsuarioId', length: 50, default: null, nullable: true })
 	userId: string;
 
 	@ApiProperty({ description: 'name' })

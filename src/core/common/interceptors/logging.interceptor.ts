@@ -26,7 +26,7 @@ export class LoggingInterceptor implements NestInterceptor {
 		const now = Date.now();
 
 		const statusCode = response.statusCode;
-		const userId = request.user?.id || '1';
+		const userId = request.user?.sub || '1';
 
 		return next.handle().pipe(
 			tap(async (resData) => {
