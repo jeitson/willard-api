@@ -8,6 +8,7 @@ import { Transporter } from "src/modules/transporters/entities/transporter.entit
 import { CollectionRequestAudit } from "src/modules/collection_request_audits/entities/collection_request_audit.entity";
 import { Route } from "src/modules/routes/entities/route.entity";
 import { User } from "src/modules/users/entities/user.entity";
+import { Driver } from "src/modules/drivers/entities/driver.entity";
 
 @Entity({ name: 'solicitud_recogida' })
 export class CollectionRequest extends CompleteEntity {
@@ -85,4 +86,7 @@ export class CollectionRequest extends CompleteEntity {
 
 	@OneToOne(() => Route, (route) => route.collectionRequest)
 	route: Route;
+
+	@OneToOne(() => Driver, (driver) => driver.collectionRequest)
+	driver: Driver;
 }
