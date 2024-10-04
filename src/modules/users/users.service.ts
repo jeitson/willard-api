@@ -105,6 +105,8 @@ export class UsersService {
 			description: 'CREATED BY OAUTH0',
 			oauthId,
 			...data,
+			referencePH: '',
+			referenceWLL: '',
 			roles: []
 		});
 	}

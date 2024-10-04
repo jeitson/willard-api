@@ -40,6 +40,16 @@ export class UserDto {
 	@ValidateIf((o) => !isEmpty(o.email))
 	email: string;
 
+	@ApiProperty({ description: 'Referencia WLL del usuario, debe ser un texto.' })
+	@IsOptional()
+	@IsString({ message: 'ReferenciaWLL debe ser un texto.' })
+	referenceWLL: string;
+
+	@ApiProperty({ description: 'Referencia PH del usuario, debe ser un texto.' })
+	@IsOptional()
+	@IsString({ message: 'ReferenciaPH debe ser un texto.' })
+	referencePH: string;
+
 	@ApiProperty({ description: 'Roles', type: [Number] })
 	@IsInt({ each: true })
 	@IsOptional()

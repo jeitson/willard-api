@@ -26,6 +26,14 @@ export class User extends CompleteEntity {
 	@Column({ type: 'varchar', length: 10, name: 'Celular', default: null, nullable: true })
 	cellphone: string;
 
+	@ApiProperty({ description: 'referencePH' })
+	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH', default: null, nullable: true })
+	referencePH: string = null;
+
+	@ApiProperty({ description: 'referenceWLL' })
+	@Column({ type: 'varchar', length: 255, name: 'ReferenciaWLL', default: null, nullable: true })
+	referenceWLL: string = null;
+
 	@ApiProperty({ description: 'roles' })
 	@OneToMany(() => UserRole, userRole => userRole.user)
 	roles: UserRole[];
