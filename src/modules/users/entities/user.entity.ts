@@ -3,6 +3,8 @@ import { Column, Entity, OneToMany } from "typeorm";
 import { UserRole } from "./user-rol.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from 'class-transformer';
+import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
+import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 
 @Entity({ name: 'usuario' })
 export class User extends CompleteEntity {
@@ -37,4 +39,10 @@ export class User extends CompleteEntity {
 	@ApiProperty({ description: 'roles' })
 	@OneToMany(() => UserRole, userRole => userRole.user)
 	roles: UserRole[];
+
+	@OneToMany(() => PickUpLocation, (pickUpLocation) => pickUpLocation.user)
+	pickUpLocations: PickUpLocation[];
+
+	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.user)
+	collectionsRequests: CollectionRequest[];
 }

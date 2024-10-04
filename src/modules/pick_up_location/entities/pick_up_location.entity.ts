@@ -3,7 +3,7 @@ import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Client } from "src/modules/clients/entities/client.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
-import { Consultant } from "src/modules/consultants/entities/consultant.entity";
+import { User } from "src/modules/users/entities/user.entity";
 import { Column, Entity, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 
 @Entity({ name: 'lugar_recogida' })
@@ -21,9 +21,9 @@ export class PickUpLocation extends CompleteEntity {
 	@JoinColumn({ name: 'SedeAcopioId' })
 	collectionSite: CollectionSite;
 
-	@ManyToOne(() => Consultant, consultant => consultant.pickUpLocations)
+	@ManyToOne(() => User, (user) => user.pickUpLocations)
 	@JoinColumn({ name: 'AsesorId' })
-	consultant: Consultant;
+	user: User;
 
 	@ApiProperty({ description: 'Ciudad' })
 	@Column({ type: 'bigint', name: 'CiudadId' })
@@ -77,6 +77,6 @@ export class PickUpLocation extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
 
-	@OneToMany(() => CollectionRequest, collectionsRequests => collectionsRequests.pickUpLocation)
-    collectionsRequests: CollectionRequest[];
+	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.pickUpLocation)
+	collectionsRequests: CollectionRequest[];
 }

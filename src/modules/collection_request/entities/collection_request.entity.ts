@@ -3,35 +3,34 @@ import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Client } from "src/modules/clients/entities/client.entity";
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
 import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
-import { Consultant } from "src/modules/consultants/entities/consultant.entity";
 import { Column, Entity, ManyToOne, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 import { CollectionRequestAudit } from "src/modules/collection_request_audits/entities/collection_request_audit.entity";
 import { Route } from "src/modules/routes/entities/route.entity";
+import { User } from "src/modules/users/entities/user.entity";
 
 @Entity({ name: 'solicitud_recogida' })
 export class CollectionRequest extends CompleteEntity {
 
-	@ManyToOne(() => Client, client => client.collectionsRequests)
+	@ManyToOne(() => Client, (client) => client.collectionsRequests)
 	@JoinColumn({ name: 'ClienteId' })
 	client: Client;
 
-	@ManyToOne(() => PickUpLocation, pickUpLocation => pickUpLocation.collectionsRequests)
+	@ManyToOne(() => PickUpLocation, (pickUpLocation) => pickUpLocation.collectionsRequests)
 	@JoinColumn({ name: 'LugarRecogidaId' })
 	pickUpLocation: PickUpLocation;
 
-	@ManyToOne(() => CollectionSite, collectionSite => collectionSite.collectionsRequests)
+	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.collectionsRequests)
 	@JoinColumn({ name: 'SedeAcopioId' })
 	collectionSite: CollectionSite;
 
-	@ManyToOne(() => Transporter, transporter => transporter.collectionsRequests)
+	@ManyToOne(() => Transporter, (transporter) => transporter.collectionsRequests)
 	@JoinColumn({ name: 'TransportadoraId' })
 	transporter: Transporter;
 
-	@ApiProperty({ description: 'Asesor asociado' })
-	@ManyToOne(() => Consultant, consultant => consultant.collectionsRequests)
+	@ManyToOne(() => User, (user) => user.collectionsRequests)
 	@JoinColumn({ name: 'AsesorId' })
-	consultant: Consultant;
+	user: User;
 
 	@ApiProperty({ description: 'Nombre' })
 	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
@@ -81,9 +80,9 @@ export class CollectionRequest extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Recomendaciones' })
 	recommendations: string;
 
-	@OneToMany(() => CollectionRequestAudit, collectionRequestAudit => collectionRequestAudit.collectionRequest)
-    audits: CollectionRequestAudit[];
+	@OneToMany(() => CollectionRequestAudit, (collectionRequestAudit) => collectionRequestAudit.collectionRequest)
+	audits: CollectionRequestAudit[];
 
-    @OneToOne(() => Route, route => route.collectionRequest)
-    route: Route;
+	@OneToOne(() => Route, (route) => route.collectionRequest)
+	route: Route;
 }

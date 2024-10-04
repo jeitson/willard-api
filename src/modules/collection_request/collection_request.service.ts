@@ -10,9 +10,9 @@ import { PickUpLocation } from "../pick_up_location/entities/pick_up_location.en
 import { CollectionRequestAudit } from "../collection_request_audits/entities/collection_request_audit.entity";
 import { Transporter } from "../transporters/entities/transporter.entity";
 import { CollectionSite } from "../collection_sites/entities/collection_site.entity";
-import { Consultant } from "../consultants/entities/consultant.entity";
 import { Client } from "../clients/entities/client.entity";
 import { UserContextService } from "../users/user-context.service";
+import { User } from "../users/entities/user.entity";
 
 /** Estados ID
  * 1 = Pendiente
@@ -35,8 +35,8 @@ export class CollectionRequestService {
 		private readonly collectionRequestAuditRepository: Repository<CollectionRequestAudit>,
 		@InjectRepository(CollectionSite)
 		private readonly collectionSiteRepository: Repository<CollectionSite>,
-		@InjectRepository(Consultant)
-		private readonly consultantRepository: Repository<Consultant>,
+		@InjectRepository(User)
+		private readonly userRepository: Repository<User>,
 		@InjectRepository(Transporter)
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Client)
@@ -55,7 +55,7 @@ export class CollectionRequestService {
 
 		const pickUpLocation = await this.pickUpLocationRepository.findOne({
 			where: { id: pickUpLocationId, status: true },
-			relations: ['collectionSite', 'consultant'],
+			relations: ['collectionSite', 'user'],
 		});
 
 		if (!pickUpLocation) {
@@ -72,7 +72,7 @@ export class CollectionRequestService {
 				...content,
 				isSpecial,
 				collectionSite: pickUpLocation.collectionSite,
-				consultant: pickUpLocation.consultant,
+				user: pickUpLocation.user,
 				requestStatusId,
 				pickUpLocation,
 				client,
@@ -114,7 +114,7 @@ export class CollectionRequestService {
 		if (!isSpecial) {
 			const pickUpLocation = await this.pickUpLocationRepository.findOne({
 				where: { id: pickUpLocationId, status: true },
-				relations: ['collectionSite', 'consultant'],
+				relations: ['collectionSite', 'user'],
 			});
 
 			if (!pickUpLocation) {
@@ -125,7 +125,7 @@ export class CollectionRequestService {
 				...content,
 				isSpecial,
 				collectionSite: pickUpLocation.collectionSite,
-				consultant: pickUpLocation.consultant,
+				user: pickUpLocation.user,
 				requestStatusId,
 			});
 		} else {
@@ -174,9 +174,9 @@ export class CollectionRequestService {
 			throw new BusinessException(`Centro de acopio no encontrado`, 400);
 		}
 
-		const consultant = await this.consultantRepository.findOneBy({ id: +consultantId });
+		const user = await this.userRepository.findOneBy({ id: +consultantId });
 
-		if (!consultant) {
+		if (!user) {
 			throw new BusinessException(`Asesor no encontrado`, 400);
 		}
 
@@ -188,7 +188,7 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, consultant, transporter, requestStatusId: 1, modifiedBy: user_id });
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, requestStatusId: 1, modifiedBy: user_id });
 
 		if (!updated) {
 			throw new BusinessException('No se pudó actualizar la información', 400);
@@ -204,7 +204,7 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
 			.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
 			.leftJoinAndSelect('collectionRequest.transporter', 'transporter')
-			.leftJoinAndSelect('collectionRequest.consultant', 'consultant')
+			.leftJoinAndSelect('collectionRequest.consultant', 'user')
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
 			.leftJoinAndSelect('collectionRequest.route', 'route')
 			.leftJoin('usuario', 'user', 'user.email = consultant.email');
@@ -243,7 +243,7 @@ export class CollectionRequestService {
 				'pickUpLocation',
 				'collectionSite',
 				'transporter',
-				'consultant',
+				'user',
 				'audits',
 				'route',
 			],
@@ -271,7 +271,7 @@ export class CollectionRequestService {
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: 3, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { requestStatusId: 3, collectionSite: null, consultant: null, transporter: null, isSpecial: true, modifiedBy: user_id });
+		await this.collectionRequestRepository.update(id, { requestStatusId: 3, collectionSite: null, user: null, transporter: null, isSpecial: true, modifiedBy: user_id });
 	}
 
 	async approve(id: number): Promise<void> {

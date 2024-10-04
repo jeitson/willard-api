@@ -12,7 +12,6 @@ import { CollectionSitesModule } from './modules/collection_sites/collection_sit
 import { ClientsModule } from './modules/clients/clients.module';
 import { ProductsModule } from './modules/products/products.module';
 import { TransportersModule } from './modules/transporters/transporters.module';
-import { ConsultantsModule } from './modules/consultants/consultants.module';
 import { TransformInterceptor } from './core/common/interceptors/transform.interceptor';
 import { TimeoutInterceptor } from './core/common/interceptors/timeout.interceptor';
 import { PickUpLocationModule } from './modules/pick_up_location/pick_up_location.module';
@@ -43,7 +42,6 @@ import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 		ClientsModule,
 		ProductsModule,
 		TransportersModule,
-		ConsultantsModule,
 		PickUpLocationModule,
 		CollectionRequestModule,
 		CollectionRequestAuditsModule,
