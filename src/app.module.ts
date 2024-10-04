@@ -22,6 +22,7 @@ import { LoggingInterceptor } from './core/common/interceptors/logging.intercept
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 import { AllExceptionsFilter } from './core/filters/any-exception.filter';
+import { DriversModule } from './modules/drivers/drivers.module';
 
 @Module({
 	imports: [
@@ -47,6 +48,7 @@ import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 		CollectionRequestAuditsModule,
 		RoutesModule,
 		AuthModule,
+		DriversModule,
 	],
 	controllers: [],
 	providers: [
