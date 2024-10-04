@@ -1,5 +1,6 @@
 import { ApiProperty, IntersectionType, OmitType, PartialType } from '@nestjs/swagger';
 import {
+	IsArray,
 	IsNotEmpty,
 	IsString,
 	MaxLength,
@@ -18,6 +19,10 @@ export class RolDto {
 	@IsString()
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	description: string = '';
+
+	@ApiProperty({ description: 'JSON Menú', example: [] })
+	@IsArray()
+	menu: any[] = [];
 }
 
 export class RolUpdateDto extends PartialType(RolDto) { }

@@ -13,6 +13,10 @@ export class Role extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, default: null, nullable: true, name: 'Descripcion' })
 	description: string;
 
+	@ApiProperty({ description: 'JSON Menú' })
+	@Column({ type: 'varchar', length: 400, default: '[]', nullable: true, name: 'Menujson' })
+	menu: string = '[]';
+
 	@ManyToMany(() => User, user => user.roles)
 	users: User[];
 }

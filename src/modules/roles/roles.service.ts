@@ -61,7 +61,8 @@ export class RolesService {
 
 	async create({
 		name,
-		description
+		description,
+		menu
 	}: RolDto): Promise<void> {
 		const exists = await this.rolesRepository.findOneBy({ name });
 
@@ -74,6 +75,7 @@ export class RolesService {
 			const r = manager.create(Role, {
 				name,
 				description,
+				menu: JSON.stringify(menu),
 				createdBy: user_id,
 				modifiedBy: user_id,
 			});
@@ -96,6 +98,6 @@ export class RolesService {
 
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
-		await this.rolesRepository.save({ ...updatedData, modifiedBy });
+		await this.rolesRepository.save({ ...updatedData, menu: JSON.stringify(updatedData.menu), modifiedBy });
 	}
 }
