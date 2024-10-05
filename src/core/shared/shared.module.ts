@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import { isDev } from '../global/env';
+import { MailerModule } from './mailer/mailer.module';
 
 @Global()
 @Module({
@@ -29,6 +30,7 @@ import { isDev } from '../global/env';
 			verboseMemoryLeak: isDev,
 			ignoreErrors: false,
 		}),
+		MailerModule,
 	],
 	exports: [HttpModule],
 })
