@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { CreateDriverDto } from './dto/create-driver.dto';
-import { UpdateDriverDto } from './dto/update-driver.dto';
+import { DriverDto } from './dto/driver.dto';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { Driver } from './entities/driver.entity';
+import { EntityManager, Repository } from 'typeorm';
+import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { UserContextService } from '../users/user-context.service';
+import { CollectionRequest } from '../collection_request/entities/collection_request.entity';
 
 @Injectable()
 export class DriversService {
-  create(createDriverDto: CreateDriverDto) {
-    return 'This action adds a new driver';
-  }
 
-  findAll() {
-    return `This action returns all drivers`;
-  }
+	constructor(
+		@InjectRepository(CollectionRequest)
+		private readonly collectionRequestRepository: Repository<CollectionRequest>,
+		@InjectEntityManager() private entityManager: EntityManager,
+		private userContextService: UserContextService
+	) { }
 
-  findOne(id: number) {
-    return `This action returns a #${id} driver`;
-  }
+	async create({ collectionRequestId: id, ...content }: DriverDto): Promise<void> {
+		const collectionRequest = await this.collectionRequestRepository.findOneBy({ id });
 
-  update(id: number, updateDriverDto: UpdateDriverDto) {
-    return `This action updates a #${id} driver`;
-  }
+		if (!collectionRequest) {
+			throw new BusinessException('La solicitud de recogida no existe.');
+		}
 
-  remove(id: number) {
-    return `This action removes a #${id} driver`;
-  }
+		await this.entityManager.transaction(async (manager) => {
+			const user_id = this.userContextService.getUserDetails().id;
+
+			const driver = manager.create(Driver, {
+				collectionRequest,
+				...content,
+				createdBy: user_id,
+				modifiedBy: user_id,
+			});
+
+			await manager.save(driver);
+		});
+	}
 }
