@@ -11,6 +11,8 @@ import { CollectionRequest } from '../collection_request/entities/collection_req
 export class DriversService {
 
 	constructor(
+		@InjectRepository(Driver)
+		private readonly driverRepository: Repository<Driver>,
 		@InjectRepository(CollectionRequest)
 		private readonly collectionRequestRepository: Repository<CollectionRequest>,
 		@InjectEntityManager() private entityManager: EntityManager,
@@ -35,6 +37,28 @@ export class DriversService {
 			});
 
 			await manager.save(driver);
+		});
+	}
+
+	async update(_id, { collectionRequestId: id, ...updatedData }: DriverDto): Promise<void> {
+		const driver = await this.driverRepository.findOneBy({ id: _id });
+
+		if (!driver) {
+			throw new BusinessException('El conductor no existe.');
+		}
+
+		const collectionRequest = await this.collectionRequestRepository.findOneBy({ id });
+
+		if (!collectionRequest) {
+			throw new BusinessException('La solicitud de recogida no existe.');
+		}
+
+		await this.entityManager.transaction(async (manager) => {
+			const user_id = this.userContextService.getUserDetails().id;
+
+			updatedData = Object.assign(driver, updatedData);
+
+			await manager.update(Driver, id, { ...updatedData, collectionRequest, modifiedBy: user_id });
 		});
 	}
 }
