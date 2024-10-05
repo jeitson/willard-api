@@ -8,11 +8,18 @@ export class MailerService {
 		private mailerService: NestMailerService,
 	) { }
 
-	async send(
+	async send({
 		to,
 		subject,
-		content: string,
-		type: 'text' | 'html' = 'text',
+		content,
+		type
+	}:
+		{
+			to: string,
+			subject: string,
+			content: string,
+			type: 'text' | 'html',
+		} = { to: '', subject: '', content: '', type: 'text' }
 	): Promise<any> {
 		if (type === 'text') {
 			return this.mailerService.sendMail({

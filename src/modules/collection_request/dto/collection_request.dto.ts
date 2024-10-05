@@ -13,6 +13,11 @@ export class CollectionRequestCreateDto {
 	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
+	@ApiProperty({ description: 'Producto' })
+	@IsInt()
+	@Min(1, { message: 'El ID del producto no puede ser 0' })
+	productoId: number;
+
 	@ApiProperty({ description: 'Nombre' })
 	@IsString()
 	@MaxLength(50)

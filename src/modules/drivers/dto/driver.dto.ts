@@ -14,6 +14,7 @@ import { PagerDto } from 'src/core/common/dto/pager.dto';
 
 export class DriverDto {
 	@ApiProperty({ description: 'Solicitud de Recogida', example: '123...' })
+	@IsOptional()
 	@IsString()
 	@IsNotEmpty({ message: 'La solicitud de recogida no debe de estar vacío' })
 	collectionRequestId: number;

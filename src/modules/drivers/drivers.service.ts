@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DriverDto } from './dto/driver.dto';
+import { DriverDto, DriverUpdateDto } from './dto/driver.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Driver } from './entities/driver.entity';
 import { EntityManager, Repository } from 'typeorm';
@@ -19,28 +19,21 @@ export class DriversService {
 		private userContextService: UserContextService
 	) { }
 
-	async create({ collectionRequestId: id, ...content }: DriverDto): Promise<void> {
+	async create({ collectionRequestId: id, ...content }: DriverDto): Promise<Driver> {
 		const collectionRequest = await this.collectionRequestRepository.findOneBy({ id });
 
 		if (!collectionRequest) {
 			throw new BusinessException('La solicitud de recogida no existe.');
 		}
 
-		await this.entityManager.transaction(async (manager) => {
-			const user_id = this.userContextService.getUserDetails().id;
+		const user_id = this.userContextService.getUserDetails().id;
 
-			const driver = manager.create(Driver, {
-				collectionRequest,
-				...content,
-				createdBy: user_id,
-				modifiedBy: user_id,
-			});
-
-			await manager.save(driver);
-		});
+		const driver = this.driverRepository.create({ collectionRequest, ...content, createdBy: user_id, modifiedBy: user_id });
+		const driverSaved = await this.driverRepository.save(driver);
+		return driverSaved;
 	}
 
-	async update(_id, { collectionRequestId: id, ...updatedData }: DriverDto): Promise<void> {
+	async update(_id, { collectionRequestId: id, ...updatedData }: DriverUpdateDto): Promise<any> {
 		const driver = await this.driverRepository.findOneBy({ id: _id });
 
 		if (!driver) {
@@ -53,12 +46,12 @@ export class DriversService {
 			throw new BusinessException('La solicitud de recogida no existe.');
 		}
 
-		await this.entityManager.transaction(async (manager) => {
-			const user_id = this.userContextService.getUserDetails().id;
+		const user_id = this.userContextService.getUserDetails().id;
 
-			updatedData = Object.assign(driver, updatedData);
+		updatedData = Object.assign(driver, updatedData);
 
-			await manager.update(Driver, id, { ...updatedData, collectionRequest, modifiedBy: user_id });
-		});
+		const updateDriver = await this.driverRepository.update(id, { ...updatedData, collectionRequest, modifiedBy: user_id });
+
+		return updateDriver;
 	}
 }

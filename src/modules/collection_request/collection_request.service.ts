@@ -13,6 +13,7 @@ import { CollectionSite } from "../collection_sites/entities/collection_site.ent
 import { Client } from "../clients/entities/client.entity";
 import { UserContextService } from "../users/user-context.service";
 import { User } from "../users/entities/user.entity";
+import { Product } from "../products/entities/product.entity";
 
 /** Estados ID
  * 1 = Pendiente
@@ -41,6 +42,8 @@ export class CollectionRequestService {
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Client)
 		private readonly clientRepository: Repository<Client>,
+		@InjectRepository(Product)
+		private readonly productRepository: Repository<Product>,
 		private readonly userContextService: UserContextService
 	) { }
 
@@ -53,6 +56,12 @@ export class CollectionRequestService {
 			throw new BusinessException('El cliente no existe', 400);
 		}
 
+		const product = await this.productRepository.findOneBy({ id: createDto.productoId })
+
+		if (!product) {
+			throw new BusinessException('El producto no existe', 400);
+		}
+
 		const pickUpLocation = await this.pickUpLocationRepository.findOne({
 			where: { id: pickUpLocationId, status: true },
 			relations: ['collectionSite', 'user'],
@@ -63,7 +72,7 @@ export class CollectionRequestService {
 		}
 
 		let requestStatusId = 1;
-		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation });
+		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation, product });
 
 		if (isSpecial) {
 			requestStatusId = 6;
@@ -76,6 +85,7 @@ export class CollectionRequestService {
 				requestStatusId,
 				pickUpLocation,
 				client,
+				product
 			});
 		}
 
@@ -107,6 +117,12 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
+		const product = await this.productRepository.findOneBy({ id: createDto.productoId })
+
+		if (!product) {
+			throw new BusinessException('El producto no existe', 400);
+		}
+
 		let requestStatusId = 1;
 
 		const { isSpecial, pickUpLocationId, ...content } = createDto;
@@ -127,6 +143,7 @@ export class CollectionRequestService {
 				collectionSite: pickUpLocation.collectionSite,
 				user: pickUpLocation.user,
 				requestStatusId,
+				product
 			});
 		} else {
 			requestStatusId = 6;

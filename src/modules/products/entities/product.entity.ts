@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity } from "typeorm";
+import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
+import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity({ name: 'producto' })
 export class Product extends CompleteEntity {
@@ -51,4 +52,7 @@ export class Product extends CompleteEntity {
 	@ApiProperty({ description: 'referencePH' })
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
+
+	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.product)
+	collectionsRequests: CollectionRequest[];
 }

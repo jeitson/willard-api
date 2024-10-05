@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsDateString, IsBoolean } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsOptional, IsString, IsDateString, IsBoolean, ValidateNested } from "class-validator";
+import { DriverDto } from "src/modules/drivers/dto/driver.dto";
 
 export class CreateRouteDto {
 	@ApiProperty({ description: 'Estado de la ruta' })
@@ -55,9 +57,10 @@ export class CreateRouteDto {
 	@IsDateString()
 	deliveryDateToCollectionSite: string;
 
-	@ApiProperty({ description: 'ID del transportador' })
-	@IsNotEmpty()
-	transporterId: number;
+	@ApiProperty({ description: 'Datos del transportador', type: DriverDto })
+	@ValidateNested()
+	@Type(() => DriverDto)
+	transporter: DriverDto;
 }
 
 export class UpdateRouteDto {

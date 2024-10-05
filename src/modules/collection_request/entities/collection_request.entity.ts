@@ -9,6 +9,7 @@ import { CollectionRequestAudit } from "src/modules/collection_request_audits/en
 import { Route } from "src/modules/routes/entities/route.entity";
 import { User } from "src/modules/users/entities/user.entity";
 import { Driver } from "src/modules/drivers/entities/driver.entity";
+import { Product } from "src/modules/products/entities/product.entity";
 
 @Entity({ name: 'solicitud_recogida' })
 export class CollectionRequest extends CompleteEntity {
@@ -20,6 +21,10 @@ export class CollectionRequest extends CompleteEntity {
 	@ManyToOne(() => PickUpLocation, (pickUpLocation) => pickUpLocation.collectionsRequests)
 	@JoinColumn({ name: 'LugarRecogidaId' })
 	pickUpLocation: PickUpLocation;
+
+	@ManyToOne(() => Product, (product) => product.collectionsRequests)
+	@JoinColumn({ name: 'ProductoId' })
+	product: Product;
 
 	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.collectionsRequests)
 	@JoinColumn({ name: 'SedeAcopioId' })
