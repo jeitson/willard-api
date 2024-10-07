@@ -15,7 +15,7 @@ export class DriversController {
 
 	@Put(':id')
 	@Roles(0)
-	@ApiOperation({ summary: 'Crear una nueva ruta' })
+	@ApiOperation({ summary: 'Actualización de conductor' })
 	create(@IdParam('id') id: string, @Body() createDto: DriverUpdateDto): Promise<Driver> {
 		return this.driversServices.update(+id, createDto);
 	}
