@@ -8,6 +8,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { ConfigKeyPaths, IAppConfig, IMailerConfig } from 'src/core/config'
 
 import { MailerService } from './mailer.service'
+import { NotificationsModule } from 'src/modules/notifications/notifications.module'
 
 const providers: Provider<any>[] = [
 	MailerService,
@@ -35,6 +36,7 @@ const providers: Provider<any>[] = [
 			}),
 			inject: [ConfigService],
 		}),
+		NotificationsModule
 	],
 	providers,
 	exports: providers,

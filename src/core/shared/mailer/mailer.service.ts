@@ -1,39 +1,52 @@
-import { Injectable } from '@nestjs/common'
-
-import { MailerService as NestMailerService } from '@nestjs-modules/mailer'
+import { Injectable } from '@nestjs/common';
+import { MailerService as NestMailerService } from '@nestjs-modules/mailer';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
 
 @Injectable()
 export class MailerService {
 	constructor(
-		private mailerService: NestMailerService,
+		private readonly mailerService: NestMailerService,
+		private readonly notificationsService: NotificationsService,
 	) { }
 
 	async send({
 		to,
 		subject,
 		content,
-		type
-	}:
-		{
-			to: string,
-			subject: string,
-			content: string,
-			type: 'text' | 'html',
-		} = { to: '', subject: '', content: '', type: 'text' }
-	): Promise<any> {
-		if (type === 'text') {
-			return this.mailerService.sendMail({
+		cc = [],
+		type = 'text',
+	}: {
+		to: string[];
+		subject: string;
+		content: string;
+		cc?: string[];
+		type?: 'text' | 'html';
+	}): Promise<any> {
+		try {
+			const body = type === 'text' ? { text: content } : { html: content };
+
+			const response = await this.mailerService.sendMail({
 				to,
 				subject,
-				text: content,
-			})
-		}
-		else {
-			return this.mailerService.sendMail({
-				to,
+				cc,
+				...body,
+			});
+
+			if (!response) {
+				console.error('No se recibió respuesta del servicio de correo.');
+				return { success: false, message: 'No se pudo enviar el correo.' };
+			}
+
+			await this.notificationsService.createLog({
+				name: 'Email Sent',
+				addressee: to,
+				body: content,
 				subject,
-				html: content,
-			})
+			});
+
+			return { success: true, message: 'Correo enviado exitosamente.' };
+		} catch (error) {
+			return { success: false, message: 'Error enviando el correo.', error };
 		}
 	}
 }

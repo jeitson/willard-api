@@ -4,15 +4,14 @@ import { RoutesService } from './routes.service';
 import { RoutesController } from './routes.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Route } from './entities/route.entity';
-import { CollectionRequestModule } from '../collection_request/collection_request.module';
-import { CollectionRequestAuditsModule } from '../collection_request_audits/collection_request_audits.module';
 import { UsersModule } from '../users/users.module';
 import { MailerModule } from 'src/core/shared/mailer/mailer.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 const providers = [RoutesService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Route]), CollectionRequestModule, CollectionRequestAuditsModule, DriversModule, UsersModule, MailerModule],
+	imports: [TypeOrmModule.forFeature([Route]), DriversModule, UsersModule, MailerModule, NotificationsModule],
 	controllers: [RoutesController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

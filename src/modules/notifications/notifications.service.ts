@@ -6,13 +6,16 @@ import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Notification } from './entities/notification.entity';
-import { NotificationDto, NotificationQueryDto, NotificationUpdateDto } from './dto/notification.dto';
+import { NotificationDto, NotificationQueryDto, NotificationSendDto, NotificationUpdateDto } from './dto/notification.dto';
+import { NotificationSend } from './entities/notification-send.entity';
 
 @Injectable()
 export class NotificationsService {
 	constructor(
 		@InjectRepository(Notification)
 		private readonly notificationRepository: Repository<Notification>,
+		@InjectRepository(NotificationSend)
+		private readonly notificationSendRepository: Repository<NotificationSend>,
 		@InjectEntityManager() private entityManager: EntityManager,
 		private userContextService: UserContextService
 	) { }
@@ -65,5 +68,12 @@ export class NotificationsService {
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		return await this.notificationRepository.save({ ...notification, modifiedBy });
+	}
+
+	async createLog({ addressee, ...content }: NotificationSendDto): Promise<NotificationSend> {
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const notification = this.notificationSendRepository.create({ ...content, createdBy: user_id, modifiedBy: user_id, addressee: JSON.stringify(addressee) });
+		return await this.notificationSendRepository.save(notification);
 	}
 }

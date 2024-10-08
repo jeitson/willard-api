@@ -4,3 +4,4 @@ export * from './is.util';
 export * from './list2tree.util';
 export * from './schedule.util';
 export * from './tool.util';
+export * from './validate.util';
