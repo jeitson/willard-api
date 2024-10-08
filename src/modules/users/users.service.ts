@@ -60,6 +60,12 @@ export class UsersService {
 			.getOne();
 	}
 
+	async getProfile(): Promise<User | undefined> {
+		const id = this.userContextService.getUserDetails().id;
+
+		return this.findUserById(id);
+	}
+
 	async create({
 		email,
 		roles,

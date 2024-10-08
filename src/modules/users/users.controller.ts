@@ -22,6 +22,14 @@ export class UsersController {
 		return this.usersService.findAll(dto);
 	}
 
+	@Get('profile')
+	@Roles(0)
+	@ApiOperation({ summary: 'Obtener información del usuario' })
+	@ApiResult({ type: User })
+	async getProfile() {
+		return this.usersService.getProfile();
+	}
+
 	@Get(':id')
 	@Roles(22)
 	@ApiOperation({ summary: 'Obtener usuario por su ID' })
