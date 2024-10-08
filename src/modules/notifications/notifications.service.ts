@@ -30,7 +30,7 @@ export class NotificationsService {
 	}
 
 
-	async findUserById(id: number): Promise<Notification | undefined> {
+	async findOne(id: number): Promise<Notification | undefined> {
 		const notification = await this.notificationRepository.findOne({ where: { id } });
 		if (!notification) {
 			throw new BusinessException('Tipo de Notificación no encontrada', 404);
@@ -56,5 +56,14 @@ export class NotificationsService {
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		return await this.notificationRepository.save({ ...updatedData, modifiedBy });
+	}
+
+	async changeStatus(id: number): Promise<Notification> {
+		const notification = await this.findOne(id);
+		notification.status = !notification.status;
+
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.notificationRepository.save({ ...notification, modifiedBy });
 	}
 }
