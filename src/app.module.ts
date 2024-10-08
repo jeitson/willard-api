@@ -52,7 +52,7 @@ import { DriversModule } from './modules/drivers/drivers.module';
 	],
 	controllers: [],
 	providers: [
-		{ provide: APP_GUARD, useClass: JwtAuthGuard },
+		// { provide: APP_GUARD, useClass: JwtAuthGuard },
 		{ provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
 		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },
