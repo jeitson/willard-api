@@ -108,7 +108,6 @@ export class RoutesService {
 
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
-			console.error('Error en la creación de la ruta o envío de correos:', error);
 			throw new BusinessException('Error al procesar la solicitud', 500);
 
 		} finally {
