@@ -1,18 +1,14 @@
-import { join } from 'node:path'
+import { join } from 'node:path';
+import { Module, Provider } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule as NestMailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
-import { Module, Provider } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
-import { MailerModule as NestMailerModule } from '@nestjs-modules/mailer'
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter'
+import { ConfigKeyPaths, IAppConfig, IMailerConfig } from 'src/core/config';
+import { MailerService } from './mailer.service';
+import { NotificationsModule } from 'src/modules/notifications/notifications.module';
 
-import { ConfigKeyPaths, IAppConfig, IMailerConfig } from 'src/core/config'
-
-import { MailerService } from './mailer.service'
-import { NotificationsModule } from 'src/modules/notifications/notifications.module'
-
-const providers: Provider<any>[] = [
-	MailerService,
-]
+const providers: Provider<any>[] = [MailerService];
 
 @Module({
 	imports: [
@@ -36,7 +32,7 @@ const providers: Provider<any>[] = [
 			}),
 			inject: [ConfigService],
 		}),
-		NotificationsModule
+		NotificationsModule,
 	],
 	providers,
 	exports: providers,

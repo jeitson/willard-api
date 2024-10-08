@@ -3,14 +3,18 @@ import { env, envNumber } from '../global/env';
 
 export const mailerRegToken = 'mailer';
 
+const port = envNumber('SMTP_PORT');
+
 export const MailerConfig = registerAs(mailerRegToken, () => ({
 	host: env('SMTP_HOST'),
-	port: envNumber('SMTP_PORT'),
-	ignoreTLS: true,
-	secure: true,
+	port,
+	secure: port !== 587,
 	auth: {
 		user: env('SMTP_USER'),
 		pass: env('SMTP_PASS'),
+	},
+	tls: {
+		rejectUnauthorized: false,
 	},
 }));
 
