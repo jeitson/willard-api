@@ -87,7 +87,7 @@ export class RoutesService {
 			const allEmails = [email, contactEmail, pickUpLocationEmail, ...emails].filter(validateEmail);
 
 			const mailPromises = allEmails.map(recipient =>
-				this.mailerService.send({ to: [recipient], type: 'html', content: template, subject })
+				this.mailerService.send({ to: [recipient], type: 'html', content: template, subject, context: collectionRequest })
 			);
 
 			await Promise.all(mailPromises);

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService as NestMailerService } from '@nestjs-modules/mailer';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { processContent } from 'src/core/utils';
 
 @Injectable()
 export class MailerService {
@@ -15,14 +16,18 @@ export class MailerService {
 		content,
 		cc = [],
 		type = 'text',
+		context
 	}: {
 		to: string[];
 		subject: string;
 		content: string;
 		cc?: string[];
 		type?: 'text' | 'html';
+		context?: any
 	}): Promise<any> {
 		try {
+			content = processContent(content, context);
+
 			const body = type === 'text' ? { text: content } : { html: content };
 
 			const response = await this.mailerService.sendMail({

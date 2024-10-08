@@ -5,3 +5,4 @@ export * from './list2tree.util';
 export * from './schedule.util';
 export * from './tool.util';
 export * from './validate.util';
+export * from './convert.util';
