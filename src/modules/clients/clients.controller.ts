@@ -47,7 +47,7 @@ export class ClientsController {
 	@Roles(0)
 	@ApiOperation({ summary: 'Cambiar de estado cliente' })
 
-	changeStatus(@Param('id') id: string): Promise<Client> {
+	changeStatus(@IdParam('id') id: string): Promise<Client> {
 		return this.clientsService.changeStatus(+id);
 	}
 

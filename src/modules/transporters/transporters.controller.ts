@@ -46,7 +46,7 @@ export class TransportersController {
 	@Patch(':id/change-status')
 	@Roles(0)
 	@ApiOperation({ summary: 'Cambiar de estado transportador' })
-	changeStatus(@Param('id') id: string): Promise<Transporter> {
+	changeStatus(@IdParam('id') id: string): Promise<Transporter> {
 		return this.transportersService.changeStatus(+id);
 	}
 

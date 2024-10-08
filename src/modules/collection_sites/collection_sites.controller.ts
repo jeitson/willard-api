@@ -46,7 +46,7 @@ export class CollectionSitesController {
 	@Patch(':id/change-status')
 	@Roles(0)
 	@ApiOperation({ summary: 'Cambiar de estado centro de acopio' })
-	changeStatus(@Param('id') id: string): Promise<CollectionSite> {
+	changeStatus(@IdParam('id') id: string): Promise<CollectionSite> {
 		return this.collectionSitesService.changeStatus(+id);
 
 	}

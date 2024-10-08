@@ -23,6 +23,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 import { DriversModule } from './modules/drivers/drivers.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
 	imports: [
@@ -49,6 +50,7 @@ import { DriversModule } from './modules/drivers/drivers.module';
 		RoutesModule,
 		AuthModule,
 		DriversModule,
+		NotificationsModule,
 	],
 	controllers: [],
 	providers: [

@@ -46,7 +46,7 @@ export class ProductsController {
 	@Patch(':id/change-status')
 	@Roles(0)
 	@ApiOperation({ summary: 'Cambiar de estado producto' })
-	changeStatus(@Param('id') id: string): Promise<Product> {
+	changeStatus(@IdParam('id') id: string): Promise<Product> {
 		return this.productsService.changeStatus(+id);
 	}
 
