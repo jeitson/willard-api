@@ -56,7 +56,7 @@ export class CollectionRequestController {
 	}
 
 	@Put(':id')
-	@Roles(13)
+	@Roles(13, 16)
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCreateDto): Promise<void> {
