@@ -217,16 +217,20 @@ export class CollectionRequestService {
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 	}
 
+	private createBaseQueryBuilder() {
+		return this.collectionRequestRepository.createQueryBuilder('collectionRequest')
+		.leftJoinAndSelect('collectionRequest.client', 'client')
+		.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
+		.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
+		.leftJoinAndSelect('collectionRequest.driver', 'driver')
+		.leftJoinAndSelect('collectionRequest.user', 'user')
+		.leftJoinAndSelect('collectionRequest.audits', 'audits')
+		.leftJoinAndSelect('collectionRequest.route', 'route')
+		.leftJoinAndMapOne('collectionRequest.productType', Child, 'productType', 'productType.id = collectionRequest.productTypeId');
+	}
+
 	async findAll(query: any): Promise<Pagination<CollectionRequest>> {
-		const queryBuilder = this.collectionRequestRepository.createQueryBuilder('collectionRequest')
-			.leftJoinAndSelect('collectionRequest.client', 'client')
-			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
-			.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
-			.leftJoinAndSelect('collectionRequest.driver', 'driver')
-			.leftJoinAndSelect('collectionRequest.user', 'user')
-			.leftJoinAndSelect('collectionRequest.audits', 'audits')
-			.leftJoinAndSelect('collectionRequest.route', 'route')
-			.leftJoinAndMapOne('collectionRequest.productType', Child, 'productType', 'productType.id = collectionRequest.productTypeId');
+		const queryBuilder = this.createBaseQueryBuilder();
 
 		// 13 => ROL PH Asesor
 		// 14 => ROL Planeador
@@ -256,18 +260,7 @@ export class CollectionRequestService {
 
 
 	async findOne(id: number): Promise<CollectionRequest> {
-		const collectionRequest = await this.collectionRequestRepository.findOne({
-			where: { id, status: true },
-			relations: [
-				'client',
-				'pickUpLocation',
-				'collectionSite',
-				'transporter',
-				'user',
-				'audits',
-				'route',
-			],
-		});
+		const collectionRequest = this.createBaseQueryBuilder().where('collectionRequest.id = :id', { id }).getOne();
 
 		if (!collectionRequest) {
 			throw new BusinessException('Solicitud no encontrada', 404);
