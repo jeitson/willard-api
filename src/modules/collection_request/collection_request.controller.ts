@@ -24,7 +24,7 @@ export class CollectionRequestController {
 	}
 
 	@Get()
-	@Roles(13, 14, 15)
+	@Roles(13, 14, 15, 16)
 	@ApiOperation({ summary: 'Listar solicitudes' })
 	@ApiResult({ type: [CollectionRequest] })
 	async findAll(@Query() query: any): Promise<any> {

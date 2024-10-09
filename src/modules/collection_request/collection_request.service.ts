@@ -237,7 +237,7 @@ export class CollectionRequestService {
 		let { roles, id } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId)
 
-		if (roles.includes(13)) {
+		if (roles.includes(13, 16)) {
 			queryBuilder.where('collectionRequest.createdBy = :id', { id });
 		}
 
