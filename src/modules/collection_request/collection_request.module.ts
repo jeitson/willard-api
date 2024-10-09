@@ -9,12 +9,12 @@ import { TransportersModule } from '../transporters/transporters.module';
 import { CollectionSitesModule } from '../collection_sites/collection_sites.module';
 import { ClientsModule } from '../clients/clients.module';
 import { UsersModule } from '../users/users.module';
-import { ProductsModule } from '../products/products.module';
+import { CatalogsModule } from '../catalogs/catalogs.module';
 
 const providers = [CollectionRequestService]
 
 @Module({
-    imports: [TypeOrmModule.forFeature([CollectionRequest]), PickUpLocationModule, CollectionRequestAuditsModule, CollectionSitesModule, TransportersModule, ClientsModule, UsersModule, ProductsModule],
+    imports: [TypeOrmModule.forFeature([CollectionRequest]), PickUpLocationModule, CollectionRequestAuditsModule, CollectionSitesModule, TransportersModule, ClientsModule, UsersModule, CatalogsModule],
     controllers: [CollectionRequestController],
     providers,
     exports: [TypeOrmModule, ...providers],

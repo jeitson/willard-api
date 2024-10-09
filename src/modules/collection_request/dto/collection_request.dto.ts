@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType, PartialType } from "@nestjs/swagger";
-import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsNumber, MaxLength, ValidateIf, Min } from "class-validator";
+import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsNumber, MaxLength, ValidateIf, Min, IsNotEmpty } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
 
 export class CollectionRequestCreateDto {
@@ -13,10 +13,10 @@ export class CollectionRequestCreateDto {
 	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
-	@ApiProperty({ description: 'Producto' })
-	@IsInt()
-	@Min(1, { message: 'El ID del producto no puede ser 0' })
-	productoId: number;
+	@ApiProperty({ description: 'ID del tipo de producto, debe ser un número.' })
+	@IsNotEmpty({ message: 'TipoProductoId es obligatorio y debe ser un número.' })
+	@IsNumber({}, { message: 'TipoProductoId debe ser un número.' })
+	productTypeId: number;
 
 	@ApiProperty({ description: 'Nombre' })
 	@IsString()

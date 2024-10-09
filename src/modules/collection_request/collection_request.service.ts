@@ -13,7 +13,7 @@ import { CollectionSite } from "../collection_sites/entities/collection_site.ent
 import { Client } from "../clients/entities/client.entity";
 import { UserContextService } from "../users/user-context.service";
 import { User } from "../users/entities/user.entity";
-import { Product } from "../products/entities/product.entity";
+import { Child } from "../catalogs/entities/child.entity";
 
 /** Estados ID
  * 1 = Pendiente
@@ -42,8 +42,8 @@ export class CollectionRequestService {
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Client)
 		private readonly clientRepository: Repository<Client>,
-		@InjectRepository(Product)
-		private readonly productRepository: Repository<Product>,
+		@InjectRepository(Child)
+		private readonly childRepository: Repository<Child>,
 		private readonly userContextService: UserContextService
 	) { }
 
@@ -62,10 +62,10 @@ export class CollectionRequestService {
 			throw new BusinessException('El cliente no existe', 400);
 		}
 
-		const product = await this.productRepository.findOneBy({ id: createDto.productoId })
+		const productTypeId = await this.childRepository.findOneBy({ id: +createDto.productTypeId, catalogCode: 'TIPO_PRODUCTO' })
 
-		if (!product) {
-			throw new BusinessException('El producto no existe', 400);
+		if (!productTypeId) {
+			throw new BusinessException('El tipo de producto no existe', 400);
 		}
 
 		const pickUpLocation = await this.pickUpLocationRepository.findOne({
@@ -78,7 +78,7 @@ export class CollectionRequestService {
 		}
 
 		let requestStatusId = 1;
-		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation, product });
+		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation });
 
 		if (isSpecial) {
 			requestStatusId = 6;
@@ -90,8 +90,7 @@ export class CollectionRequestService {
 				user: pickUpLocation.user,
 				requestStatusId,
 				pickUpLocation,
-				client,
-				product
+				client
 			});
 		}
 
@@ -121,10 +120,10 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
-		const product = await this.productRepository.findOneBy({ id: createDto.productoId })
+		const productTypeId = await this.childRepository.findOneBy({ id: +createDto.productTypeId, catalogCode: 'TIPO_PRODUCTO' })
 
-		if (!product) {
-			throw new BusinessException('El producto no existe', 400);
+		if (!productTypeId) {
+			throw new BusinessException('El tipo de producto no existe', 400);
 		}
 
 		let requestStatusId = 1;
@@ -146,8 +145,7 @@ export class CollectionRequestService {
 				isSpecial,
 				collectionSite: pickUpLocation.collectionSite,
 				user: pickUpLocation.user,
-				requestStatusId,
-				product
+				requestStatusId
 			});
 		} else {
 			requestStatusId = 6;
@@ -223,12 +221,12 @@ export class CollectionRequestService {
 		const queryBuilder = this.collectionRequestRepository.createQueryBuilder('collectionRequest')
 			.leftJoinAndSelect('collectionRequest.client', 'client')
 			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
-			.leftJoinAndSelect('collectionRequest.product', 'product')
 			.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
 			.leftJoinAndSelect('collectionRequest.driver', 'driver')
 			.leftJoinAndSelect('collectionRequest.user', 'user')
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
-			.leftJoinAndSelect('collectionRequest.route', 'route');
+			.leftJoinAndSelect('collectionRequest.route', 'route')
+			.leftJoinAndMapOne('collectionRequest.productType', Child, 'productType', 'productType.id = collectionRequest.productTypeId');
 
 		// 13 => ROL PH Asesor
 		// 14 => ROL Planeador
@@ -237,7 +235,7 @@ export class CollectionRequestService {
 		let { roles, id } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId);
 
-		if (roles.includes(13)) { // Cambiado a 13, 16 no tiene sentido aquí
+		if (roles.find((role: number) => [13, 16].includes(role))) {
 			queryBuilder.where('collectionRequest.createdBy = :id', { id });
 		}
 
@@ -247,7 +245,7 @@ export class CollectionRequestService {
 
 		if (roles.includes(15)) {
 			queryBuilder.where('collectionRequest.requestStatusId = 6');
-			queryBuilder.andWhere('user.id = :id', { id }); // Cambiado a andWhere
+			queryBuilder.andWhere('user.id = :id', { id });
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {

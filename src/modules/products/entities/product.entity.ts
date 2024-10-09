@@ -52,7 +52,4 @@ export class Product extends CompleteEntity {
 	@ApiProperty({ description: 'referencePH' })
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
-
-	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.product)
-	collectionsRequests: CollectionRequest[];
 }
