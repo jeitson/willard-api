@@ -21,7 +21,7 @@ export class AuditsService {
 		return this.dataSource
 			.getRepository(Audit)
 			.createQueryBuilder('audit')
-			.leftJoinAndMapOne('audit.user', User, 'user', 'user.id = audit.userId')
+			.leftJoinAndMapOne('audit.user', User, 'user', 'user.oauthId = audit.userId')
 			.leftJoinAndSelect('user.roles', 'userRoles');
 	}
 
