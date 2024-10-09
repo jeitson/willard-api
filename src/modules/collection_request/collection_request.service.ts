@@ -223,21 +223,21 @@ export class CollectionRequestService {
 		const queryBuilder = this.collectionRequestRepository.createQueryBuilder('collectionRequest')
 			.leftJoinAndSelect('collectionRequest.client', 'client')
 			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
+			.leftJoinAndSelect('collectionRequest.product', 'product')
 			.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
-			.leftJoinAndSelect('collectionRequest.transporter', 'transporter')
-			.leftJoinAndSelect('collectionRequest.consultant', 'user')
+			.leftJoinAndSelect('collectionRequest.driver', 'driver')
+			.leftJoinAndSelect('collectionRequest.user', 'user')
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
-			.leftJoinAndSelect('collectionRequest.route', 'route')
-			.leftJoin('usuario', 'user', 'user.email = consultant.email');
-
+			.leftJoinAndSelect('collectionRequest.route', 'route');
 
 		// 13 => ROL PH Asesor
 		// 14 => ROL Planeador
 		// 15 => ROL Willard Logistica
+		// 16 => ROL Fabrica
 		let { roles, id } = this.userContextService.getUserDetails();
-		roles = roles.map(({ roleId }) => +roleId)
+		roles = roles.map(({ roleId }) => +roleId);
 
-		if (roles.includes(13, 16)) {
+		if (roles.includes(13)) { // Cambiado a 13, 16 no tiene sentido aquí
 			queryBuilder.where('collectionRequest.createdBy = :id', { id });
 		}
 
@@ -247,7 +247,7 @@ export class CollectionRequestService {
 
 		if (roles.includes(15)) {
 			queryBuilder.where('collectionRequest.requestStatusId = 6');
-			queryBuilder.where('user.id = :id', { id });
+			queryBuilder.andWhere('user.id = :id', { id }); // Cambiado a andWhere
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
@@ -255,6 +255,7 @@ export class CollectionRequestService {
 			pageSize: query.pageSize,
 		});
 	}
+
 
 	async findOne(id: number): Promise<CollectionRequest> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({
