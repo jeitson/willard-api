@@ -48,7 +48,13 @@ export class CollectionRequestService {
 	) { }
 
 	async create(createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
-		const { isSpecial, pickUpLocationId, ...content } = createDto;
+		let { isSpecial, pickUpLocationId, ...content } = createDto;
+
+		const { id: user_id, roles } = this.userContextService.getUserDetails();
+
+		const isFactory = roles.map(({ roleId }) => +roleId).includes(16);
+
+		isSpecial = isFactory ? true : isSpecial;
 
 		const client = await this.clientRepository.findOneBy({ id: createDto.clientId })
 
@@ -88,8 +94,6 @@ export class CollectionRequestService {
 				product
 			});
 		}
-
-		const user_id = this.userContextService.getUserDetails().id;
 
 		const collectionRequestSaved = await this.collectionRequestRepository.save({ requestStatusId, ...collectionRequest, createdBy: user_id, modifiedBy: user_id });
 

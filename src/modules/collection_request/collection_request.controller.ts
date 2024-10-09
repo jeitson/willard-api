@@ -16,7 +16,7 @@ export class CollectionRequestController {
 	constructor(private readonly collectionsRequestervice: CollectionRequestService) { }
 
 	@Post()
-	@Roles(13)
+	@Roles(13, 16)
 	@ApiOperation({ summary: 'Crear solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async create(@Body() createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
