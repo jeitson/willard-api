@@ -128,22 +128,24 @@ export class UsersService {
 			let { roles, ...updatedData } = data;
 
 			updatedData = Object.assign(user, updatedData);
-
 			const user_id = this.userContextService.getUserDetails().id;
 
 			await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
 
-			if (roles) {
-				await manager.delete(UserRole, { usuarioId: id });
+			if (roles && roles.length > 0) {
+				await manager.delete(UserRole, { user: { id: +id } });
 
-				const userRoles = roles.map(roleId => manager.create(UserRole, {
-					userId: id,
-					rolId: roleId,
-					createdBy: user_id,
-					modifiedBy: user_id,
-				}));
+				const _roles = await this.rolesRepository.find({ where: { id: In(roles) } });
 
-				await manager.save(UserRole, userRoles);
+				for (const role of _roles) {
+					const userRole = manager.create(UserRole, {
+						user,
+						role,
+						createdBy: user_id,
+						modifiedBy: user_id,
+					});
+					await manager.save(userRole);
+				}
 			}
 		});
 	}
