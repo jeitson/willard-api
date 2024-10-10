@@ -31,6 +31,7 @@ async function bootstrap() {
 					const constraints = error.constraints
 						? Object.values(error.constraints)
 						: [];
+						console.log(error.children)
 					return {
 						property: error.property,
 						errors: constraints,

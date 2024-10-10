@@ -300,10 +300,10 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: 3, createdBy: user_id, modifiedBy: user_id });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: 6, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { requestStatusId: 3, collectionSite: null, user: null, transporter: null, isSpecial: true, modifiedBy: user_id });
+		await this.collectionRequestRepository.update(id, { requestStatusId: 6, collectionSite: null, user: null, transporter: null, isSpecial: true, modifiedBy: user_id });
 	}
 
 	async approve(id: number): Promise<void> {

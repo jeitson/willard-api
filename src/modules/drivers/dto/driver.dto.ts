@@ -15,9 +15,6 @@ import { PagerDto } from 'src/core/common/dto/pager.dto';
 
 export class DriverDto {
 	@ApiProperty({ description: 'Solicitud de Recogida', example: '123...' })
-	@IsOptional()
-	@IsString()
-	@IsNotEmpty({ message: 'La solicitud de recogida no debe de estar vacío' })
 	collectionRequestId: number;
 
 	@ApiProperty({ description: 'Nombre', example: 'Jon Doe' })
@@ -28,7 +25,6 @@ export class DriverDto {
 
 	@ApiProperty({ description: 'Celular' })
 	@IsNumber()
-	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
 	cellphone: number = null;
 
 	@ApiProperty({ description: 'Descripción', example: 'Jon Doe, usuario de prueba' })
