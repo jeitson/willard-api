@@ -269,7 +269,7 @@ export class CollectionRequestService {
 
 		if (roles.includes(15)) {
 			queryBuilder.where('collectionRequest.requestStatusId = 6');
-			queryBuilder.andWhere('user.id = :id', { id });
+//			queryBuilder.andWhere('user.id = :id', { id });
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
