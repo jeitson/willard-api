@@ -148,7 +148,6 @@ export class UsersService {
 		});
 	}
 
-
 	async addRolToUser(userId: number, rolId: number): Promise<UserRole> {
 		const user = await this.userRepository.findOneBy({ id: userId });
 		const rol = await this.rolesRepository.findOneBy({ id: rolId });
@@ -168,20 +167,31 @@ export class UsersService {
 		return this.userRolRepository.save(userRol);
 	}
 
-	async getUserRoles({ sub: id, ...content }): Promise<string[]> {
-		const user = await this.userRepository
+	async getUserRoles({ sub: id, ...content }: any): Promise<string[]> {
+		let user = await this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'role')
 			.where('user.oauthId = :id', { id })
 			.getOne();
 
 		if (!user) {
-			throw new Error('Usuario no encontrado');
+			await this.createByOAuth0({ user_id: id, ...content });
+
+			user = await this.userRepository
+				.createQueryBuilder('user')
+				.leftJoinAndSelect('user.roles', 'role')
+				.where('user.oauthId = :id', { id })
+				.getOne();
+
+			if (!user) {
+				throw new Error('Error al crear el usuario');
+			}
 		}
 
 		this.userContextService.setUserDetails(user);
 		this.userContextService.setUser({ sub: id, ...content });
 
-		return user.roles.map(({ roleId }) => roleId)
+		return user.roles.map(({ roleId }) => roleId);
 	}
+
 }
