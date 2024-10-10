@@ -3,7 +3,7 @@ import { CollectionRequestService } from './collection_request.service';
 
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiResult } from "src/core/common/decorators/api-result.decorator";
-import { CollectionRequestCreateDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
+import { CollectionRequestCreateDto, CollectionRequestCompleteDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
 import { CollectionRequest } from './entities/collection_request.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
@@ -43,7 +43,7 @@ export class CollectionRequestController {
 	@Roles(15)
 	@ApiOperation({ summary: 'Completar información de la solicitud' })
 	@ApiResult({ type: CollectionRequest })
-	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
+	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCompleteDto): Promise<void> {
 		await this.collectionsRequestervice.completeInfo(id, updateDto);
 	}
 
@@ -59,7 +59,7 @@ export class CollectionRequestController {
 	@Roles(13, 16)
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
-	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCreateDto): Promise<void> {
+	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
 		await this.collectionsRequestervice.update(id, updateDto);
 	}
 

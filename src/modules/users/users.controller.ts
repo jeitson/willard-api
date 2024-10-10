@@ -15,7 +15,7 @@ export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
 	@Get()
-	@Roles(22)
+	@Roles(0)
 	@ApiOperation({ summary: 'Obtener listado de todos los usuarios - Paginación' })
 	@ApiResult({ type: [User], isPage: true })
 	async findAll(@Query() dto: UserQueryDto) {
@@ -31,7 +31,7 @@ export class UsersController {
 	}
 
 	@Get(':id')
-	@Roles(22)
+	@Roles(0)
 	@ApiOperation({ summary: 'Obtener usuario por su ID' })
 	@ApiResult({ type: User })
 	async findOneById(@IdParam() id: string) {

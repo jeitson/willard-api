@@ -5,7 +5,7 @@ import { BusinessException } from "src/core/common/exceptions/biz.exception";
 import { Pagination } from "src/core/helper/paginate/pagination";
 import { paginate } from "src/core/helper/paginate";
 import { CollectionRequest } from "./entities/collection_request.entity";
-import { CollectionRequestCreateDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
+import { CollectionRequestCompleteDto, CollectionRequestCreateDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
 import { PickUpLocation } from "../pick_up_location/entities/pick_up_location.entity";
 import { CollectionRequestAudit } from "../collection_request_audits/entities/collection_request_audit.entity";
 import { Transporter } from "../transporters/entities/transporter.entity";
@@ -113,11 +113,15 @@ export class CollectionRequestService {
 		return collectionRequestSaved;
 	}
 
-	async update(id: number, createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
+	async update(id: number, createDto: CollectionRequestUpdateDto): Promise<CollectionRequest> {
 		let collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
 		if (!collectionRequest) {
 			throw new BusinessException('Solicitud no encontrada', 404);
+		}
+
+		if (collectionRequest.requestStatusId === 2) {
+			throw new BusinessException('La solicitud no puede ser actualizada, ya fue confirmada', 400);
 		}
 
 		const productTypeId = await this.childRepository.findOneBy({ id: +createDto.productTypeId, catalogCode: 'TIPO_PRODUCTO' })
@@ -128,9 +132,9 @@ export class CollectionRequestService {
 
 		let requestStatusId = 1;
 
-		const { isSpecial, pickUpLocationId, ...content } = createDto;
+		const { pickUpLocationId, ...content } = createDto;
 
-		if (!isSpecial) {
+		if (!collectionRequest.isSpecial) {
 			const pickUpLocation = await this.pickUpLocationRepository.findOne({
 				where: { id: pickUpLocationId, status: true },
 				relations: ['collectionSite', 'user'],
@@ -142,7 +146,6 @@ export class CollectionRequestService {
 
 			collectionRequest = this.collectionRequestRepository.create({
 				...content,
-				isSpecial,
 				collectionSite: pickUpLocation.collectionSite,
 				user: pickUpLocation.user,
 				requestStatusId
@@ -162,7 +165,7 @@ export class CollectionRequestService {
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({
 			collectionRequest,
 			name: 'UPDATED',
-			description: `UPDATED - ${createDto.isSpecial ? 'SPECIAL' : 'NORMAL'}`,
+			description: `UPDATED - ${collectionRequest.isSpecial ? 'SPECIAL' : 'NORMAL'}`,
 			statusId: requestStatusId || 1,
 			createdBy: user_id, modifiedBy: user_id
 		});
@@ -172,7 +175,7 @@ export class CollectionRequestService {
 		return collectionRequest;
 	}
 
-	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId }: CollectionRequestUpdateDto): Promise<void> {
+	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId }: CollectionRequestCompleteDto): Promise<void> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
 		if (!collectionRequest) {
@@ -257,7 +260,6 @@ export class CollectionRequestService {
 			pageSize: query.pageSize,
 		});
 	}
-
 
 	async findOne(id: number): Promise<CollectionRequest> {
 		const collectionRequest = this.createBaseQueryBuilder().where('collectionRequest.id = :id', { id }).getOne();
