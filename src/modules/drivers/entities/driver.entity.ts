@@ -17,6 +17,10 @@ export class Driver extends CompleteEntity {
 	@Column({ type: 'varchar', length: 50, name: 'Cedula' })
 	document: string;
 
+	@ApiProperty({ description: 'cellphone' })
+	@Column({ type: 'varchar', length: 50, name: 'Cedula' })
+	cellphone: string;
+
 	@ApiProperty({ description: 'email' })
 	@Column({ type: 'varchar', length: 100, name: 'Correo', default: null, nullable: true })
 	email: string;

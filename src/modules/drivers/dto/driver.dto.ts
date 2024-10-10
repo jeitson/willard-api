@@ -3,6 +3,7 @@ import {
 	IsEmail,
 	IsInt,
 	IsNotEmpty,
+	IsNumber,
 	IsOptional,
 	IsString,
 	MaxLength,
@@ -24,6 +25,11 @@ export class DriverDto {
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	name: string;
+
+	@ApiProperty({ description: 'Celular' })
+	@IsNumber()
+	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
+	cellphone: number = null;
 
 	@ApiProperty({ description: 'Descripción', example: 'Jon Doe, usuario de prueba' })
 	@IsString()

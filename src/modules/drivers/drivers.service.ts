@@ -19,7 +19,7 @@ export class DriversService {
 		private userContextService: UserContextService
 	) { }
 
-	async create({ collectionRequestId: id, ...content }: DriverDto): Promise<Driver> {
+	async create({ collectionRequestId: id, cellphone, ...content }: DriverDto): Promise<Driver> {
 		const collectionRequest = await this.collectionRequestRepository.findOneBy({ id });
 
 		if (!collectionRequest) {
@@ -28,12 +28,12 @@ export class DriversService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const driver = this.driverRepository.create({ collectionRequest, ...content, createdBy: user_id, modifiedBy: user_id });
+		const driver = this.driverRepository.create({ collectionRequest, ...content, createdBy: user_id, modifiedBy: user_id, cellphone: String(cellphone) });
 		const driverSaved = await this.driverRepository.save(driver);
 		return driverSaved;
 	}
 
-	async update(_id, { collectionRequestId: id, ...updatedData }: DriverUpdateDto): Promise<any> {
+	async update(_id, { collectionRequestId: id, cellphone, ...updatedData }: DriverUpdateDto): Promise<any> {
 		const driver = await this.driverRepository.findOneBy({ id: _id });
 
 		if (!driver) {
@@ -50,7 +50,7 @@ export class DriversService {
 
 		updatedData = Object.assign(driver, updatedData);
 
-		const updateDriver = await this.driverRepository.update(id, { ...updatedData, collectionRequest, modifiedBy: user_id });
+		const updateDriver = await this.driverRepository.update(id, { ...updatedData, collectionRequest, modifiedBy: user_id, cellphone: String(cellphone) });
 
 		return updateDriver;
 	}
