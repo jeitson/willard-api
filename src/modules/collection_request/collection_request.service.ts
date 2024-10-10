@@ -241,6 +241,7 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
 			.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
 			.leftJoinAndSelect('collectionRequest.driver', 'driver')
+			.leftJoinAndSelect('collectionRequest.transporter', 'transporter')
 			.leftJoinAndSelect('collectionRequest.user', 'user')
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
 			.leftJoinAndSelect('collectionRequest.route', 'route')
