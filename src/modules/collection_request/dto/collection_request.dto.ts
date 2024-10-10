@@ -29,6 +29,11 @@ export class CollectionRequestCreateDto {
 	@MaxLength(255)
 	description?: string;
 
+	@ApiProperty({ description: 'ID del motivo especial, debe ser un número.' })
+	@IsNotEmpty({ message: 'MotivoEspecial es obligatorio y debe ser un número.' })
+	@IsNumber({}, { message: 'MotivoEspecial debe ser un número.' })
+	motiveSpecialId: number = null;
+
 	@ApiProperty({ description: 'Fecha de solicitud' })
 	@IsDateString()
 	requestDate: string;
@@ -120,6 +125,11 @@ export class CollectionRequestUpdateDto {
 	@IsString()
 	@MaxLength(255)
 	description?: string;
+
+	@ApiProperty({ description: 'ID del motivo especial, debe ser un número.' })
+	@IsNotEmpty({ message: 'MotivoEspecial es obligatorio y debe ser un número.' })
+	@IsNumber({}, { message: 'MotivoEspecial debe ser un número.' })
+	motiveSpecialId: number = null;
 
 	@ApiProperty({ description: 'Fecha de solicitud' })
 	@IsDateString()

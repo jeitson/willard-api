@@ -81,6 +81,12 @@ export class CollectionRequestService {
 		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation });
 
 		if (isSpecial) {
+			const motiveSpecial = await this.childRepository.findOneBy({ id: +createDto.motiveSpecialId, catalogCode: 'MOTIVO_ESPECIAL' })
+
+			if (!motiveSpecial) {
+				throw new BusinessException('El motivo especial no existe', 400);
+			}
+
 			requestStatusId = 6;
 		} else {
 			collectionRequest = this.collectionRequestRepository.create({
@@ -222,14 +228,15 @@ export class CollectionRequestService {
 
 	private createBaseQueryBuilder() {
 		return this.collectionRequestRepository.createQueryBuilder('collectionRequest')
-		.leftJoinAndSelect('collectionRequest.client', 'client')
-		.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
-		.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
-		.leftJoinAndSelect('collectionRequest.driver', 'driver')
-		.leftJoinAndSelect('collectionRequest.user', 'user')
-		.leftJoinAndSelect('collectionRequest.audits', 'audits')
-		.leftJoinAndSelect('collectionRequest.route', 'route')
-		.leftJoinAndMapOne('collectionRequest.productType', Child, 'productType', 'productType.id = collectionRequest.productTypeId');
+			.leftJoinAndSelect('collectionRequest.client', 'client')
+			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
+			.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
+			.leftJoinAndSelect('collectionRequest.driver', 'driver')
+			.leftJoinAndSelect('collectionRequest.user', 'user')
+			.leftJoinAndSelect('collectionRequest.audits', 'audits')
+			.leftJoinAndSelect('collectionRequest.route', 'route')
+			.leftJoinAndMapOne('collectionRequest.productType', Child, 'productType', 'productType.id = collectionRequest.productTypeId')
+			.leftJoinAndMapOne('collectionRequest.motiveSpecial', Child, 'motiveSpecial', 'motiveSpecial.id = collectionRequest.motiveSpecialId');
 	}
 
 	async findAll(query: any): Promise<Pagination<CollectionRequest>> {

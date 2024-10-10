@@ -45,6 +45,10 @@ export class CollectionRequest extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Descripcion' })
 	description: string;
 
+	@ApiProperty({ description: 'Motivo Especial' })
+	@Column({ type: 'bigint', nullable: true, name: 'MotivoEspecialId' })
+	motiveSpecialId: number;
+
 	@ApiProperty({ description: 'Fecha de solicitud' })
 	@Column({ type: 'date', name: 'FechaSolicitud' })
 	requestDate: string;
