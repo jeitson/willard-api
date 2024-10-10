@@ -78,7 +78,7 @@ export class UsersService {
 		}
 
 		await this.entityManager.transaction(async (manager) => {
-			const user_id = this.userContextService.getUserDetails().id;
+			const user_id = this.userContextService.getUserDetails()?.id;
 
 			const user = manager.create(User, {
 				email,

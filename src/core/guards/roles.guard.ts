@@ -12,6 +12,12 @@ export class RolesGuard implements CanActivate {
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		try {
+			const { path } = context.getArgs()[0].route;
+
+			if (path.includes('oauth')) {
+				return true;
+			}
+
 			const roles = this.reflector.getAllAndOverride<number[]>(ROLES_KEY, [
 				context.getHandler(),
 				context.getClass(),
@@ -24,7 +30,7 @@ export class RolesGuard implements CanActivate {
 				throw new ForbiddenException('No se encontró un usuario autenticado.');
 			}
 
-			const isProfile = context.getArgs()[0].route.path.includes('profile');
+			const isProfile = path.includes('profile');
 
 			if (['GET'].includes(context.getArgs()[0].method) && roles.includes(0) && !isProfile) return true;
 
@@ -38,7 +44,7 @@ export class RolesGuard implements CanActivate {
 				return true;
 			}
 
-			const hasRole = () => userRoles.some(role => roles.includes(+role));
+			const hasRole = () => [0, ...userRoles].some(role => roles.includes(+role));
 
 			if (!hasRole() && !isProfile) {
 				throw new ForbiddenException('No tienes permisos para acceder a este recurso.');

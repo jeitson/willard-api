@@ -46,7 +46,7 @@ export class UsersController {
 	}
 
 	@Post('oauth')
-	@Roles(22)
+	@Roles(0)
 	@ApiOperation({ summary: 'Crear usuario por medio de OAuth0' })
 	async createByOAuth0(@Body() dto: UserOAuthDto): Promise<void> {
 		await this.usersService.createByOAuth0(dto);
