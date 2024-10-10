@@ -24,8 +24,9 @@ export class DriverDto {
 	name: string;
 
 	@ApiProperty({ description: 'Celular' })
-	@IsNumber()
-	cellphone: number = null;
+	@IsString()
+	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
+	cellphone: string = '';
 
 	@ApiProperty({ description: 'Descripción', example: 'Jon Doe, usuario de prueba' })
 	@IsString()
