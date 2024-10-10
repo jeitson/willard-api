@@ -119,8 +119,8 @@ export class CollectionRequestService {
 		return collectionRequestSaved;
 	}
 
-	async update(id: number, createDto: CollectionRequestUpdateDto): Promise<CollectionRequest> {
-		let collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
+	async update(id: number, updatedDto: CollectionRequestUpdateDto): Promise<CollectionRequest> {
+		let collectionRequest: any = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
 		if (!collectionRequest) {
 			throw new BusinessException('Solicitud no encontrada', 404);
@@ -130,55 +130,64 @@ export class CollectionRequestService {
 			throw new BusinessException('La solicitud no puede ser actualizada, ya fue confirmada', 400);
 		}
 
-		const productTypeId = await this.childRepository.findOneBy({ id: +createDto.productTypeId, catalogCode: 'TIPO_PRODUCTO' })
+		const { id: user_id } = this.userContextService.getUserDetails();
 
+		const client = await this.clientRepository.findOneBy({ id: updatedDto.clientId });
+		if (!client) {
+			throw new BusinessException('El cliente no existe', 400);
+		}
+
+		const productTypeId = await this.childRepository.findOneBy({ id: +updatedDto.productTypeId, catalogCode: 'TIPO_PRODUCTO' });
 		if (!productTypeId) {
 			throw new BusinessException('El tipo de producto no existe', 400);
 		}
 
+		const pickUpLocation = await this.pickUpLocationRepository.findOne({
+			where: { id: updatedDto.pickUpLocationId, status: true },
+			relations: ['collectionSite', 'user'],
+		});
+		if (!pickUpLocation) {
+			throw new BusinessException('No existe el lugar de recogida', 400);
+		}
+
 		let requestStatusId = 1;
-
-		const { pickUpLocationId, ...content } = createDto;
-
-		if (!collectionRequest.isSpecial) {
-			const pickUpLocation = await this.pickUpLocationRepository.findOne({
-				where: { id: pickUpLocationId, status: true },
-				relations: ['collectionSite', 'user'],
-			});
-
-			if (!pickUpLocation) {
-				throw new BusinessException('No existe el lugar de recogida', 400);
+		if (collectionRequest.isSpecial) {
+			const motiveSpecial = await this.childRepository.findOneBy({ id: +updatedDto.motiveSpecialId, catalogCode: 'MOTIVO_ESPECIAL' });
+			if (!motiveSpecial) {
+				throw new BusinessException('El motivo especial no existe', 400);
 			}
-
-			collectionRequest = this.collectionRequestRepository.create({
-				...content,
-				collectionSite: pickUpLocation.collectionSite,
-				user: pickUpLocation.user,
-				requestStatusId
-			});
-		} else {
 			requestStatusId = 6;
 		}
 
-		const user_id = this.userContextService.getUserDetails().id;
+		collectionRequest = {
+			...collectionRequest,
+			...updatedDto,
+			requestStatusId,
+			client,
+			pickUpLocation,
+			collectionSite: pickUpLocation.collectionSite,
+			user: pickUpLocation.user,
+			modifiedBy: user_id,
+		};
 
-		const collectionRequestSaved = await this.collectionRequestRepository.update(id, { ...collectionRequest, modifiedBy: user_id });
+		const collectionRequestSaved = await this.collectionRequestRepository.save(collectionRequest);
 
 		if (!collectionRequestSaved) {
 			throw new BusinessException('Error en el guardado de la solicitud', 400);
 		}
 
 		const collectionRequestAudit = this.collectionRequestAuditRepository.create({
-			collectionRequest,
+			collectionRequest: collectionRequestSaved,
 			name: 'UPDATED',
 			description: `UPDATED - ${collectionRequest.isSpecial ? 'SPECIAL' : 'NORMAL'}`,
-			statusId: requestStatusId || 1,
-			createdBy: user_id, modifiedBy: user_id
+			statusId: requestStatusId,
+			createdBy: user_id,
+			modifiedBy: user_id
 		});
 
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		return collectionRequest;
+		return collectionRequestSaved;
 	}
 
 	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId }: CollectionRequestCompleteDto): Promise<void> {
