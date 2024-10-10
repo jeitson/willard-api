@@ -7,6 +7,7 @@ import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
 import { Roles } from 'src/core/common/decorators/role.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
+import { Public } from 'src/core/common/decorators/public.decorator';
 
 @ApiTags('Sistema - Usuarios')
 @Controller('users')
@@ -46,7 +47,7 @@ export class UsersController {
 	}
 
 	@Post('oauth')
-	@Roles(0)
+	@Public()
 	@ApiOperation({ summary: 'Crear usuario por medio de OAuth0' })
 	async createByOAuth0(@Body() dto: UserOAuthDto): Promise<void> {
 		await this.usersService.createByOAuth0(dto);
