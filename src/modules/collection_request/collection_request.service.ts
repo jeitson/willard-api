@@ -100,7 +100,7 @@ export class CollectionRequestService {
 			});
 		}
 
-		const collectionRequestSaved = await this.collectionRequestRepository.save({ requestStatusId, ...collectionRequest, createdBy: user_id, modifiedBy: user_id });
+		const collectionRequestSaved = await this.collectionRequestRepository.save({ ...collectionRequest, requestStatusId, createdBy: user_id, modifiedBy: user_id });
 
 		if (!collectionRequestSaved) {
 			throw new BusinessException('Error en el guardado de la solicitud', 400);
