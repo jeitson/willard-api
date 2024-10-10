@@ -2,7 +2,7 @@ export enum ErrorEnum {
 	DEFAULT = '0: Error desconocido',
 	SERVER_ERROR = '500: El servidor está ocupado, inténtelo de nuevo más tarde',
 
-	SYSTEM_USER_EXISTS = '1001: El usuario del sistema ya existe',
+	SYSTEM_USER_EXISTS = '1001: Ya existe el usuario',
 	INVALID_VERIFICATION_CODE = '1002: Código de verificación inválido',
 	INVALID_EMAIL_PASSWORD = '1003: Correo electronico o contraseña incorrectos',
 	NODE_ROUTE_EXISTS = '1004: La ruta del nodo ya existe',
