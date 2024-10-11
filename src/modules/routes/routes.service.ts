@@ -108,8 +108,7 @@ export class RoutesService {
 
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
-			throw new BusinessException('Error al procesar la solicitud', 500);
-
+			throw error
 		} finally {
 			await queryRunner.release();
 		}
