@@ -18,11 +18,6 @@ export class CollectionRequestCreateDto {
 	@IsNumber({}, { message: 'TipoProductoId debe ser un número.' })
 	productTypeId: number;
 
-	@ApiProperty({ description: 'Nombre' })
-	@IsString()
-	@MaxLength(50)
-	name: string;
-
 	@ApiProperty({ description: 'Descripción' })
 	@IsOptional()
 	@IsString()
@@ -33,14 +28,6 @@ export class CollectionRequestCreateDto {
 	@IsNotEmpty({ message: 'MotivoEspecial es obligatorio y debe ser un número.' })
 	@IsNumber({}, { message: 'MotivoEspecial debe ser un número.' })
 	motiveSpecialId: number = null;
-
-	@ApiProperty({ description: 'Fecha de solicitud' })
-	@IsDateString()
-	requestDate: string;
-
-	@ApiProperty({ description: 'Hora de solicitud' })
-	@IsString()
-	requestTime: string;
 
 	@ApiProperty({ description: 'Cantidad estimada' })
 	@IsNumber()
@@ -53,11 +40,6 @@ export class CollectionRequestCreateDto {
 	@ApiProperty({ description: 'Es especial' })
 	@IsBoolean()
 	isSpecial: boolean;
-
-	// @ApiProperty({ description: 'Estado de la solicitud' })
-	// @IsInt()
-	// @Min(1, { message: 'El ID del estado de solicitud no puede ser 0' })
-	// requestStatusId: number;
 
 	@ApiProperty({ description: 'Fecha estimada de recogida' })
 	@IsOptional()
@@ -80,6 +62,11 @@ export class CollectionRequestCreateDto {
 	@IsString()
 	@MaxLength(255)
 	recommendations?: string;
+
+	@ApiProperty({ description: 'Transportadora asociada' })
+	@IsInt()
+	@Min(1, { message: 'El ID de la transportadora no puede ser 0' })
+	transporterId: number;
 }
 
 export class CollectionRequestCompleteDto {

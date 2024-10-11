@@ -38,8 +38,8 @@ export class CollectionRequest extends CompleteEntity {
 	user: User;
 
 	@ApiProperty({ description: 'Nombre' })
-	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
-	name: string;
+	@Column({ type: 'varchar', length: 50, name: 'Nombre', nullable: true, default: null })
+	name: string = null;
 
 	@ApiProperty({ description: 'Descripción' })
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Descripcion' })
@@ -50,12 +50,12 @@ export class CollectionRequest extends CompleteEntity {
 	motiveSpecialId: number;
 
 	@ApiProperty({ description: 'Fecha de solicitud' })
-	@Column({ type: 'date', name: 'FechaSolicitud' })
-	requestDate: string;
+	@Column({ type: 'date', name: 'FechaSolicitud', nullable: true, default: null })
+	requestDate: string = null;
 
 	@ApiProperty({ description: 'Hora de solicitud' })
-	@Column({ type: 'time', name: 'HoraSolicitud' })
-	requestTime: string;
+	@Column({ type: 'time', name: 'HoraSolicitud', nullable: true, default: null })
+	requestTime: string = null;
 
 	@ApiProperty({ description: 'Cantidad estimada' })
 	@Column({ type: 'int', name: 'CantidadEstimada' })

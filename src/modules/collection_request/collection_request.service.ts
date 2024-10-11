@@ -89,6 +89,12 @@ export class CollectionRequestService {
 
 			requestStatusId = 6;
 		} else {
+			const transporter = await this.transporterRepository.findOneBy({ id: +createDto.transporterId })
+
+			if (!transporter) {
+				throw new BusinessException('La transportadora no existe', 400);
+			}
+
 			collectionRequest = this.collectionRequestRepository.create({
 				...content,
 				isSpecial,
@@ -96,7 +102,8 @@ export class CollectionRequestService {
 				user: pickUpLocation.user,
 				requestStatusId,
 				pickUpLocation,
-				client
+				client,
+				transporter
 			});
 		}
 
