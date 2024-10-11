@@ -81,9 +81,9 @@ export class CollectionRequestCompleteDto {
 	consultantId: number;
 
 	@ApiProperty({ description: 'Transportadora asociada' })
+	@IsOptional()
 	@IsInt()
-	@Min(1, { message: 'El ID de la transportadora no puede ser 0' })
-	transporterId: number;
+	transporterId: number = null;
 }
 
 export class CollectionRequestUpdateDto {
@@ -155,6 +155,11 @@ export class CollectionRequestUpdateDto {
 	@IsString()
 	@MaxLength(255)
 	recommendations?: string;
+
+	@ApiProperty({ description: 'Transportadora asociada' })
+	@IsOptional()
+	@IsInt()
+	transporterId: number = null;
 }
 
 export class CollectionRequestQueryDto extends IntersectionType(

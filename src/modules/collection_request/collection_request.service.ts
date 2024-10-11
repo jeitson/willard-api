@@ -164,6 +164,12 @@ export class CollectionRequestService {
 				throw new BusinessException('El motivo especial no existe', 400);
 			}
 			requestStatusId = 6;
+		} else {
+			const transporter = await this.transporterRepository.findOneBy({ id: +updatedDto.transporterId })
+
+			if (!transporter) {
+				throw new BusinessException('La transportadora no existe', 400);
+			}
 		}
 
 		collectionRequest = {
