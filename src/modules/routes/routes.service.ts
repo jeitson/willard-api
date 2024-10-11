@@ -33,14 +33,14 @@ export class RoutesService {
 		try {
 			const collectionRequest = await queryRunner.manager.findOne(CollectionRequest, {
 				where: { id, status: true },
-				relations: ['route', 'user', 'pickUpLocation', 'pickUpLocation.user']
+				relations: ['route', 'user', 'pickUpLocation', 'pickUpLocation.user', 'driver']
 			});
 
 			if (!collectionRequest) {
 				throw new BusinessException('Solicitud no encontrada', 400);
 			}
 
-			if (collectionRequest.requestStatusId !== 1 || collectionRequest.route) {
+			if (collectionRequest.requestStatusId !== 1 || collectionRequest.route || collectionRequest.driver) {
 				throw new BusinessException('La solicitud no aplica para la acción a ejecutar', 400);
 			}
 
