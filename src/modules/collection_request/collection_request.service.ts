@@ -151,6 +151,13 @@ export class CollectionRequestService {
 
 		let requestStatusId = 1, pickUpLocation = null;
 		if (collectionRequest.isSpecial) {
+			const motiveSpecial = await this.childRepository.findOneBy({ id: +updatedDto.motiveSpecialId, catalogCode: 'MOTIVO_ESPECIAL' });
+			if (!motiveSpecial) {
+				throw new BusinessException('El motivo especial no existe', 400);
+			}
+
+			requestStatusId = 6;
+		} else {
 			pickUpLocation = await this.pickUpLocationRepository.findOne({
 				where: { id: updatedDto.pickUpLocationId, status: true },
 				relations: ['collectionSite', 'user'],
@@ -160,13 +167,6 @@ export class CollectionRequestService {
 				throw new BusinessException('No existe el lugar de recogida', 400);
 			}
 
-			const motiveSpecial = await this.childRepository.findOneBy({ id: +updatedDto.motiveSpecialId, catalogCode: 'MOTIVO_ESPECIAL' });
-			if (!motiveSpecial) {
-				throw new BusinessException('El motivo especial no existe', 400);
-			}
-
-			requestStatusId = 6;
-		} else {
 			const transporter = await this.transporterRepository.findOneBy({ id: +updatedDto.transporterId })
 
 			if (!transporter) {
