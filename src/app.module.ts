@@ -24,6 +24,7 @@ import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 import { DriversModule } from './modules/drivers/drivers.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ReceptionsModule } from './modules/receptions/receptions.module';
 
 @Module({
 	imports: [
@@ -51,6 +52,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 		AuthModule,
 		DriversModule,
 		NotificationsModule,
+		ReceptionsModule,
 	],
 	controllers: [],
 	providers: [
