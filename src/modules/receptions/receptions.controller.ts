@@ -39,7 +39,7 @@ export class ReceptionsController {
 	@Put(':id')
 	@Roles(18, 20)
 	@ApiOperation({ summary: 'Actualizar' })
-	async update(@IdParam('id') id: string, @Body() updateProductDto: ReceptionUpdateDto): Promise<Reception> {
-		return this.receptionsService.update(+id, updateProductDto);
+	async update(@IdParam('id') id: string, @Body() updateDto: ReceptionUpdateDto): Promise<Reception> {
+		return this.receptionsService.update(+id, updateDto);
 	}
 }
