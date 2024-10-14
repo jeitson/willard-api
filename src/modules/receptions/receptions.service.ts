@@ -9,6 +9,7 @@ import { Product } from '../products/entities/product.entity';
 import { ReceptionDetail } from './entities/reception_detail.entity';
 import { ReceptionPhoto } from './entities/reception_photo.entity';
 import { UserContextService } from '../users/user-context.service';
+import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 
 @Injectable()
 export class ReceptionsService {
@@ -117,4 +118,91 @@ export class ReceptionsService {
 
 		await this.receptionPhotoRepository.save(receptionPhotos);
 	}
+
+	async update(id: number, updateReceptionDto: ReceptionDto): Promise<Reception> {
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const reception = await this.receptionRepository.findOneBy({ id });
+		if (!reception) {
+			throw new BusinessException('Recepción no encontrada.', 404);
+		}
+
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: updateReceptionDto.collectionSiteId });
+		if (!collectionSite) {
+			throw new BadRequestException('El lugar de recogida no es válido.');
+		}
+
+		if (collectionSite.siteTypeId === 52) {
+			if (!updateReceptionDto.referenceDoc1) {
+				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+			}
+			if (!updateReceptionDto.referenceDoc2) {
+				throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+			}
+		}
+
+		const transporter = await this.transporterRepository.findOneBy({ id: updateReceptionDto.transporterId });
+		if (!transporter) {
+			throw new BadRequestException('La transportadora no es válida.');
+		}
+
+		if (updateReceptionDto.details) {
+			await this.validateReceptionDetails(updateReceptionDto.details);
+		}
+
+		try {
+			const updatedReception = this.receptionRepository.create({ ...reception, ...updateReceptionDto, modifiedBy: user_id });
+			const savedReception = await this.receptionRepository.save(updatedReception);
+
+			if (updateReceptionDto.details) {
+				await this.updateReceptionDetails(savedReception.id, updateReceptionDto.details);
+			}
+
+			if (updateReceptionDto.photos) {
+				await this.updateReceptionPhotos(savedReception.id, updateReceptionDto.photos);
+			}
+
+			return savedReception;
+
+		} catch (error) {
+			throw new BadRequestException('Error al actualizar la recepción: ' + error.message);
+		}
+	}
+
+	private async updateReceptionDetails(receptionId: number, details: ReceptionDetailDto[]): Promise<void> {
+		const user_id = this.userContextService.getUserDetails().id;
+
+		await this.receptionDetailRepository.delete({ reception: { id: receptionId } });
+
+		const receptionDetails = details.map(detail => {
+			const receptionDetail = this.receptionDetailRepository.create({
+				...detail,
+				createdBy: user_id,
+				modifiedBy: user_id,
+				reception: { id: receptionId },
+			});
+			return receptionDetail;
+		});
+
+		await this.receptionDetailRepository.save(receptionDetails);
+	}
+
+	private async updateReceptionPhotos(receptionId: number, photos: ReceptionPhotoDto[]): Promise<void> {
+		const user_id = this.userContextService.getUserDetails().id;
+
+		await this.receptionPhotoRepository.delete({ reception: { id: receptionId } });
+
+		const receptionPhotos = photos.map(photo => {
+			const receptionPhoto = this.receptionPhotoRepository.create({
+				...photo,
+				createdBy: user_id,
+				modifiedBy: user_id,
+				reception: { id: receptionId },
+			});
+			return receptionPhoto;
+		});
+
+		await this.receptionPhotoRepository.save(receptionPhotos);
+	}
+
 }
