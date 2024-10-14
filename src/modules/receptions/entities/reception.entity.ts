@@ -41,7 +41,7 @@ export class Reception extends CompleteEntity {
 
 	@ApiProperty({ description: 'Estado de recepción 1' })
 	@Column({ type: 'int', name: 'RecepcionEstado1' })
-	receptionStatus1: number;
+	receptionStatusId: number;
 
 	@OneToMany(() => ReceptionDetail, (receptionDetail) => receptionDetail.reception)
 	receptionDetails: ReceptionDetail[];

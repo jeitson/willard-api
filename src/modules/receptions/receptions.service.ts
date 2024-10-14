@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { ReceptionDto, ReceptionDetailDto, ReceptionPhotoDto } from './dto/create-reception.dto';
+import { ReceptionDto, ReceptionDetailDto, ReceptionPhotoDto, ReceptionQueryDto, ReceptionUpdateDto } from './dto/create-reception.dto';
 import { Reception } from './entities/reception.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,14 @@ import { ReceptionDetail } from './entities/reception_detail.entity';
 import { ReceptionPhoto } from './entities/reception_photo.entity';
 import { UserContextService } from '../users/user-context.service';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { Pagination } from 'src/core/helper/paginate/pagination';
+import { paginate } from 'src/core/helper/paginate';
+import { Child } from '../catalogs/entities/child.entity';
+
+
+/** Estados ID
+ * 1 = Registrado
+ *  **/
 
 @Injectable()
 export class ReceptionsService {
@@ -57,7 +65,7 @@ export class ReceptionsService {
 		}
 
 		const reception = this.receptionRepository.create(createReceptionDto);
-		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id });
+		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id, receptionStatusId: 67 });
 
 		try {
 			if (createReceptionDto.details) {
@@ -119,7 +127,7 @@ export class ReceptionsService {
 		await this.receptionPhotoRepository.save(receptionPhotos);
 	}
 
-	async update(id: number, updateReceptionDto: ReceptionDto): Promise<Reception> {
+	async update(id: number, updateReceptionDto: ReceptionUpdateDto): Promise<Reception> {
 		const user_id = this.userContextService.getUserDetails().id;
 
 		const reception = await this.receptionRepository.findOneBy({ id });
@@ -203,6 +211,62 @@ export class ReceptionsService {
 		});
 
 		await this.receptionPhotoRepository.save(receptionPhotos);
+	}
+
+	async findAll({
+		page,
+		pageSize,
+		collectionSiteId,
+		transporterId,
+	}: ReceptionQueryDto): Promise<Pagination<Reception>> {
+		const queryBuilder = this.receptionRepository
+			.createQueryBuilder('reception')
+			.leftJoinAndSelect('reception.receptionDetails', 'details')
+			.leftJoinAndSelect('reception.receptionPhotos', 'photos')
+			.leftJoinAndMapOne('reception.child', Child, 'child', 'child.id = reception.receptionStatusId')
+			.where({});
+
+		if (collectionSiteId) {
+			queryBuilder.andWhere('reception.collectionSiteId = :collectionSiteId', { collectionSiteId });
+		}
+
+		if (transporterId) {
+			queryBuilder.andWhere('reception.transporterId = :transporterId', { transporterId });
+		}
+
+		queryBuilder.select([
+			'reception',
+			'details',
+			'photos',
+			'child.name'
+		]);
+
+		return paginate<Reception>(queryBuilder, {
+			page,
+			pageSize,
+		});
+	}
+
+	async findOne(id: number): Promise<Reception> {
+		const reception = await this.receptionRepository
+			.createQueryBuilder('reception')
+			.leftJoinAndSelect('reception.receptionDetails', 'details')
+			.leftJoinAndSelect('reception.receptionPhotos', 'photos')
+			.leftJoinAndMapOne('reception.child', Child, 'child', 'child.id = reception.receptionStatusId')
+			.where('reception.id = :id', { id })
+			.select([
+				'reception',
+				'details',
+				'photos',
+				'child.name'
+			])
+			.getOne();
+
+		if (!reception) {
+			throw new BadRequestException('Recepción no encontrada');
+		}
+
+		return reception;
 	}
 
 }
