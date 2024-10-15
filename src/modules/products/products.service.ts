@@ -18,6 +18,12 @@ export class ProductsService {
 	) { }
 
 	async create(productCreateDto: ProductCreateDto): Promise<Product> {
+		const isExist = await this.productsRepository.findOne({ where: { name: productCreateDto.name } });
+
+		if (isExist) {
+			throw new BusinessException('El producto ya existe', 400);
+		}
+
 		const user_id = this.userContextService.getUserDetails().id;
 
 		const product = this.productsRepository.create({ ...productCreateDto, createdBy: user_id, modifiedBy: user_id });
