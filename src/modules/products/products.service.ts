@@ -40,13 +40,18 @@ export class ProductsService {
 	async findAll({
 		page,
 		pageSize,
-		name
+		name,
+		productTypeId
 	}: ProductQueryDto): Promise<Pagination<Product>> {
 		const queryBuilder = this.productsRepository
-			.createQueryBuilder('producto')
+			.createQueryBuilder('product')
 			.where({
 				...(name ? { name: Like(`%${name}%`) } : null),
 			});
+
+		if (productTypeId) {
+			queryBuilder.andWhere('product.productTypeId = :productTypeId', { productTypeId });
+		}
 
 		return paginate<Product>(queryBuilder, {
 			page,
