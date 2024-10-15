@@ -42,7 +42,8 @@ export class CatalogsService {
 			...childData,
 			name,
 			catalogCode,
-			parentId: parentChild.id,
+			parentId: parent.id,
+			parent: parent,
 			createdBy: user_id, modifiedBy: user_id
 		});
 
