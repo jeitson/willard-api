@@ -6,7 +6,7 @@ import { ReceptionDetail } from "./reception_detail.entity";
 import { ReceptionPhoto } from "./reception_photo.entity";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 
-@Entity({ name: 'Recepcion' })
+@Entity({ name: 'recepcion' })
 export class Reception extends CompleteEntity {
 
 	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.collectionsRequests)

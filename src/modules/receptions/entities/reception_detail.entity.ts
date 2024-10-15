@@ -4,7 +4,7 @@ import { Reception } from "./reception.entity";
 import { Product } from "src/modules/products/entities/product.entity";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 
-@Entity({ name: 'RecepcionDetalle' })
+@Entity({ name: 'recepcion_detalle' })
 export class ReceptionDetail extends CompleteEntity {
 
 	@ApiProperty({ description: 'ID de recepción (FK)' })
