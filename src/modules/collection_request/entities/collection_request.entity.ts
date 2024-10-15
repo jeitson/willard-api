@@ -56,6 +56,7 @@ export class CollectionRequest extends CompleteEntity {
 		type: 'date',
 		default: () => 'CURRENT_DATE',
 		name: 'FechaSolicitud',
+		nullable: true,
 	})
 	requestDate: Date;
 
@@ -64,6 +65,7 @@ export class CollectionRequest extends CompleteEntity {
 		type: 'time',
 		name: 'HoraSolicitud',
 		default: () => 'CURRENT_TIME',
+		nullable: true,
 	})
 	requestTime: string;
 
