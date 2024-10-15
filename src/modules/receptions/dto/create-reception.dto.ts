@@ -1,6 +1,29 @@
 import { ApiProperty, IntersectionType, PartialType } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsInt, MaxLength, Matches, Min, Max } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsOptional, IsString, IsInt, MaxLength, Matches, Min, Max, ValidateNested } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
+
+export class ReceptionDetailDto {
+	@ApiProperty({ description: 'ID del producto' })
+	@IsNotEmpty({ message: 'ProductoId es obligatorio.' })
+	@IsInt({ message: 'ProductoId debe ser un número entero.' })
+	productId: number;
+
+	@ApiProperty({ description: 'Cantidad de productos, máximo 10,000' })
+	@IsNotEmpty({ message: 'Cantidad es obligatoria.' })
+	@IsInt({ message: 'Cantidad debe ser un número entero.' })
+	@Min(1, { message: 'La cantidad mínima es 1.' })
+	@Max(10000, { message: 'La cantidad máxima es 10,000.' })
+	quantity: number;
+}
+
+export class ReceptionPhotoDto {
+	@ApiProperty({ description: 'URL de la foto' })
+	@IsString({ message: 'Url debe ser una cadena de texto.' })
+	@IsNotEmpty({ message: 'Url es obligatoria.' })
+	@MaxLength(255, { message: 'Url no puede exceder 255 caracteres.' })
+	url: string;
+}
 
 export class ReceptionDto {
 	@ApiProperty({ description: 'ID de la sede de acopio, se pasa por URL' })
@@ -41,37 +64,14 @@ export class ReceptionDto {
 	@Matches(/^[A-Z0-9]{0,10}$/, { message: 'DocReferencia2 debe ser alfanumérico y tener hasta 10 caracteres.' })
 	referenceDoc2?: string;
 
-	@ApiProperty({ description: 'Detalles de la recepción', isArray: true })
+	@ApiProperty({ description: 'Detalles de la recepción', isArray: true, type: ReceptionDetailDto })
 	@IsOptional()
 	details?: ReceptionDetailDto[];
 
-	@ApiProperty({ description: 'Fotos de la recepción', isArray: true })
+	@ApiProperty({ description: 'Fotos de la recepción', isArray: true, type: ReceptionPhotoDto })
 	@IsOptional()
 	photos?: ReceptionPhotoDto[];
 }
-
-export class ReceptionDetailDto {
-	@ApiProperty({ description: 'ID del producto' })
-	@IsNotEmpty({ message: 'ProductoId es obligatorio.' })
-	@IsInt({ message: 'ProductoId debe ser un número entero.' })
-	productId: number;
-
-	@ApiProperty({ description: 'Cantidad de productos, máximo 10,000' })
-	@IsNotEmpty({ message: 'Cantidad es obligatoria.' })
-	@IsInt({ message: 'Cantidad debe ser un número entero.' })
-	@Min(1, { message: 'La cantidad mínima es 1.' })
-	@Max(10000, { message: 'La cantidad máxima es 10,000.' })
-	quantity: number;
-}
-
-export class ReceptionPhotoDto {
-	@ApiProperty({ description: 'URL de la foto' })
-	@IsString({ message: 'Url debe ser una cadena de texto.' })
-	@IsNotEmpty({ message: 'Url es obligatoria.' })
-	@MaxLength(255, { message: 'Url no puede exceder 255 caracteres.' })
-	url: string;
-}
-
 
 export class ReceptionUpdateDto extends PartialType(ReceptionDto) { }
 
