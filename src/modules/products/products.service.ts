@@ -7,6 +7,7 @@ import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { UserContextService } from '../users/user-context.service';
+import { Child } from '../catalogs/entities/child.entity';
 
 @Injectable()
 export class ProductsService {
@@ -51,6 +52,7 @@ export class ProductsService {
 	}: ProductQueryDto): Promise<Pagination<Product>> {
 		const queryBuilder = this.productsRepository
 			.createQueryBuilder('product')
+			.leftJoinAndMapOne('product.productType', Child, 'child', 'child.id = product.productTypeId')
 			.where({
 				...(name ? { name: Like(`%${name}%`) } : null),
 			});
@@ -58,6 +60,11 @@ export class ProductsService {
 		if (productTypeId) {
 			queryBuilder.andWhere('product.productTypeId = :productTypeId', { productTypeId });
 		}
+
+		queryBuilder.select([
+			'product',
+			'child.name'
+		]);
 
 		return paginate<Product>(queryBuilder, {
 			page,
