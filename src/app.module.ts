@@ -26,6 +26,7 @@ import { DriversModule } from './modules/drivers/drivers.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ReceptionsModule } from './modules/receptions/receptions.module';
 import { RegistersModule } from './modules/registers/registers.module';
+import { FilesModule } from './modules/files/files.module';
 
 @Module({
 	imports: [
@@ -55,6 +56,7 @@ import { RegistersModule } from './modules/registers/registers.module';
 		NotificationsModule,
 		ReceptionsModule,
 		RegistersModule,
+		FilesModule,
 	],
 	controllers: [],
 	providers: [

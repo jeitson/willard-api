@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Express } from 'express';
+import { extname } from 'path';
 import { getFirebaseStorage } from 'src/core/config';
+import { generateUUID } from 'src/core/utils';
 
 @Injectable()
 export class FirebaseService {
@@ -8,7 +10,7 @@ export class FirebaseService {
 
 	async uploadFile(file: Express.Multer.File): Promise<string> {
 		const bucket = getFirebaseStorage();
-		const fileName = `${Date.now()}_${file.originalname}`;
+		const fileName = `${generateUUID()}${extname(file.originalname)}`; // Generar un nombre único para el archivo
 		const fileUpload = bucket.file(fileName);
 
 		try {
