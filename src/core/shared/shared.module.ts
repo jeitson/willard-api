@@ -6,6 +6,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 
 import { isDev } from '../global/env';
 import { MailerModule } from './mailer/mailer.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Global()
 @Module({
@@ -31,6 +32,7 @@ import { MailerModule } from './mailer/mailer.module';
 			ignoreErrors: false,
 		}),
 		MailerModule,
+		FirebaseModule,
 	],
 	exports: [HttpModule],
 })
