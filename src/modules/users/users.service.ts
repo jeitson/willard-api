@@ -48,7 +48,7 @@ export class UsersService {
 
 		return paginate<User>(queryBuilder, {
 			page,
-			pageSize,
+			pageSize: 30,
 		});
 	}
 
