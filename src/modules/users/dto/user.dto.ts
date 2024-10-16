@@ -40,6 +40,11 @@ export class UserDto {
 	@ValidateIf((o) => !isEmpty(o.email))
 	email: string;
 
+	@ApiProperty({ description: 'Contraseña' })
+	@IsOptional()
+	@IsString()
+	password?: string;
+
 	@ApiProperty({ description: 'Referencia WLL del usuario, debe ser un texto.' })
 	@IsOptional()
 	@IsString({ message: 'ReferenciaWLL debe ser un texto.' })

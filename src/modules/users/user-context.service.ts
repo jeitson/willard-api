@@ -4,6 +4,7 @@ import { Injectable, Scope } from '@nestjs/common';
 export class UserContextService {
 	private user: any;
 	private userDetails: any;
+	private token: any;
 
 	setUser(user: any) {
 		this.user = user;
@@ -27,5 +28,13 @@ export class UserContextService {
 
 	getUserRoles() {
 		return this.userDetails?.roles;
+	}
+
+	setUserToken(token: any) {
+		this.token = token;
+	}
+
+	getToken() {
+		return this.token;
 	}
 }

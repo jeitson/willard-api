@@ -2,12 +2,14 @@ import { CanActivate, ExecutionContext, Injectable, ForbiddenException, Inject }
 import { Reflector } from '@nestjs/core';
 import { UsersService } from 'src/modules/users/users.service';
 import { ROLES_KEY } from '../common/decorators/role.decorator';
+import { UserContextService } from 'src/modules/users/user-context.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
 	constructor(
 		private reflector: Reflector,
 		private usersService: UsersService,
+		private usersContextService: UserContextService,
 	) { }
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,6 +34,9 @@ export class RolesGuard implements CanActivate {
 
 			const isProfile = path.includes('profile');
 
+			const token = request.headers.authorization.split('Bearer ')[1];
+			this.usersContextService.setUserToken(token || '');
+
 			if (['GET'].includes(context.getArgs()[0].method) && roles.includes(0) && !isProfile) return true;
 
 			const userRoles = await this.usersService.getUserRoles(user);
@@ -52,7 +57,6 @@ export class RolesGuard implements CanActivate {
 
 			return true;
 		} catch (error) {
-			console.log(error)
 			return false;
 		}
 	}

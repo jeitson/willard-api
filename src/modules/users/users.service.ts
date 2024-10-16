@@ -10,6 +10,7 @@ import { UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.d
 import { Role } from '../roles/entities/rol.entity';
 import { UserRole } from './entities/user-rol.entity';
 import { UserContextService } from './user-context.service';
+import { Auth0Service } from './auth0.service';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,8 @@ export class UsersService {
 		private readonly rolesRepository: Repository<Role>,
 		@InjectRepository(UserRole)
 		private readonly userRolRepository: Repository<UserRole>,
-		private userContextService: UserContextService
+		private userContextService: UserContextService,
+		private auth0Service: Auth0Service
 	) { }
 
 	async findAll({
@@ -80,28 +82,45 @@ export class UsersService {
 		await this.entityManager.transaction(async (manager) => {
 			const user_id = this.userContextService.getUserDetails()?.id;
 
-			const user = manager.create(User, {
-				email,
-				...data,
-				createdBy: user_id,
-				modifiedBy: user_id,
-			});
+			try {
+				let auth0User = {
+					user_id: data.oauthId
+				};
 
-			await manager.save(user);
-
-			if (roles && roles.length > 0) {
-
-				const _roles = await this.rolesRepository.find({ where: { id: In(roles) } });
-
-				for (const role of _roles) {
-					const userRole = manager.create(UserRole, {
-						user,
-						role,
-						createdBy: user_id,
-						modifiedBy: user_id,
+				if (data.description !== 'CREATED BY OAUTH0') {
+					auth0User = await this.auth0Service.createUser({
+						email,
+						connection: 'Username-Password-Authentication',
+						password: data.password,
+						user_metadata: { roles, ...data }
 					});
-					await manager.save(userRole);
 				}
+
+				const user = manager.create(User, {
+					auth0Id: auth0User.user_id,
+					email,
+					...data,
+					createdBy: user_id,
+					modifiedBy: user_id,
+				});
+
+				await manager.save(user);
+
+				if (roles && roles.length > 0) {
+					const _roles = await this.rolesRepository.find({ where: { id: In(roles) } });
+
+					for (const role of _roles) {
+						const userRole = manager.create(UserRole, {
+							user,
+							role,
+							createdBy: user_id,
+							modifiedBy: user_id,
+						});
+						await manager.save(userRole);
+					}
+				}
+			} catch (error) {
+				throw new BusinessException('Error en la creación del usuario' + error.message, 400);
 			}
 		});
 	}
@@ -126,29 +145,35 @@ export class UsersService {
 
 		await this.entityManager.transaction(async (manager) => {
 			let { roles, ...updatedData } = data;
-
-			updatedData = Object.assign(user, updatedData);
 			const user_id = this.userContextService.getUserDetails().id;
 
-			await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
+			try {
+				await this.auth0Service.updateUser(user.oauthId, { email: updatedData.email, ...updatedData });
 
-			if (roles && roles.length > 0) {
-				await manager.delete(UserRole, { user: { id: +id } });
+				updatedData = Object.assign(user, updatedData);
+				await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
 
-				const _roles = await this.rolesRepository.find({ where: { id: In(roles) } });
+				if (roles && roles.length > 0) {
+					await manager.delete(UserRole, { user: { id: +id } });
 
-				for (const role of _roles) {
-					const userRole = manager.create(UserRole, {
-						user,
-						role,
-						createdBy: user_id,
-						modifiedBy: user_id,
-					});
-					await manager.save(userRole);
+					const _roles = await this.rolesRepository.find({ where: { id: In(roles) } });
+
+					for (const role of _roles) {
+						const userRole = manager.create(UserRole, {
+							user,
+							role,
+							createdBy: user_id,
+							modifiedBy: user_id,
+						});
+						await manager.save(userRole);
+					}
 				}
+			} catch (error) {
+				throw new BusinessException('Error actualizando usuario en Auth0: ' + error.message, 400);
 			}
 		});
 	}
+
 
 	async addRolToUser(userId: number, rolId: number): Promise<UserRole> {
 		const user = await this.userRepository.findOneBy({ id: userId });
