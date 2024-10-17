@@ -7,6 +7,7 @@ import { plainToClass } from 'class-transformer';
 import { Register } from './entities/register.entity';
 import { RegisterDto } from './dto/register.dto';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { excelDateToJSDate, excelTimeToJSDate } from 'src/core/utils';
 
 @Injectable()
 export class RegistersService {
@@ -38,7 +39,7 @@ export class RegistersService {
 		}
 
 		try {
-			const item = this.mapExcelRowToRegisterDto(data);
+			const item = this.mapRowToRegisterDto(data);
 			const travelRecord = this.registerRepository.create(item);
 			return await this.registerRepository.save(travelRecord);
 		} catch (error) {
@@ -54,43 +55,43 @@ export class RegistersService {
 			const jsonData = XLSX.utils.sheet_to_json(sheet);
 
 			const records = [];
+			const validationErrors = [];
 
-			const itemsValidate = jsonData.map(async (item) => await this.validate(item)).filter(async (item) => (await item).length > 0)
+			for (const [index, row] of jsonData.entries()) {
 
-			if (itemsValidate.length > 0) {
-				throw new UnprocessableEntityException({
-					message: 'Error de validación en fila',
-					errors: itemsValidate.map(error => error),
-				});
-			}
+				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
+				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
 
-			for (const row of jsonData) {
-				const record = this.mapExcelRowToRegisterDto(row);
+				const record = this.mapRowToRegisterDto(row);
 
 				const errors = await validate(record);
 				if (errors.length > 0) {
-					const errorMessages = errors.map(error => {
-						const constraints = error.constraints
-							? Object.values(error.constraints)
-							: [];
-						return {
-							property: error.property,
-							errors: constraints,
-						};
-					});
+					const errorMessages = errors.map(error => ({
+						property: error.property,
+						errors: Object.values(error.constraints || {}),
+					}));
 
-					throw new UnprocessableEntityException({
-						message: 'Error de validación en fila',
+					validationErrors.push({
+						row: index + 1,
 						errors: errorMessages,
 					});
+				} else {
+					records.push(this.registerRepository.create(record));
 				}
+			}
 
-				records.push(this.registerRepository.create(record));
+			if (validationErrors.length > 0) {
+				throw new UnprocessableEntityException({
+					message: 'Error de validación en una o más filas',
+					errors: validationErrors,
+				});
 			}
 
 			return await this.registerRepository.save(records);
+
 		} catch (error) {
-			throw new BusinessException('Error al procesar el archivo Excel: ' + error.message);
+			console.log(error);
+			throw new BadRequestException('Error al procesar el archivo Excel: ' + error.message);
 		}
 	}
 
@@ -112,7 +113,7 @@ export class RegistersService {
 		return [];
 	}
 
-	private mapExcelRowToRegisterDto(row: any): any {
+	private mapRowToRegisterDto(row: any): any {
 		return {
 			routeId: row['idRuta'],
 			guideId: row['idGuia'],
@@ -132,12 +133,15 @@ export class RegistersService {
 			totalQuantity: row['totCant'],
 			referenceDocument: row['docReferencia'],
 			referenceDocument2: row['docReferencia2'],
-			supportUrls: row['urlSoportes'] ? row['urlSoportes'].split(',') : [],
-			details: row['detalles'] ? row['detalles'].map((d: any) => ({
-				batteryType: d.tipoBat,
-				quantities: d.cantidades,
-				travelRecord: 1,
-			})) : []
+			supportUrls: row['urlSoportes'] || [],
+			details: Array.isArray(row['detalles']) ? this.convertDetail(row['detalles']) : this.convertDetail(JSON.parse(row['detalles']))
 		};
+	}
+
+	convertDetail(details: any): any[] {
+		return details.map((d: any) => ({
+			batteryType: d.tipoBat,
+			quantities: d.cantidades,
+		})) || [];
 	}
 }

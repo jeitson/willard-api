@@ -46,7 +46,7 @@ export class Register extends CompleteEntity {
     @Column({ type: 'varchar', length: 100, name: 'Direccion' })
     address: string;
 
-    @Column({ type: 'varchar', length: 15, name: 'GpsPosicion' })
+    @Column({ type: 'varchar', length: 20, name: 'GpsPosicion' })
     gpsPosition: string;
 
     @Column({ type: 'int', name: 'CantidadTotal' })

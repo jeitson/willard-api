@@ -79,7 +79,7 @@ export class RegisterDto {
 
 	@IsString({ message: 'El campo posGps debe ser un texto.' })
 	@IsNotEmpty({ message: 'El campo posGps no puede estar vacío.' })
-	@MaxLength(15, { message: 'El campo posGps no debe exceder los 15 caracteres.' })
+	@MaxLength(20, { message: 'El campo posGps no debe exceder los 15 caracteres.' })
 	posGps: string;
 
 	@IsInt({ message: 'El total de cantidades debe ser un número entero.' })

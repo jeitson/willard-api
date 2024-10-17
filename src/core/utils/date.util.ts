@@ -21,3 +21,20 @@ export function formatToDate(
 export function isDateObject(obj: unknown): boolean {
 	return isDate(obj) || dayjs.isDayjs(obj);
 }
+
+export function excelDateToJSDate(excelDate: number): string {
+    const baseDate = new Date(1900, 0, 1);
+    const daysSince1900 = excelDate - 1;
+    baseDate.setDate(baseDate.getDate() + daysSince1900 - 1);
+    return baseDate.toISOString().split('T')[0];
+}
+
+export function excelTimeToJSDate(excelTime: number): string {
+    const totalSeconds = Math.floor(excelTime * 24 * 60 * 60);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
