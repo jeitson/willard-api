@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
@@ -21,7 +21,20 @@ export class RegistersService {
 		const errors = await validate(travelRecordDto);
 
 		if (errors.length > 0) {
-			throw new BusinessException('Error de validación', 400);
+			const errorMessages = errors.map(error => {
+				const constraints = error.constraints
+					? Object.values(error.constraints)
+					: [];
+				return {
+					property: error.property,
+					errors: constraints,
+				};
+			});
+
+			throw new UnprocessableEntityException({
+				message: 'Validation failed',
+				errors: errorMessages,
+			});
 		}
 
 		try {
@@ -41,12 +54,35 @@ export class RegistersService {
 			const jsonData = XLSX.utils.sheet_to_json(sheet);
 
 			const records = [];
+
+			const itemsValidate = jsonData.map(async (item) => await this.validate(item)).filter(async (item) => (await item).length > 0)
+
+			if (itemsValidate.length > 0) {
+				throw new UnprocessableEntityException({
+					message: 'Error de validación en fila',
+					errors: itemsValidate.map(error => error),
+				});
+			}
+
 			for (const row of jsonData) {
 				const record = this.mapExcelRowToRegisterDto(row);
 
 				const errors = await validate(record);
 				if (errors.length > 0) {
-					throw new BusinessException('Error de validación en fila', 400);
+					const errorMessages = errors.map(error => {
+						const constraints = error.constraints
+							? Object.values(error.constraints)
+							: [];
+						return {
+							property: error.property,
+							errors: constraints,
+						};
+					});
+
+					throw new UnprocessableEntityException({
+						message: 'Error de validación en fila',
+						errors: errorMessages,
+					});
 				}
 
 				records.push(this.registerRepository.create(record));
@@ -56,6 +92,24 @@ export class RegistersService {
 		} catch (error) {
 			throw new BusinessException('Error al procesar el archivo Excel: ' + error.message);
 		}
+	}
+
+	async validate(item: any): Promise<any[]> {
+		const errors = await validate(item);
+
+		if (errors.length > 0) {
+			return errors.map(error => {
+				const constraints = error.constraints
+					? Object.values(error.constraints)
+					: [];
+				return {
+					property: error.property,
+					errors: constraints,
+				};
+			});
+		}
+
+		return [];
 	}
 
 	private mapExcelRowToRegisterDto(row: any): any {
