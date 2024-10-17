@@ -282,11 +282,11 @@ export class CollectionRequestService {
 		}
 
 		if (roles.includes(14)) {
-			queryBuilder.where('collectionRequest.requestStatusId IN (1, 2)');
+			queryBuilder.where('collectionRequest.requestStatusId IN (61, 62)');
 		}
 
 		if (roles.includes(15)) {
-			queryBuilder.where('collectionRequest.requestStatusId = 6');
+			queryBuilder.where('collectionRequest.requestStatusId = 66');
 //			queryBuilder.andWhere('user.id = :id', { id });
 		}
 
