@@ -64,9 +64,8 @@ export class CollectionRequestCreateDto {
 	recommendations?: string;
 
 	@ApiProperty({ description: 'Transportadora asociada' })
-	@IsInt()
-	@Min(1, { message: 'El ID de la transportadora no puede ser 0' })
-	transporterId: number;
+	@IsOptional()
+	transporterId: number = null;
 }
 
 export class CollectionRequestCompleteDto {
