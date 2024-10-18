@@ -180,7 +180,7 @@ export class UsersService {
 			const user_id = this.userContextService.getUserDetails().id;
 
 			try {
-				await this.auth0Service.updateUser(user.oauthId, { email: updatedData.email, ...updatedData });
+				// await this.auth0Service.updateUser(user.oauthId, { email: updatedData.email, ...updatedData });
 
 				updatedData = Object.assign(user, updatedData);
 				await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
