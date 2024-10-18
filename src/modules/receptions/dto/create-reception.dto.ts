@@ -50,7 +50,8 @@ export class ReceptionDto {
 
 	@ApiProperty({ description: 'Número de guía' })
 	@IsNotEmpty({ message: 'NumeroGuia es obligatorio.' })
-	@Matches(/^[A-Z0-9]{10}$/, { message: 'NumeroGuia debe ser alfanumérico, de 10 dígitos y en mayúsculas.' })
+	@Matches(/^[A-Z0-9]$/, { message: 'NumeroGuia debe ser alfanumérico y en mayúsculas.' })
+	// @Matches(/^[A-Z0-9]{10}$/, { message: 'NumeroGuia debe ser alfanumérico, de 10 dígitos y en mayúsculas.' })
 	guideNumber: string;
 
 	// Referencias opcionales - aplica si la sede de acopio es una agencia
