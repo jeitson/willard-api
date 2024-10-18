@@ -50,19 +50,38 @@ export class RegistersService {
 	async createFromExcel(file: Express.Multer.File): Promise<Register[]> {
 		try {
 			const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-			const sheetName = workbook.SheetNames[0];
-			const sheet = workbook.Sheets[sheetName];
-			const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+			const mainSheetName = workbook.SheetNames[0];
+			const mainSheet = workbook.Sheets[mainSheetName];
+			const mainData = XLSX.utils.sheet_to_json(mainSheet);
+
+			const detailSheetName = workbook.SheetNames[1];
+			const detailSheet = workbook.Sheets[detailSheetName];
+			const detailData = XLSX.utils.sheet_to_json(detailSheet);
 
 			const records = [];
 			const validationErrors = [];
 
-			for (const [index, row] of jsonData.entries()) {
+			const detailsByGuide = detailData.reduce((acc, detail) => {
+				const idGuia = detail['idGuia'];
+				if (!acc[idGuia]) {
+					acc[idGuia] = [];
+				}
+				acc[idGuia].push({
+					tipoBat: detail['tipoBat'],
+					cantidades: detail['cantidades'],
+				});
+				return acc;
+			}, {});
 
+			for (const [index, row] of mainData.entries()) {
 				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
 				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
 
 				const record = this.mapRowToRegisterDto(row);
+
+				const details = detailsByGuide[record.idGuia] || [];
+				record.detalles = details.map(detail => this.mapRowToRegisterDto(detail));
 
 				const errors = await validate(record);
 				if (errors.length > 0) {
