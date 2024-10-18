@@ -47,16 +47,30 @@ export class RolesService {
 				...(name ? { name: Like(`%${name}%`) } : null),
 			});
 
-		return paginate<Role>(queryBuilder, {
+		const paginatedResult: any = await paginate<Role>(queryBuilder, {
 			page,
 			pageSize,
 		});
+
+		paginatedResult.items = paginatedResult.items.map((role) => {
+			return {
+				...role,
+				menu: role.menu ? JSON.parse(role.menu) : [],
+			};
+		});
+
+		return paginatedResult;
 	}
 
+
 	async findOneById(id: number): Promise<Role | undefined> {
-		return this.rolesRepository.findOneBy({
+		const role = await this.rolesRepository.findOneBy({
 			id
 		});
+
+		role.menu = role.menu ? JSON.parse(role.menu) : [];
+
+		return role;
 	}
 
 	async create({

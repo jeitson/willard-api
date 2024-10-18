@@ -261,6 +261,7 @@ export class UsersService {
 		let user = await this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'role')
+			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.where('user.oauthId = :id', { id })
 			.getOne();
 
@@ -270,6 +271,7 @@ export class UsersService {
 			user = await this.userRepository
 				.createQueryBuilder('user')
 				.leftJoinAndSelect('user.roles', 'role')
+				.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
 				.where('user.oauthId = :id', { id })
 				.getOne();
 

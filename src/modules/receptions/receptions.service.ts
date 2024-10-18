@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ReceptionDto, ReceptionDetailDto, ReceptionPhotoDto, ReceptionQueryDto, ReceptionUpdateDto } from './dto/create-reception.dto';
 import { Reception } from './entities/reception.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CollectionSite } from '../collection_sites/entities/collection_site.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
@@ -38,22 +38,22 @@ export class ReceptionsService {
 	) { }
 
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
-		const user_id = this.userContextService.getUserDetails().id;
+		const { collectionSites, id: user_id } = this.userContextService.getUserDetails();
 
-		// const collectionSite = await this.collectionSiteRepository.findOneBy({ id: createReceptionDto.collectionSiteId });
-		// if (!collectionSite) {
-		// 	throw new BadRequestException('El lugar de recogida no es válido.');
-		// }
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites) });
+		if (!collectionSite) {
+			throw new BadRequestException('El usuario no tiene vinculado una sede de acopio.');
+		}
 
-		// // aplica si la sede de acopio es una agencia
-		// if (collectionSite.siteTypeId === 52) {
-		// 	if (!createReceptionDto.referenceDoc1) {
-		// 		throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-		// 	}
-		// 	if (!createReceptionDto.referenceDoc2) {
-		// 		throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-		// 	}
-		// }
+		// aplica si la sede de acopio es una agencia
+		if (collectionSite.siteTypeId === 52) {
+			if (!createReceptionDto.referenceDoc1) {
+				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+			}
+			if (!createReceptionDto.referenceDoc2) {
+				throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+			}
+		}
 
 		const transporter = await this.transporterRepository.findOneBy({ id: createReceptionDto.transporterId });
 		if (!transporter) {
@@ -65,7 +65,7 @@ export class ReceptionsService {
 		}
 
 		const reception = this.receptionRepository.create(createReceptionDto);
-		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id, receptionStatusId: 67 });
+		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id, receptionStatusId: 67, collectionSite });
 
 		try {
 			if (createReceptionDto.details) {
@@ -128,26 +128,27 @@ export class ReceptionsService {
 	}
 
 	async update(id: number, updateReceptionDto: ReceptionUpdateDto): Promise<Reception> {
-		const user_id = this.userContextService.getUserDetails().id;
-
 		const reception = await this.receptionRepository.findOneBy({ id });
 		if (!reception) {
 			throw new BusinessException('Recepción no encontrada.', 404);
 		}
 
-		// const collectionSite = await this.collectionSiteRepository.findOneBy({ id: updateReceptionDto.collectionSiteId });
-		// if (!collectionSite) {
-		// 	throw new BadRequestException('El lugar de recogida no es válido.');
-		// }
+		const { collectionSites, id: user_id } = this.userContextService.getUserDetails();
 
-		// if (collectionSite.siteTypeId === 52) {
-		// 	if (!updateReceptionDto.referenceDoc1) {
-		// 		throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-		// 	}
-		// 	if (!updateReceptionDto.referenceDoc2) {
-		// 		throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-		// 	}
-		// }
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites) });
+		if (!collectionSite) {
+			throw new BadRequestException('El usuario no tiene vinculado una sede de acopio.');
+		}
+
+		// aplica si la sede de acopio es una agencia
+		if (collectionSite.siteTypeId === 52) {
+			if (!updateReceptionDto.referenceDoc1) {
+				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+			}
+			if (!updateReceptionDto.referenceDoc2) {
+				throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+			}
+		}
 
 		const transporter = await this.transporterRepository.findOneBy({ id: updateReceptionDto.transporterId });
 		if (!transporter) {
@@ -159,7 +160,7 @@ export class ReceptionsService {
 		}
 
 		try {
-			const updatedReception = this.receptionRepository.create({ ...reception, ...updateReceptionDto, modifiedBy: user_id });
+			const updatedReception = this.receptionRepository.create({ ...reception, collectionSite, ...updateReceptionDto, modifiedBy: user_id });
 			const savedReception = await this.receptionRepository.save(updatedReception);
 
 			if (updateReceptionDto.details) {
