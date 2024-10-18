@@ -76,7 +76,11 @@ export class UsersService {
 	async getProfile(): Promise<User | undefined> {
 		const id = this.userContextService.getUserDetails().id;
 
-		return this.findUserById(id);
+		const user = await this.findUserById(id);
+
+		user.roles = user.roles.map((role) => ({ ...role, role: JSON.parse(role.role.menu) }))
+
+		return user;
 	}
 
 	async create({
