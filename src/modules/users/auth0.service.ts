@@ -3,6 +3,19 @@ import axios from 'axios';
 import { env } from 'src/core/global/env';
 import { UserContextService } from './user-context.service';
 
+interface UserDto {
+	email: string;
+	phone_number: string;
+	user_metadata?: any;
+	app_metadata?: any;
+	given_name: string;
+	family_name: string;
+	name: string;
+	nickname: string;
+	password?: string;
+	username: string;
+}
+
 @Injectable()
 export class Auth0Service {
 	private auth0Domain: string;
@@ -11,11 +24,11 @@ export class Auth0Service {
 		this.auth0Domain = env('AUTH0_DOMAIN');
 	}
 
-	async createUser(user: any): Promise<any> {
+	async createUser(user: UserDto): Promise<any> {
 		const url = `https://${this.auth0Domain}/api/v2/users`;
 
 		try {
-			const response = await axios.post(url, user, {
+			const response = await axios.post(url, { ...user, connection: "Username-Password-Authentication", client_id: "WZNm59oARsrlUlcSjdDrxqRfM6DtmqSz", picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg" }, {
 				headers: {
 					Authorization: `Bearer ${this.userContextService.getToken()}`,
 				},
@@ -43,13 +56,19 @@ export class Auth0Service {
 		}
 	}
 
-	async updateUser(userId: string, userData: any): Promise<any> {
+	async updateUser(userId: string, userData: UserDto): Promise<any> {
 		const url = `https://${this.auth0Domain}/api/v2/users/${userId}`;
 
 		try {
-			const response = await axios.patch(url, userData, {
+			const data = { ...userData, connection: "Username-Password-Authentication", client_id: "WZNm59oARsrlUlcSjdDrxqRfM6DtmqSz", picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg" };
+
+			const Authorization = `Bearer ${this.userContextService.getToken()}`;
+
+			console.log(Authorization);
+
+			const response = await axios.patch(url, data, {
 				headers: {
-					Authorization: `Bearer ${this.userContextService.getToken()}`,
+					Authorization,
 				},
 			});
 

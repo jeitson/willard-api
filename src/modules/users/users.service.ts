@@ -103,14 +103,19 @@ export class UsersService {
 					user_id: data.oauthId
 				};
 
-				if (data.description !== 'CREATED BY OAUTH0') {
-					auth0User = await this.auth0Service.createUser({
-						email,
-						connection: 'Username-Password-Authentication',
-						password: data.password,
-						user_metadata: { roles, collectionSites, ...data }
-					});
-				}
+				// if (data.description !== 'CREATED BY OAUTH0') {
+				// 	auth0User = await this.auth0Service.createUser({
+				// 		phone_number: data.cellphone,
+				// 		family_name: this.getName(email),
+				// 		nickname: this.getName(email),
+				// 		username: this.getName(email),
+				// 		given_name: this.getName(email),
+				// 		name: data.name,
+				// 		email,
+				// 		password: data.password,
+				// 		user_metadata: { roles, collectionSites, ...data }
+				// 	});
+				// }
 
 				const user = manager.create(User, {
 					auth0Id: auth0User.user_id,
@@ -180,7 +185,16 @@ export class UsersService {
 			const user_id = this.userContextService.getUserDetails().id;
 
 			try {
-				// await this.auth0Service.updateUser(user.oauthId, { email: updatedData.email, ...updatedData });
+				// await this.auth0Service.updateUser(user.oauthId, {
+				// 	phone_number: data.cellphone,
+				// 	family_name: this.getName(data.email),
+				// 	nickname: this.getName(data.email),
+				// 	username: this.getName(data.email),
+				// 	given_name: this.getName(data.email),
+				// 	name: data.name,
+				// 	email: data.email,
+				// 	user_metadata: { roles, collectionSites, ...data }
+				// });
 
 				updatedData = Object.assign(user, updatedData);
 				await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
@@ -218,6 +232,7 @@ export class UsersService {
 				}
 
 			} catch (error) {
+				console.log(error)
 				throw new BusinessException('Error actualizando usuario en Auth0: ' + error.message, 400);
 			}
 		});
@@ -292,4 +307,7 @@ export class UsersService {
 		return user.roles.map(({ roleId }) => roleId);
 	}
 
+	private getName(email: string): string {
+		return email.split('@')[0];
+	}
 }

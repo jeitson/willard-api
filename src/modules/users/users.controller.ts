@@ -46,15 +46,15 @@ export class UsersController {
 		await this.usersService.create(dto);
 	}
 
-	@Post('oauth')
-	@Public()
-	@ApiOperation({ summary: 'Crear usuario por medio de OAuth0' })
-	async createByOAuth0(@Body() dto: UserOAuthDto): Promise<void> {
-		await this.usersService.createByOAuth0(dto);
-	}
+	// @Post('oauth')
+	// @Public()
+	// @ApiOperation({ summary: 'Crear usuario por medio de OAuth0' })
+	// async createByOAuth0(@Body() dto: UserOAuthDto): Promise<void> {
+	// 	await this.usersService.createByOAuth0(dto);
+	// }
 
 	@Put(':id')
-	@Roles(22)
+	// @Roles(22)
 	@ApiOperation({ summary: 'Actualizar usuario' })
 	async update(
 		@IdParam() id: string,
