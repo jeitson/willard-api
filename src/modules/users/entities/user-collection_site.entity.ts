@@ -10,10 +10,10 @@ export class UserCollectionSite {
 	@PrimaryColumn({ type: 'bigint', name: 'UsuarioId' })
 	userId: string;
 
-	@PrimaryColumn({ type: 'bigint', name: 'RolId' })
+	@PrimaryColumn({ type: 'bigint', name: 'SedeAcopioId' })
 	collectionSiteId: string;
 
-	@ManyToOne(() => User, user => user.roles)
+	@ManyToOne(() => User, user => user.collectionSites)
 	@JoinColumn({ name: 'UsuarioId' })
 	user: User;
 
