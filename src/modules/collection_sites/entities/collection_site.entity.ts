@@ -2,7 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
-import { Column, Entity, OneToMany } from "typeorm";
+import { User } from "src/modules/users/entities/user.entity";
+import { Column, Entity, ManyToMany, OneToMany } from "typeorm";
 
 @Entity({ name: 'sedes_acopio' })
 export class CollectionSite extends CompleteEntity {
@@ -72,4 +73,7 @@ export class CollectionSite extends CompleteEntity {
 
 	@OneToMany(() => CollectionRequest, collectionsRequests => collectionsRequests.collectionSite)
 	collectionsRequests: CollectionRequest[];
+
+	@ManyToMany(() => User, user => user.collectionSites)
+	users: User[];
 }

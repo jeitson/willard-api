@@ -11,6 +11,8 @@ import { Role } from '../roles/entities/rol.entity';
 import { UserRole } from './entities/user-rol.entity';
 import { UserContextService } from './user-context.service';
 import { Auth0Service } from './auth0.service';
+import { UserCollectionSite } from './entities/user-collection_site.entity';
+import { CollectionSite } from '../collection_sites/entities/collection_site.entity';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +24,10 @@ export class UsersService {
 		private readonly rolesRepository: Repository<Role>,
 		@InjectRepository(UserRole)
 		private readonly userRolRepository: Repository<UserRole>,
+		@InjectRepository(CollectionSite)
+		private readonly collectionSitesRepository: Repository<CollectionSite>,
+		@InjectRepository(UserCollectionSite)
+		private readonly userCollectionSiteRepository: Repository<UserCollectionSite>,
 		private userContextService: UserContextService,
 		private auth0Service: Auth0Service
 	) { }
@@ -36,6 +42,8 @@ export class UsersService {
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'userRol')
 			.leftJoinAndSelect('userRol.role', 'role')
+			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
+			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
 			.where('1=1')
 
 		if (name) {
@@ -58,9 +66,12 @@ export class UsersService {
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'userRol')
 			.leftJoinAndSelect('userRol.role', 'role')
+			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
+			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
 			.where('user.id = :id', { id })
 			.getOne();
 	}
+
 
 	async getProfile(): Promise<User | undefined> {
 		const id = this.userContextService.getUserDetails().id;
@@ -71,6 +82,7 @@ export class UsersService {
 	async create({
 		email,
 		roles,
+		collectionSites,
 		...data
 	}: UserDto): Promise<void> {
 		const exists = await this.userRepository.findOneBy({ email });
@@ -92,7 +104,7 @@ export class UsersService {
 						email,
 						connection: 'Username-Password-Authentication',
 						password: data.password,
-						user_metadata: { roles, ...data }
+						user_metadata: { roles, collectionSites, ...data }
 					});
 				}
 
@@ -119,6 +131,21 @@ export class UsersService {
 						await manager.save(userRole);
 					}
 				}
+
+				if (collectionSites && collectionSites.length > 0) {
+					const _collectionSites = await this.collectionSitesRepository.find({ where: { id: In(collectionSites) } });
+
+					for (const collectionSite of _collectionSites) {
+						const userCollectionSite = manager.create(UserCollectionSite, {
+							user,
+							collectionSite,
+							createdBy: user_id,
+							modifiedBy: user_id,
+						});
+						await manager.save(userCollectionSite);
+					}
+				}
+
 			} catch (error) {
 				throw new BusinessException('Error en la creación del usuario' + error.message, 400);
 			}
@@ -132,7 +159,8 @@ export class UsersService {
 			...data,
 			referencePH: '',
 			referenceWLL: '',
-			roles: []
+			roles: [],
+			collectionSites: []
 		});
 	}
 
@@ -144,7 +172,7 @@ export class UsersService {
 		}
 
 		await this.entityManager.transaction(async (manager) => {
-			let { roles, ...updatedData } = data;
+			let { roles, collectionSites, ...updatedData } = data;
 			const user_id = this.userContextService.getUserDetails().id;
 
 			try {
@@ -168,12 +196,47 @@ export class UsersService {
 						await manager.save(userRole);
 					}
 				}
+
+				if (collectionSites && collectionSites.length > 0) {
+					await manager.delete(UserCollectionSite, { user: { id: +id } });
+
+					const _collectionSites = await this.collectionSitesRepository.find({ where: { id: In(collectionSites) } });
+
+					for (const collectionSite of _collectionSites) {
+						const userCollectionSite = manager.create(UserCollectionSite, {
+							user,
+							collectionSite,
+							createdBy: user_id,
+							modifiedBy: user_id,
+						});
+						await manager.save(userCollectionSite);
+					}
+				}
+
 			} catch (error) {
 				throw new BusinessException('Error actualizando usuario en Auth0: ' + error.message, 400);
 			}
 		});
 	}
 
+	async addCollectionSiteToUser(userId: number, collectionSiteId: number): Promise<UserCollectionSite> {
+		const user = await this.userRepository.findOneBy({ id: userId });
+		const collectionSite = await this.collectionSitesRepository.findOneBy({ id: collectionSiteId });
+
+		if (!user || !collectionSite) {
+			throw new Error('Usuario o Sede de acopio no encontrado');
+		}
+
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const userCollectionSite = new UserCollectionSite();
+		userCollectionSite.user = user;
+		userCollectionSite.collectionSite = collectionSite;
+		userCollectionSite.createdBy = user_id;
+		userCollectionSite.updatedBy = user_id;
+
+		return this.userCollectionSiteRepository.save(userCollectionSite);
+	}
 
 	async addRolToUser(userId: number, rolId: number): Promise<UserRole> {
 		const user = await this.userRepository.findOneBy({ id: userId });

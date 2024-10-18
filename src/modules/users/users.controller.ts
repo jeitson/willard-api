@@ -69,4 +69,11 @@ export class UsersController {
 	async addRolToUser(@IdParam('id') id: string, @IdParam('rol_id') rol_id: string): Promise<void> {
 		await this.usersService.addRolToUser(+id, +rol_id);
 	}
+
+	@Post(':id/collection_site/:collection_site_id')
+	@Roles(22)
+	@ApiOperation({ summary: 'Asignar sede de acopio a usuario' })
+	async addCollectionSiteToUser(@IdParam('id') id: string, @IdParam('collection_site_id') collection_site_id: string): Promise<void> {
+		await this.usersService.addCollectionSiteToUser(+id, +collection_site_id);
+	}
 }

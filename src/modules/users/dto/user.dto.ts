@@ -58,7 +58,12 @@ export class UserDto {
 	@ApiProperty({ description: 'Roles', type: [Number] })
 	@IsInt({ each: true })
 	@IsOptional()
-	roles: number[] = [];
+	roles?: number[] = [];
+
+	@ApiProperty({ description: 'Sedes de Acopio', type: [Number] })
+	@IsInt({ each: true })
+	@IsOptional()
+	collectionSites?: number[] = [];
 }
 
 export class UserOAuthDto {
