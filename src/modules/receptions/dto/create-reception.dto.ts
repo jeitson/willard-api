@@ -1,6 +1,6 @@
 import { ApiProperty, IntersectionType, PartialType } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsOptional, IsString, IsInt, MaxLength, Matches, Min, Max, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsInt, MaxLength, Matches, Min, Max, ValidateNested, maxLength } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
 
 export class ReceptionDetailDto {
@@ -26,11 +26,6 @@ export class ReceptionPhotoDto {
 }
 
 export class ReceptionDto {
-	@ApiProperty({ description: 'ID de la sede de acopio, se pasa por URL' })
-	@IsNotEmpty({ message: 'SedeAcopioId es obligatorio.' })
-	@IsInt({ message: 'SedeAcopioId debe ser un número entero.' })
-	collectionSiteId: number;
-
 	@ApiProperty({ description: 'ID de la transportadora' })
 	@IsNotEmpty({ message: 'TransportadoraId es obligatorio.' })
 	@IsInt({ message: 'TransportadoraId debe ser un número entero.' })
@@ -50,7 +45,8 @@ export class ReceptionDto {
 
 	@ApiProperty({ description: 'Número de guía' })
 	@IsNotEmpty({ message: 'NumeroGuia es obligatorio.' })
-	@Matches(/^[A-Z0-9]$/, { message: 'NumeroGuia debe ser alfanumérico y en mayúsculas.' })
+	@IsString({ message: 'NumeroGuia debe ser un texto.' })
+	@MaxLength(10, { message: 'Debe de tener máximo 10 caracteres.' })
 	// @Matches(/^[A-Z0-9]{10}$/, { message: 'NumeroGuia debe ser alfanumérico, de 10 dígitos y en mayúsculas.' })
 	guideNumber: string;
 

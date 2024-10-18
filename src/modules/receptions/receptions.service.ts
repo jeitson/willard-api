@@ -40,20 +40,20 @@ export class ReceptionsService {
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: createReceptionDto.collectionSiteId });
-		if (!collectionSite) {
-			throw new BadRequestException('El lugar de recogida no es válido.');
-		}
+		// const collectionSite = await this.collectionSiteRepository.findOneBy({ id: createReceptionDto.collectionSiteId });
+		// if (!collectionSite) {
+		// 	throw new BadRequestException('El lugar de recogida no es válido.');
+		// }
 
-		// aplica si la sede de acopio es una agencia
-		if (collectionSite.siteTypeId === 52) {
-			if (!createReceptionDto.referenceDoc1) {
-				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-			}
-			if (!createReceptionDto.referenceDoc2) {
-				throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-			}
-		}
+		// // aplica si la sede de acopio es una agencia
+		// if (collectionSite.siteTypeId === 52) {
+		// 	if (!createReceptionDto.referenceDoc1) {
+		// 		throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+		// 	}
+		// 	if (!createReceptionDto.referenceDoc2) {
+		// 		throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+		// 	}
+		// }
 
 		const transporter = await this.transporterRepository.findOneBy({ id: createReceptionDto.transporterId });
 		if (!transporter) {
@@ -135,19 +135,19 @@ export class ReceptionsService {
 			throw new BusinessException('Recepción no encontrada.', 404);
 		}
 
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: updateReceptionDto.collectionSiteId });
-		if (!collectionSite) {
-			throw new BadRequestException('El lugar de recogida no es válido.');
-		}
+		// const collectionSite = await this.collectionSiteRepository.findOneBy({ id: updateReceptionDto.collectionSiteId });
+		// if (!collectionSite) {
+		// 	throw new BadRequestException('El lugar de recogida no es válido.');
+		// }
 
-		if (collectionSite.siteTypeId === 52) {
-			if (!updateReceptionDto.referenceDoc1) {
-				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-			}
-			if (!updateReceptionDto.referenceDoc2) {
-				throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
-			}
-		}
+		// if (collectionSite.siteTypeId === 52) {
+		// 	if (!updateReceptionDto.referenceDoc1) {
+		// 		throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+		// 	}
+		// 	if (!updateReceptionDto.referenceDoc2) {
+		// 		throw new BadRequestException('DocReferencia2 es obligatorio cuando el lugar de recogida es una sede de acopio.');
+		// 	}
+		// }
 
 		const transporter = await this.transporterRepository.findOneBy({ id: updateReceptionDto.transporterId });
 		if (!transporter) {
@@ -216,7 +216,6 @@ export class ReceptionsService {
 	async findAll({
 		page,
 		pageSize,
-		collectionSiteId,
 		transporterId,
 	}: ReceptionQueryDto): Promise<Pagination<Reception>> {
 		const queryBuilder = this.receptionRepository
@@ -225,10 +224,6 @@ export class ReceptionsService {
 			.leftJoinAndSelect('reception.receptionPhotos', 'photos')
 			.leftJoinAndMapOne('reception.child', Child, 'child', 'child.id = reception.receptionStatusId')
 			.where({});
-
-		if (collectionSiteId) {
-			queryBuilder.andWhere('reception.collectionSiteId = :collectionSiteId', { collectionSiteId });
-		}
 
 		if (transporterId) {
 			queryBuilder.andWhere('reception.transporterId = :transporterId', { transporterId });
