@@ -22,7 +22,7 @@ export class RolDto {
 
 	@ApiProperty({ description: 'JSON Menú', example: [] })
 	@IsArray()
-	menu: any[] = [];
+	menu: any = null;
 }
 
 export class RolUpdateDto extends PartialType(RolDto) { }
