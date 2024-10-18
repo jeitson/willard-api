@@ -78,7 +78,7 @@ export class UsersService {
 
 		const user = await this.findUserById(id);
 
-		user.roles = user.roles.map((role) => ({ ...role, role: JSON.parse(role.role.menu) }))
+		user.roles = user.roles.map((role) => ({ ...role, role: { ...role.role, menu: JSON.parse(role.role.menu) } })) as any
 
 		return user;
 	}
