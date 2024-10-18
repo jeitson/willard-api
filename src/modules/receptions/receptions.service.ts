@@ -40,7 +40,8 @@ export class ReceptionsService {
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
 		const { collectionSites, id: user_id } = this.userContextService.getUserDetails();
 
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites) });
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites.map(({ collectionSiteId }) => collectionSiteId)) });
+
 		if (!collectionSite) {
 			throw new BadRequestException('El usuario no tiene vinculado una sede de acopio.');
 		}
@@ -69,14 +70,16 @@ export class ReceptionsService {
 
 		try {
 			if (createReceptionDto.details) {
-				await this.saveReceptionDetails(savedReception.id, createReceptionDto.details);
+				await this.saveReceptionDetails(savedReception, createReceptionDto.details);
 			}
 
 			if (createReceptionDto.photos) {
-				await this.saveReceptionPhotos(savedReception.id, createReceptionDto.photos);
+				await this.saveReceptionPhotos(savedReception, (createReceptionDto.photos as any[]).map(url => ({ url })));
 			}
 
 		} catch (error) {
+			await this.receptionDetailRepository.delete({ reception });
+			await this.receptionPhotoRepository.delete({ reception });
 			await this.receptionRepository.delete(savedReception.id);
 			throw new BadRequestException('Error al crear la recepción: ' + error.message);
 		}
@@ -86,7 +89,7 @@ export class ReceptionsService {
 
 	private async validateReceptionDetails(details: ReceptionDetailDto[]): Promise<void> {
 		for (const detail of details) {
-			const product = await this.productRepository.findOneBy({ id: detail.productId });
+			const product = await this.receptionDetailRepository.findOneBy({ id: detail.productId });
 			if (!product) {
 				throw new BadRequestException(`El producto con ID ${detail.productId} no es válido.`);
 			}
@@ -97,14 +100,14 @@ export class ReceptionsService {
 		}
 	}
 
-	private async saveReceptionDetails(receptionId: number, details: ReceptionDetailDto[]): Promise<void> {
+	private async saveReceptionDetails(reception: Reception, details: ReceptionDetailDto[]): Promise<void> {
 		const user_id = this.userContextService.getUserDetails().id;
 
 		const receptionDetails = details.map(detail => {
 			const receptionDetail = this.receptionDetailRepository.create({
 				...detail,
 				createdBy: user_id, modifiedBy: user_id,
-				reception: { id: receptionId },
+				reception,
 			});
 			return receptionDetail;
 		});
@@ -112,17 +115,18 @@ export class ReceptionsService {
 		await this.receptionDetailRepository.save(receptionDetails);
 	}
 
-	private async saveReceptionPhotos(receptionId: number, photos: ReceptionPhotoDto[]): Promise<void> {
+	private async saveReceptionPhotos(reception: Reception, photos: ReceptionPhotoDto[]): Promise<void> {
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const receptionPhotos = photos.map(photo => {
+		const receptionPhotos = photos.map(({ url }) => {
 			const receptionPhoto = this.receptionPhotoRepository.create({
-				...photo,
+				url,
 				createdBy: user_id, modifiedBy: user_id,
-				reception: { id: receptionId },
+				reception,
 			});
 			return receptionPhoto;
 		});
+
 
 		await this.receptionPhotoRepository.save(receptionPhotos);
 	}
