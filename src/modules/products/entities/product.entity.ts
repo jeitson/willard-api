@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { ReceptionDetail } from "src/modules/receptions/entities/reception_detail.entity";
+import { ShipmentDetail } from "src/modules/shipments/entities/shipment_detail.entity";
 import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity({ name: 'producto' })
@@ -55,4 +56,7 @@ export class Product extends CompleteEntity {
 
 	@OneToMany(() => ReceptionDetail, (receptionDetail) => receptionDetail.product)
 	receptionDetails: ReceptionDetail[];
+
+	@OneToMany(() => ShipmentDetail, (shipmentDetail) => shipmentDetail.product)
+	shipmentDetails: ShipmentDetail[];
 }

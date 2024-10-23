@@ -27,6 +27,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { ReceptionsModule } from './modules/receptions/receptions.module';
 import { RegistersModule } from './modules/registers/registers.module';
 import { FilesModule } from './modules/files/files.module';
+import { ShipmentsModule } from './modules/shipments/shipments.module';
 
 @Module({
 	imports: [
@@ -57,6 +58,7 @@ import { FilesModule } from './modules/files/files.module';
 		ReceptionsModule,
 		RegistersModule,
 		FilesModule,
+		ShipmentsModule,
 	],
 	controllers: [],
 	providers: [
