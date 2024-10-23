@@ -92,7 +92,7 @@ export class ShipmentsService {
 
 	private async validateShipmentDetails(details: ShipmentDetailDto[]): Promise<void> {
 		for (const detail of details) {
-			const product = await this.shipmentDetailRepository.findOneBy({ id: detail.productId });
+			const product = await this.productRepository.findOneBy({ id: detail.productId });
 			if (!product) {
 				throw new BadRequestException(`El producto con ID ${detail.productId} no es válido.`);
 			}
