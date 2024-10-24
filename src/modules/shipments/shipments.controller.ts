@@ -36,10 +36,10 @@ export class ShipmentsController {
 		return this.shipmentsService.findOne(+id);
 	}
 
-	@Put(':id')
-	@Roles(18, 20)
-	@ApiOperation({ summary: 'Actualizar' })
-	async update(@IdParam('id') id: string, @Body() updateDto: ShipmentUpdateDto): Promise<Shipment> {
-		return this.shipmentsService.update(+id, updateDto);
-	}
+	// @Put(':id')
+	// @Roles(18, 20)
+	// @ApiOperation({ summary: 'Actualizar' })
+	// async update(@IdParam('id') id: string, @Body() updateDto: ShipmentUpdateDto): Promise<Shipment> {
+	// 	return this.shipmentsService.update(+id, updateDto);
+	// }
 }

@@ -36,10 +36,10 @@ export class ReceptionsController {
 		return this.receptionsService.findOne(+id);
 	}
 
-	@Put(':id')
-	@Roles(18, 20)
-	@ApiOperation({ summary: 'Actualizar' })
-	async update(@IdParam('id') id: string, @Body() updateDto: ReceptionUpdateDto): Promise<Reception> {
-		return this.receptionsService.update(+id, updateDto);
-	}
+	// @Put(':id')
+	// @Roles(18, 20)
+	// @ApiOperation({ summary: 'Actualizar' })
+	// async update(@IdParam('id') id: string, @Body() updateDto: ReceptionUpdateDto): Promise<Reception> {
+	// 	return this.receptionsService.update(+id, updateDto);
+	// }
 }

@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, InternalServerErrorException } from '@
 import axios from 'axios';
 import { env } from 'src/core/global/env';
 import { UserContextService } from './user-context.service';
+import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 
 interface UserDto {
 	email: string;
@@ -19,16 +20,24 @@ interface UserDto {
 @Injectable()
 export class Auth0Service {
 	private auth0Domain: string;
+	private auth0ClientId: string;
+	private auth0Connection: string;
 
 	constructor(private readonly userContextService: UserContextService) {
 		this.auth0Domain = env('AUTH0_DOMAIN');
+		this.auth0ClientId = env('AUTH0_CLIENT_ID');
+		this.auth0Connection = env('AUTH0_CONNECTION');
 	}
 
 	async createUser(user: UserDto): Promise<any> {
 		const url = `https://${this.auth0Domain}/api/v2/users`;
 
 		try {
-			const response = await axios.post(url, { ...user, connection: "Username-Password-Authentication", client_id: "WZNm59oARsrlUlcSjdDrxqRfM6DtmqSz", picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg" }, {
+			const response = await axios.post(url, {
+				...user,
+				connection: this.auth0Connection,
+				client_id: this.auth0ClientId,
+				picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg" }, {
 				headers: {
 					Authorization: `Bearer ${this.userContextService.getToken()}`,
 				},
@@ -60,11 +69,18 @@ export class Auth0Service {
 		const url = `https://${this.auth0Domain}/api/v2/users/${userId}`;
 
 		try {
-			const data = { ...userData, connection: "Username-Password-Authentication", client_id: "WZNm59oARsrlUlcSjdDrxqRfM6DtmqSz", picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg" };
+			const data = {
+				...userData,
+				connection: this.auth0Connection,
+				client_id: this.auth0ClientId,
+				picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg",
+				blocked: false,
+				app_metadata: {},
+				verify_email: false,
+  				verify_phone_number: false,
+			};
 
 			const Authorization = `Bearer ${this.userContextService.getToken()}`;
-
-			console.log(Authorization);
 
 			const response = await axios.patch(url, data, {
 				headers: {
@@ -114,7 +130,7 @@ export class Auth0Service {
 		if (error.response) {
 			const status = error.response.status;
 			const message = error.response.data?.message || error.response.statusText || 'Unknown error';
-			throw new BadRequestException(`${customMessage}: ${message} (Status: ${status})`);
+			throw new BusinessException(`${customMessage}: ${message} (Status: ${status})`);
 		} else if (error.request) {
 			throw new InternalServerErrorException(`${customMessage}: No response from Auth0`);
 		} else {

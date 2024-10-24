@@ -4,7 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { User } from './entities/user.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
+import { PasswordUpdateDto, UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
 import { Roles } from 'src/core/common/decorators/role.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Public } from 'src/core/common/decorators/public.decorator';
@@ -54,13 +54,23 @@ export class UsersController {
 	// }
 
 	@Put(':id')
-	// @Roles(22)
+	@Roles(22)
 	@ApiOperation({ summary: 'Actualizar usuario' })
 	async update(
 		@IdParam() id: string,
 		@Body() dto: UserUpdateDto,
 	): Promise<void> {
 		await this.usersService.update(id, dto);
+	}
+
+	@Patch('password/:id')
+	@Roles(22)
+	@ApiOperation({ summary: 'Actualizar contraseña de usuario' })
+	async updatePassword(
+		@IdParam() id: string,
+		@Body() dto: PasswordUpdateDto,
+	): Promise<void> {
+		await this.usersService.updatePassword(id, dto);
 	}
 
 	@Post(':id/role/:rol_id')

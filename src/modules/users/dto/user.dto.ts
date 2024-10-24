@@ -5,7 +5,9 @@ import {
 	IsNotEmpty,
 	IsOptional,
 	IsString,
+	Matches,
 	MaxLength,
+	MinLength,
 	ValidateIf,
 } from 'class-validator';
 import { isEmpty } from 'lodash';
@@ -91,6 +93,23 @@ export class UserOAuthDto {
 }
 
 export class UserUpdateDto extends PartialType(UserDto) {}
+
+export class PasswordUpdateDto {
+	@ApiProperty({
+	  description: 'Contraseña',
+	  minLength: 8,
+	  maxLength: 20,
+	  example: 'Password123!'
+	})
+	@IsString({ message: 'La contraseña debe ser una cadena de texto.' })
+	@MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres.' })
+	@MaxLength(20, { message: 'La contraseña no puede tener más de 20 caracteres.' })
+	@Matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/, {
+	  message: 'La contraseña debe contener al menos una letra minúscula, una letra mayúscula, un número y un carácter especial.'
+	})
+	password: string;
+  }
+
 
 export class UserQueryDto extends IntersectionType(
 	PagerDto<UserDto>,
