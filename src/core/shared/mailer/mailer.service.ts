@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MailerService as NestMailerService } from '@nestjs-modules/mailer';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { processContent } from 'src/core/utils';
+import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 
 @Injectable()
 export class MailerService {
@@ -38,8 +39,7 @@ export class MailerService {
 			});
 
 			if (!response) {
-				console.error('No se recibió respuesta del servicio de correo.');
-				return { success: false, message: 'No se pudo enviar el correo.' };
+				throw new BusinessException('Error en el envío del correo', 500);
 			}
 
 			await this.notificationsService.createLog({
@@ -49,9 +49,9 @@ export class MailerService {
 				subject,
 			});
 
-			return { success: true, message: 'Correo enviado exitosamente.' };
+			return true;
 		} catch (error) {
-			return { success: false, message: 'Error enviando el correo.', error };
+			throw error;
 		}
 	}
 }
