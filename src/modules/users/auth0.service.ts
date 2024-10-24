@@ -5,16 +5,16 @@ import { UserContextService } from './user-context.service';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 
 interface UserDto {
-	email: string;
-	phone_number: string;
+	email?: string;
+	phone_number?: string;
 	user_metadata?: any;
 	app_metadata?: any;
-	given_name: string;
-	family_name: string;
-	name: string;
-	nickname: string;
+	given_name?: string;
+	family_name?: string;
+	name?: string;
+	nickname?: string;
 	password?: string;
-	username: string;
+	username?: string;
 }
 
 @Injectable()

@@ -113,7 +113,7 @@ export class UsersService {
 						name: data.name,
 						email,
 						password: data.password,
-						user_metadata: { roles, collectionSites, ...data }
+						user_metadata: { roles, collectionSites }
 					});
 				}
 
@@ -184,16 +184,23 @@ export class UsersService {
 			let { roles, collectionSites, ...updatedData } = data;
 			const user_id = this.userContextService.getUserDetails().id;
 
+			let complete = {}
+
+			if (data.email) {
+				complete = { email: data.email }
+			} else {
+				complete = { username: this.getName(data.email) }
+			}
+
 			try {
 				await this.auth0Service.updateUser(user.oauthId, {
 					phone_number: data.cellphone,
 					family_name: this.getName(data.email),
 					nickname: this.getName(data.email),
-					username: this.getName(data.email),
 					given_name: this.getName(data.email),
 					name: data.name,
-					email: data.email,
-					user_metadata: { roles, collectionSites, ...data }
+					user_metadata: { roles, collectionSites },
+					...complete
 				});
 
 				updatedData = Object.assign(user, updatedData);
@@ -250,13 +257,6 @@ export class UsersService {
 
 			try {
 				await this.auth0Service.updateUser(user.oauthId, {
-					phone_number: user.cellphone,
-					family_name: this.getName(user.email),
-					nickname: this.getName(user.email),
-					username: this.getName(user.email),
-					given_name: this.getName(user.email),
-					name: user.name,
-					email: user.email,
 					password: updatedData.password,
 				});
 
