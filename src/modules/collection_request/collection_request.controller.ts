@@ -16,7 +16,7 @@ export class CollectionRequestController {
 	constructor(private readonly collectionsRequestervice: CollectionRequestService) { }
 
 	@Post()
-	@Roles(13, 16)
+	@Roles(13, 16, 18)
 	@ApiOperation({ summary: 'Crear solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async create(@Body() createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -24,7 +24,7 @@ export class CollectionRequestController {
 	}
 
 	@Get()
-	@Roles(13, 14, 15, 16)
+	@Roles(13, 14, 15, 16, 18)
 	@ApiOperation({ summary: 'Listar solicitudes' })
 	@ApiResult({ type: [CollectionRequest] })
 	async findAll(@Query() query: any): Promise<any> {
@@ -56,7 +56,7 @@ export class CollectionRequestController {
 	}
 
 	@Put(':id')
-	@Roles(13, 16)
+	@Roles(13, 16, 18)
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
@@ -64,14 +64,14 @@ export class CollectionRequestController {
 	}
 
 	@Post(':id/cancel')
-	@Roles(13)
+	@Roles(13, 18)
 	@ApiOperation({ summary: 'Cancelar solicitud' })
 	async cancel(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.cancel(id);
 	}
 
 	@Delete(':id')
-	@Roles(13)
+	@Roles(13, 18)
 	@ApiOperation({ summary: 'Eliminar solicitud' })
 	async delete(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.delete(id);

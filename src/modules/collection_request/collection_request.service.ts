@@ -274,10 +274,11 @@ export class CollectionRequestService {
 		// 14 => ROL Planeador
 		// 15 => ROL Willard Logistica
 		// 16 => ROL Fabrica
+		// 18 => ROL Agencia
 		let { roles, id } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId);
 
-		if (roles.find((role: number) => [13, 16].includes(role))) {
+		if (roles.find((role: number) => [13, 16, 18].includes(role))) {
 			queryBuilder.where('collectionRequest.createdBy = :id', { id });
 		}
 
