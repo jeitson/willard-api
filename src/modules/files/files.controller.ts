@@ -4,7 +4,6 @@ import { AllFilesInterceptor } from 'src/core/common/interceptors/all-file.inter
 import { ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/common/decorators/role.decorator';
-import { Public } from 'src/core/common/decorators/public.decorator';
 import { FileSizeValidationPipe } from 'src/core/common/pipes/file-size-validation.pipe';
 
 @ApiTags('Sistema - Archivos')
@@ -17,7 +16,7 @@ export class FilesController {
 	@Roles(0)
 	@UseInterceptors(AllFilesInterceptor)
 	async uploadFile(@UploadedFiles(FileSizeValidationPipe)
-	files: Array<Express.Multer.File>,) {
+	files: Array<any>,) {
 		if (files.length === 0) {
 			throw new BadRequestException('File is required.');
 		}

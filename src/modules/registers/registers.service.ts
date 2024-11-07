@@ -47,7 +47,7 @@ export class RegistersService {
 		}
 	}
 
-	async createFromExcel(file: Express.Multer.File): Promise<Register[]> {
+	async createFromExcel(file: any): Promise<Register[]> {
 		try {
 			const workbook = XLSX.read(file.buffer, { type: 'buffer' });
 

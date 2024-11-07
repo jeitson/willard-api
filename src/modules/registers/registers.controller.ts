@@ -17,7 +17,7 @@ export class RegistersController {
 	@Public()
 	@UseInterceptors(FileInterceptor('file'))
 	async createRecord(
-		@UploadedFile() file: Express.Multer.File,
+		@UploadedFile() file: any,
 		@Body() body: any
 	) {
 		if (file) {
