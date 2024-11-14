@@ -71,7 +71,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 		if (exception instanceof HttpException) {
 			return exception.getStatus();
 		} else if (exception instanceof QueryFailedError) {
-			// console.log('driverError', exception.driverError.code)
 			return HttpStatus.INTERNAL_SERVER_ERROR;
 		} else {
 			return (

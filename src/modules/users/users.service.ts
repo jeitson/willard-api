@@ -181,23 +181,25 @@ export class UsersService {
 		}
 
 		await this.entityManager.transaction(async (manager) => {
-			let { roles, collectionSites, ...updatedData } = data;
+			let { roles, collectionSites, password, ...updatedData } = data;
 			const user_id = this.userContextService.getUserDetails().id;
 
 			let complete = {}
 
+			let email = user.email;
+
 			if (data.email) {
+				email = data.email;
 				complete = { email: data.email }
-			} else {
-				complete = { username: this.getName(data.email) }
+			} if (data.cellphone) {
+				complete = { phone_number: '+' + this.getNumber(data.cellphone || user.cellphone)}
 			}
 
 			try {
 				await this.auth0Service.updateUser(user.oauthId, {
-					phone_number: data.cellphone,
-					family_name: this.getName(data.email),
-					nickname: this.getName(data.email),
-					given_name: this.getName(data.email),
+					family_name: this.getName(email),
+					nickname: this.getName(email),
+					given_name: this.getName(email),
 					name: data.name,
 					user_metadata: { roles, collectionSites },
 					...complete
@@ -239,7 +241,6 @@ export class UsersService {
 				}
 
 			} catch (error) {
-				console.log(error);
 				throw new BusinessException('Error actualizando usuario en Auth0: ' + error.message, 400);
 			}
 		});
@@ -339,5 +340,9 @@ export class UsersService {
 
 	private getName(email: string): string {
 		return email.split('@')[0];
+	}
+
+	private getNumber(cellphone: string): string {
+		return cellphone.toString().slice(0, 1) === '57' ? cellphone.toString() : 57 + cellphone.toString()
 	}
 }

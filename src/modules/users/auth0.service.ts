@@ -22,11 +22,36 @@ export class Auth0Service {
 	private auth0Domain: string;
 	private auth0ClientId: string;
 	private auth0Connection: string;
+	private auth0ClienteSecret: string;
 
 	constructor(private readonly userContextService: UserContextService) {
 		this.auth0Domain = env('AUTH0_DOMAIN');
-		this.auth0ClientId = env('AUTH0_CLIENT_ID');
+		this.auth0ClientId = env('AUTH0_CLIENT_ID_API');
 		this.auth0Connection = env('AUTH0_CONNECTION');
+		this.auth0ClienteSecret = env('AUTH0_CLIENT_SECRET');
+	}
+
+	private async getTokenAPI(): Promise<string> {
+		const url = `https://${this.auth0Domain}/oauth/token`;
+
+		const data = {
+			client_id: this.auth0ClientId,
+			audience: `https://${this.auth0Domain}/api/v2/`,
+			grant_type: 'client_credentials',
+			client_secret: this.auth0ClienteSecret
+		}
+
+		try {
+			const response = await axios.post(url, data, {
+				headers: {
+					Authorization: `Bearer ${this.userContextService.getToken()}`,
+				}
+			});
+
+			return response.data.access_token;
+		} catch (error) {
+			this.handleAxiosError(error, 'Error creating user');
+		}
 	}
 
 	async createUser(user: UserDto): Promise<any> {
@@ -37,7 +62,8 @@ export class Auth0Service {
 				...user,
 				connection: this.auth0Connection,
 				client_id: this.auth0ClientId,
-				picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg" }, {
+				picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg"
+			}, {
 				headers: {
 					Authorization: `Bearer ${this.userContextService.getToken()}`,
 				},
@@ -77,10 +103,10 @@ export class Auth0Service {
 				blocked: false,
 				app_metadata: {},
 				verify_email: false,
-  				verify_phone_number: false,
+				verify_phone_number: false,
 			};
 
-			const Authorization = `Bearer ${this.userContextService.getToken()}`;
+			const Authorization = `Bearer ${await this.getTokenAPI()}`;
 
 			const response = await axios.patch(url, data, {
 				headers: {

@@ -4,21 +4,17 @@ import { CronJob } from 'cron';
 
 const runMigrationGenerate = async function () {
 	exec('npm run migration:revert && npm run migration:run', (error) => {
-		if (!error) console.log('操作成功', error);
-		else console.log('操作失败', error);
+		if (!error) console.log('La operación fue un éxito.', error);
+		else console.log('Fracaso de una operación', error);
 	});
 };
 
 const job = CronJob.from({
-	/** 每天凌晨 4.30 恢复初始数据 */
-	cronTime: '30 4 * * *',
-	timeZone: 'Asia/Shanghai',
+	cronTime: '* * * * *',
+	timeZone: 'America/Bogota',
 	start: true,
 	onTick() {
 		runMigrationGenerate();
-		console.log(
-			'Task executed daily at 4.30 AM:',
-			new Date().toLocaleTimeString(),
-		);
+		console.log('Tarea ejecutada diariamente', new Date().toLocaleTimeString());
 	},
 });

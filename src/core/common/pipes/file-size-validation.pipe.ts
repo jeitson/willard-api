@@ -3,7 +3,6 @@ import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 @Injectable()
 export class FileSizeValidationPipe implements PipeTransform {
 	transform(files: any[]) {
-		console.log(files);
 		const maxSize = 1024 * 1000; // 1 KB en bytes
 
 		const filesNotAllowed = files.filter((file) => file.size > maxSize);

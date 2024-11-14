@@ -109,7 +109,6 @@ export class RegistersService {
 			return await this.registerRepository.save(records);
 
 		} catch (error) {
-			console.log(error);
 			throw new BadRequestException('Error al procesar el archivo Excel: ' + error.message);
 		}
 	}
