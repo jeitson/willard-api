@@ -253,20 +253,13 @@ export class UsersService {
 			throw new BusinessException('No existe el usuario', 400);
 		}
 
-		await this.entityManager.transaction(async (manager) => {
-			const user_id = this.userContextService.getUserDetails().id;
-
-			try {
-				await this.auth0Service.updateUser(user.oauthId, {
-					password: updatedData.password,
-				});
-
-				updatedData = Object.assign(user, updatedData);
-				await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
-			} catch (error) {
-				throw new BusinessException('Error actualizando usuario en Auth0: ' + error.message, 400);
-			}
-		});
+		try {
+			await this.auth0Service.updateUser(user.oauthId, {
+				password: updatedData.password,
+			});
+		} catch (error) {
+			throw new BusinessException('Error actualizando usuario en Auth0: ' + error.message, 400);
+		}
 	}
 
 	async addCollectionSiteToUser(userId: number, collectionSiteId: number): Promise<UserCollectionSite> {

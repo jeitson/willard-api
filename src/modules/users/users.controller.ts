@@ -64,7 +64,7 @@ export class UsersController {
 	}
 
 	@Patch('password/:id')
-	@Roles(22)
+	@Roles(0)
 	@ApiOperation({ summary: 'Actualizar contraseña de usuario' })
 	async updatePassword(
 		@IdParam() id: string,
