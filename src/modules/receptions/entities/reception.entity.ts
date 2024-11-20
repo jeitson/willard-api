@@ -1,10 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, Entity, ManyToOne, OneToMany, JoinColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, JoinColumn, OneToOne } from "typeorm";
 import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
 import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 import { ReceptionDetail } from "./reception_detail.entity";
 import { ReceptionPhoto } from "./reception_photo.entity";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
+import { AuditGuia } from "src/modules/audit-guia/entities/audit-guia.entity";
 
 @Entity({ name: 'recepcion' })
 export class Reception extends CompleteEntity {
@@ -49,4 +50,6 @@ export class Reception extends CompleteEntity {
 	@OneToMany(() => ReceptionPhoto, (photo) => photo.reception)
 	receptionPhotos: ReceptionPhoto[];
 
+	@OneToOne(() => AuditGuia, (auditGuia) => auditGuia.reception)
+	auditGuia: AuditGuia;
 }

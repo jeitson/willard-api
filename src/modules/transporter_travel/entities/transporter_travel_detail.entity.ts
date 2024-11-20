@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 't
 import { CompleteEntity } from 'src/core/common/entity/common.entity';
 import { TransporterTravel } from './transporter_travel.entity';
 
-@Entity({ name: 'TransportadoraViajeProducto' })
+@Entity({ name: 'transportadora_viaje_producto' })
 export class TransporterTravelDetail extends CompleteEntity {
     @ManyToOne(() => TransporterTravel, record => record.details)
 	@JoinColumn({ name: 'TransportadoraViajeId' })

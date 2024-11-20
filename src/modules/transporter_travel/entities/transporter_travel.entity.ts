@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { CompleteEntity } from 'src/core/common/entity/common.entity';
 import { TransporterTravelDetail } from './transporter_travel_detail.entity';
 
-@Entity({ name: 'TransportadoraViaje' })
+@Entity({ name: 'transportadora_viaje' })
 export class TransporterTravel extends CompleteEntity {
     @Column({ type: 'varchar', length: 10, name: 'IdRuta' })
     routeId: string;
