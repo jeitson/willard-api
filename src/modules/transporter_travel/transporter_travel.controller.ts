@@ -1,17 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
-import { RegistersService } from './registers.service';
+import { Controller, Post, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
-import { RegisterDto } from './dto/register.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Public } from 'src/core/common/decorators/public.decorator';
+import { TransporterTravelService } from './transporter_travel.service';
+import { TransporterTravelDto } from './dto/transporter_travel.dto';
 
-@ApiTags('Negocio - Registro')
+@ApiTags('Negocio - Transportadora Viaje')
 // @UseGuards(RolesGuard)
-@Controller('registers')
-export class RegistersController {
-	constructor(private readonly registersService: RegistersService) { }
+@Controller('transporter_travel')
+export class TransporterTravelController {
+	constructor(private readonly transporterTravelService: TransporterTravelService) { }
 
 	@Post()
 	@Public()
@@ -21,12 +21,12 @@ export class RegistersController {
 		@Body() body: any
 	) {
 		if (file) {
-			return await this.registersService.createFromExcel(file);
+			return await this.transporterTravelService.createFromExcel(file);
 		}
 
 		if (body && typeof body === 'object') {
-			const jsonData = body as RegisterDto;
-			return await this.registersService.createFromJson(jsonData);
+			const jsonData = body as TransporterTravelDto;
+			return await this.transporterTravelService.createFromJson(jsonData);
 		}
 
 		throw new BusinessException('Debe proporcionar un archivo Excel o un objeto JSON válido');

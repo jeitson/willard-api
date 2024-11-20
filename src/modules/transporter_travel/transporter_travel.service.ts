@@ -4,20 +4,20 @@ import { Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
-import { Register } from './entities/register.entity';
-import { RegisterDto } from './dto/register.dto';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { excelDateToJSDate, excelTimeToJSDate } from 'src/core/utils';
+import { TransporterTravel } from './entities/transporter_travel.entity';
+import { TransporterTravelDto } from './dto/transporter_travel.dto';
 
 @Injectable()
-export class RegistersService {
+export class TransporterTravelService {
 	constructor(
-		@InjectRepository(Register)
-		private readonly registerRepository: Repository<Register>,
+		@InjectRepository(TransporterTravel)
+		private readonly transporterTravelRepository: Repository<TransporterTravel>,
 	) { }
 
-	async createFromJson(data: RegisterDto): Promise<Register[]> {
-		const travelRecordDto = plainToClass(RegisterDto, data);
+	async createFromJson(data: TransporterTravelDto): Promise<TransporterTravel[]> {
+		const travelRecordDto = plainToClass(TransporterTravelDto, data);
 
 		const errors = await validate(travelRecordDto);
 
@@ -39,15 +39,15 @@ export class RegistersService {
 		}
 
 		try {
-			const item = this.mapRowToRegisterDto(data);
-			const travelRecord = this.registerRepository.create(item);
-			return await this.registerRepository.save(travelRecord);
+			const item = this.mapRowToTransporterTravelDto(data);
+			const travelRecord = this.transporterTravelRepository.create(item);
+			return await this.transporterTravelRepository.save(travelRecord);
 		} catch (error) {
 			throw new BusinessException('Error al procesar el objeto JSON: ' + error.message);
 		}
 	}
 
-	async createFromExcel(file: any): Promise<Register[]> {
+	async createFromExcel(file: any): Promise<TransporterTravel[]> {
 		try {
 			const workbook = XLSX.read(file.buffer, { type: 'buffer' });
 
@@ -78,10 +78,10 @@ export class RegistersService {
 				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
 				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
 
-				const record = this.mapRowToRegisterDto(row);
+				const record = this.mapRowToTransporterTravelDto(row);
 
 				const details = detailsByGuide[record.idGuia] || [];
-				record.detalles = details.map(detail => this.mapRowToRegisterDto(detail));
+				record.detalles = details.map(detail => this.mapRowToTransporterTravelDto(detail));
 
 				const errors = await validate(record);
 				if (errors.length > 0) {
@@ -95,7 +95,7 @@ export class RegistersService {
 						errors: errorMessages,
 					});
 				} else {
-					records.push(this.registerRepository.create(record));
+					records.push(this.transporterTravelRepository.create(record));
 				}
 			}
 
@@ -106,7 +106,7 @@ export class RegistersService {
 				});
 			}
 
-			return await this.registerRepository.save(records);
+			return await this.transporterTravelRepository.save(records);
 
 		} catch (error) {
 			throw new BadRequestException('Error al procesar el archivo Excel: ' + error.message);
@@ -131,7 +131,7 @@ export class RegistersService {
 		return [];
 	}
 
-	private mapRowToRegisterDto(row: any): any {
+	private mapRowToTransporterTravelDto(row: any): any {
 		return {
 			routeId: row['idRuta'],
 			guideId: row['idGuia'],
@@ -159,7 +159,7 @@ export class RegistersService {
 	convertDetail(details: any): any[] {
 		return details.map((d: any) => ({
 			batteryType: d.tipoBat,
-			quantities: d.cantidades,
+			quantity: d.cantidades,
 		})) || [];
 	}
 }

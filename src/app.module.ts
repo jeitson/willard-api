@@ -25,7 +25,7 @@ import { AllExceptionsFilter } from './core/filters/any-exception.filter';
 import { DriversModule } from './modules/drivers/drivers.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ReceptionsModule } from './modules/receptions/receptions.module';
-import { RegistersModule } from './modules/registers/registers.module';
+import { TransporterTravelModule } from './modules/transporter_travel/transporter_travel.module';
 import { FilesModule } from './modules/files/files.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
 
@@ -56,7 +56,7 @@ import { ShipmentsModule } from './modules/shipments/shipments.module';
 		DriversModule,
 		NotificationsModule,
 		ReceptionsModule,
-		RegistersModule,
+		TransporterTravelModule,
 		FilesModule,
 		ShipmentsModule,
 	],

@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsOptional, IsInt, IsArray, IsDateString, ArrayMinSize, ValidateNested, MaxLength, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class RegisterDetailDto {
+export class TransporterTravelDetailDto {
 	@IsString({ message: 'El tipo de batería debe ser un texto.' })
 	@IsNotEmpty({ message: 'El campo tipoBat no puede estar vacío.' })
 	@MaxLength(10, { message: 'El campo tipoBat no debe exceder los 10 caracteres.' })
@@ -12,7 +12,7 @@ export class RegisterDetailDto {
 	cantidades: number;
 }
 
-export class RegisterDto {
+export class TransporterTravelDto {
 	@IsString({ message: 'El ID de la ruta debe ser un texto.' })
 	@IsNotEmpty({ message: 'El campo idRuta no puede estar vacío.' })
 	@MaxLength(10, { message: 'El campo idRuta no debe exceder los 10 caracteres.' })
@@ -103,6 +103,6 @@ export class RegisterDto {
 	@IsArray({ message: 'El campo detalles debe ser un arreglo.' })
 	@ArrayMinSize(1, { message: 'Debe proporcionar al menos un detalle.' })
 	@ValidateNested({ each: true, message: 'Cada detalle debe ser válido.' })
-	@Type(() => RegisterDetailDto)
-	detalles: RegisterDetailDto[];
+	@Type(() => TransporterTravelDetailDto)
+	detalles: TransporterTravelDetailDto[];
 }

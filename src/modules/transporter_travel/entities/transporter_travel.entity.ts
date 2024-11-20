@@ -1,13 +1,13 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { RegisterDetail } from './register_detail.entity';
 import { CompleteEntity } from 'src/core/common/entity/common.entity';
+import { TransporterTravelDetail } from './transporter_travel_detail.entity';
 
-@Entity({ name: 'registro' })
-export class Register extends CompleteEntity {
-    @Column({ type: 'varchar', length: 10, name: 'RutaId' })
+@Entity({ name: 'TransportadoraViaje' })
+export class TransporterTravel extends CompleteEntity {
+    @Column({ type: 'varchar', length: 10, name: 'IdRuta' })
     routeId: string;
 
-    @Column({ type: 'varchar', length: 10, name: 'GuiaId' })
+    @Column({ type: 'varchar', length: 10, name: 'IdGuia' })
     guideId: string;
 
     @Column({ type: 'varchar', name: 'Tipo' })
@@ -16,10 +16,10 @@ export class Register extends CompleteEntity {
     @Column({ type: 'int', name: 'Secuencia' })
     sequence: number;
 
-    @Column({ type: 'date', name: 'FechaMovimiento' })
+    @Column({ type: 'date', name: 'FechaMov' })
     movementDate: string;
 
-    @Column({ type: 'time', name: 'HoraMovimiento' })
+    @Column({ type: 'time', name: 'HoraMov' })
     movementTime: string;
 
     @Column({ type: 'int', name: 'Planeador' })
@@ -46,21 +46,21 @@ export class Register extends CompleteEntity {
     @Column({ type: 'varchar', length: 100, name: 'Direccion' })
     address: string;
 
-    @Column({ type: 'varchar', length: 20, name: 'GpsPosicion' })
+    @Column({ type: 'varchar', length: 20, name: 'PosGps' })
     gpsPosition: string;
 
-    @Column({ type: 'int', name: 'CantidadTotal' })
+    @Column({ type: 'int', name: 'TotCant' })
     totalQuantity: number;
 
-    @Column({ type: 'varchar', length: 50, name: 'DocReferencia1' })
+    @Column({ type: 'varchar', length: 50, name: 'DocReferencia' })
     referenceDocument: string;
 
     @Column({ type: 'varchar', length: 50, nullable: true, name: 'DocReferencia2' })
     referenceDocument2: string;
 
-    @Column({ type: 'simple-array', name: 'SoportesURL' })
+    @Column({ type: 'simple-array', name: 'UrlSoportes' })
     supportUrls: string[];
 
-    @OneToMany(() => RegisterDetail, detail => detail.travelRecord, { cascade: true })
-    details: RegisterDetail[];
+    @OneToMany(() => TransporterTravelDetail, detail => detail.travelRecord, { cascade: true })
+    details: TransporterTravelDetail[];
 }
