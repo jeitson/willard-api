@@ -3,6 +3,7 @@ import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Reception } from "src/modules/receptions/entities/reception.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import { AuditGuiaDetail } from "./audit_guia_detail.entity";
+import { AuditGuiaRoute } from "./audit_guia-ruta.entity";
 
 @Entity({ name: 'auditoria_guia' })
 export class AuditGuia extends CompleteEntity {
@@ -52,4 +53,8 @@ export class AuditGuia extends CompleteEntity {
 
 	@OneToMany(() => AuditGuiaDetail, (auditGuiaDetail) => auditGuiaDetail.auditGuia)
 	auditGuiaDetails: AuditGuiaDetail[];
+
+	@ApiProperty({ description: 'Auditorias Guias' })
+	@OneToMany(() => AuditGuiaRoute, auditGuiaRoute => auditGuiaRoute.auditGuia)
+	auditsGuiasRoutes: AuditGuiaRoute[];
 }
