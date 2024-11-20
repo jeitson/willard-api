@@ -28,6 +28,7 @@ import { ReceptionsModule } from './modules/receptions/receptions.module';
 import { TransporterTravelModule } from './modules/transporter_travel/transporter_travel.module';
 import { FilesModule } from './modules/files/files.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
+import { AuditGuiaModule } from './modules/audit-guia/audit-guia.module';
 
 @Module({
 	imports: [
@@ -59,6 +60,7 @@ import { ShipmentsModule } from './modules/shipments/shipments.module';
 		TransporterTravelModule,
 		FilesModule,
 		ShipmentsModule,
+		AuditGuiaModule,
 	],
 	controllers: [],
 	providers: [
