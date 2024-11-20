@@ -66,6 +66,11 @@ export class UserDto {
 	@IsInt({ each: true })
 	@IsOptional()
 	collectionSites?: number[] = [];
+
+	@ApiProperty({ description: 'Zonas', type: [Number] })
+	@IsInt({ each: true })
+	@IsOptional()
+	zones?: number[] = [];
 }
 
 export class UserOAuthDto {

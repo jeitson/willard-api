@@ -13,6 +13,8 @@ import { UserContextService } from './user-context.service';
 import { Auth0Service } from './auth0.service';
 import { UserCollectionSite } from './entities/user-collection_site.entity';
 import { CollectionSite } from '../collection_sites/entities/collection_site.entity';
+import { UserZone } from './entities/user-zone.entity';
+import { Child } from '../catalogs/entities/child.entity';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +30,10 @@ export class UsersService {
 		private readonly collectionSitesRepository: Repository<CollectionSite>,
 		@InjectRepository(UserCollectionSite)
 		private readonly userCollectionSiteRepository: Repository<UserCollectionSite>,
+		@InjectRepository(UserZone)
+		private readonly userZoneRepository: Repository<UserZone>,
+		@InjectRepository(Child)
+		private readonly childrensRepository: Repository<Child>,
 		private userContextService: UserContextService,
 		private auth0Service: Auth0Service
 	) { }
@@ -87,6 +93,7 @@ export class UsersService {
 		email,
 		roles,
 		collectionSites,
+		zones,
 		...data
 	}: UserDto): Promise<void> {
 		const exists = await this.userRepository.findOneBy({ email });
@@ -155,6 +162,20 @@ export class UsersService {
 					}
 				}
 
+				if (zones && zones.length > 0) {
+					const _zones = await this.childrensRepository.find({ where: { id: In(zones), catalogCode: 'ZONA' }});
+
+					for (const { id: zone } of _zones) {
+						const userZone = manager.create(UserZone, {
+							user,
+							zone,
+							createdBy: user_id,
+							modifiedBy: user_id,
+						});
+						await manager.save(userZone);
+					}
+				}
+
 			} catch (error) {
 				throw new BusinessException('Error en la creación del usuario' + error.message, 400);
 			}
@@ -181,7 +202,7 @@ export class UsersService {
 		}
 
 		await this.entityManager.transaction(async (manager) => {
-			let { roles, collectionSites, password, ...updatedData } = data;
+			let { roles, collectionSites, password, zones, ...updatedData } = data;
 			const user_id = this.userContextService.getUserDetails().id;
 
 			let complete = {}
@@ -237,6 +258,22 @@ export class UsersService {
 							modifiedBy: user_id,
 						});
 						await manager.save(userCollectionSite);
+					}
+				}
+
+				if (zones && zones.length > 0) {
+					await manager.delete(UserZone, { user: { id: +id } });
+
+					const _zones = await this.childrensRepository.find({ where: { id: In(zones), catalogCode: 'ZONA' } });
+
+					for (const { id: zone } of _zones) {
+						const userZone = manager.create(UserZone, {
+							user,
+							zone,
+							createdBy: user_id,
+							modifiedBy: user_id,
+						});
+						await manager.save(userZone);
 					}
 				}
 
