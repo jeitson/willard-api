@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuditGuiaService } from './audit-guia.service';
-import { CreateAuditGuiaDto } from './dto/create-audit-guia.dto';
-import { UpdateAuditGuiaDto } from './dto/update-audit-guia.dto';
+import { AuditGuiaService } from './audit_guia.service';
+import { CreateAuditGuiaDto } from './dto/create-audit_guia.dto';
+import { UpdateAuditGuiaDto } from './dto/update-audit_guia.dto';
 
-@Controller('audit-guia')
+@Controller('audit_guia')
 export class AuditGuiaController {
   constructor(private readonly auditGuiaService: AuditGuiaService) {}
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuditGuiaDto } from './dto/create-audit-guia.dto';
-import { UpdateAuditGuiaDto } from './dto/update-audit-guia.dto';
+import { CreateAuditGuiaDto } from './dto/create-audit_guia.dto';
+import { UpdateAuditGuiaDto } from './dto/update-audit_guia.dto';
 
 @Injectable()
 export class AuditGuiaService {

@@ -28,7 +28,7 @@ import { ReceptionsModule } from './modules/receptions/receptions.module';
 import { TransporterTravelModule } from './modules/transporter_travel/transporter_travel.module';
 import { FilesModule } from './modules/files/files.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
-import { AuditGuiaModule } from './modules/audit-guia/audit-guia.module';
+import { AuditGuiaModule } from './modules/audit_guia/audit_guia.module';
 
 @Module({
 	imports: [

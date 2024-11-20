@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Reception } from "src/modules/receptions/entities/reception.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
-import { AuditGuiaDetail } from "./audit-guia_detail.entity";
+import { AuditGuiaDetail } from "./audit_guia_detail.entity";
 
 @Entity({ name: 'auditoria_guia' })
 export class AuditGuia extends CompleteEntity {

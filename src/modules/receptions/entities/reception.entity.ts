@@ -5,7 +5,7 @@ import { Transporter } from "src/modules/transporters/entities/transporter.entit
 import { ReceptionDetail } from "./reception_detail.entity";
 import { ReceptionPhoto } from "./reception_photo.entity";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { AuditGuia } from "src/modules/audit-guia/entities/audit-guia.entity";
+import { AuditGuia } from "src/modules/audit_guia/entities/audit_guia.entity";
 
 @Entity({ name: 'recepcion' })
 export class Reception extends CompleteEntity {
