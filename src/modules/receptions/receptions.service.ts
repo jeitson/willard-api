@@ -38,7 +38,7 @@ export class ReceptionsService {
 	) { }
 
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
-		const { collectionSites, id: user_id } = this.userContextService.getUserDetails();
+		const { collectionSites, id: user_id, roles } = this.userContextService.getUserDetails();
 
 		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites.map(({ collectionSiteId }) => collectionSiteId)) });
 
@@ -75,6 +75,10 @@ export class ReceptionsService {
 
 			if (createReceptionDto.photos) {
 				await this.saveReceptionPhotos(savedReception, (createReceptionDto.photos as any[]).map(url => ({ url })));
+			}
+
+			if (roles.includes('20')) {
+				// creación de la auditoria de la guia
 			}
 
 		} catch (error) {
