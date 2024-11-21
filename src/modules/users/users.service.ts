@@ -50,6 +50,8 @@ export class UsersService {
 			.leftJoinAndSelect('userRol.role', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
+			.leftJoinAndSelect('user.zones', 'zones')
+			.leftJoinAndSelect('zones.zone', 'zone')
 			.where('1=1')
 
 		if (name) {
@@ -74,6 +76,8 @@ export class UsersService {
 			.leftJoinAndSelect('userRol.role', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
+			.leftJoinAndSelect('user.zones', 'zones')
+			.leftJoinAndSelect('zones.zone', 'zone')
 			.where('user.id = :id', { id })
 			.getOne();
 	}
