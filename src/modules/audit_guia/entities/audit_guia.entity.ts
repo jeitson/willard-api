@@ -21,23 +21,23 @@ export class AuditGuia extends CompleteEntity {
 
 	@ApiProperty({ description: 'Zona ID' })
 	@Column({ type: 'bigint', name: 'ZonaId' })
-	zoneId: string;
+	zoneId: number;
 
 	@ApiProperty({ description: 'Recuperadora ID' })
 	@Column({ type: 'bigint', name: 'RecuperadoraId' })
-	recuperatorId: string;
+	recuperatorId: number;
 
 	@ApiProperty({ description: 'Transportadora ID' })
 	@Column({ type: 'bigint', name: 'TransportadoraId' })
-	transporterId: string;
+	transporterId: number;
 
 	@ApiProperty({ description: 'Recuperadora Total' })
 	@Column({ type: 'int', name: 'RecuperadoraTotal' })
-	recuperatorTotal: string;
+	recuperatorTotal: number;
 
 	@ApiProperty({ description: 'Transportadora Total' })
 	@Column({ type: 'int', name: 'TransportadoraTotal' })
-	transporterTotal: string;
+	transporterTotal: number;
 
 	@ApiProperty({ description: 'Estado de la auditoria' })
 	@Column({ type: 'bigint', name: 'EstadoAuditoriaId' })

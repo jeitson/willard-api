@@ -15,7 +15,7 @@ export class ReceptionsController {
 	constructor(private readonly receptionsService: ReceptionsService) { }
 
 	@Post()
-	@Roles(0)
+	@Roles(18, 20)
 	@ApiOperation({ summary: 'Creación' })
 	create(@Body() createDto: ReceptionDto): Promise<Reception> {
 		return this.receptionsService.create(createDto);

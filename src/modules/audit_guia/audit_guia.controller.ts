@@ -1,34 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { AuditGuiaService } from './audit_guia.service';
-import { CreateAuditGuiaDto } from './dto/create-audit_guia.dto';
-import { UpdateAuditGuiaDto } from './dto/update-audit_guia.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/core/guards/roles.guard';
+import { Roles } from 'src/core/common/decorators/role.decorator';
+import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
+import { AuditGuia } from './entities/audit_guia.entity';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
+@ApiTags('Negocio - Auditoria de Guias')
 @Controller('audit_guia')
+@UseGuards(RolesGuard)
 export class AuditGuiaController {
-  constructor(private readonly auditGuiaService: AuditGuiaService) {}
+	constructor(private readonly auditGuiaService: AuditGuiaService) { }
 
-  @Post()
-  create(@Body() createAuditGuiaDto: CreateAuditGuiaDto) {
-    return this.auditGuiaService.create(createAuditGuiaDto);
-  }
+	@Get()
+	@Roles(13, 14, 15, 16, 18)
+	@ApiOperation({ summary: 'Listado de auditoria de guias' })
+	@ApiResult({ type: [AuditGuia] })
+	async findAll(@Query() query: any): Promise<AuditGuia[]> {
+		return this.auditGuiaService.findAll();
+	}
 
-  @Get()
-  findAll() {
-    return this.auditGuiaService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.auditGuiaService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuditGuiaDto: UpdateAuditGuiaDto) {
-    return this.auditGuiaService.update(+id, updateAuditGuiaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.auditGuiaService.remove(+id);
-  }
+	@Get(':id')
+	@Roles(0)
+	@ApiOperation({ summary: 'Obtener auditoria por ID' })
+	@ApiResult({ type: AuditGuia })
+	async findOne(@IdParam('id') id: string): Promise<AuditGuia> {
+		return this.auditGuiaService.findOne(id);
+	}
 }
