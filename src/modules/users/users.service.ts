@@ -76,8 +76,8 @@ export class UsersService {
 			.leftJoinAndSelect('userRol.role', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
-			.leftJoinAndSelect('user.zones', 'zones')
-			.leftJoinAndSelect('zones.zone', 'zone')
+			.leftJoinAndSelect('user.zones', 'userZones')
+			.leftJoinAndMapOne('userZones.zone', Child, 'child', 'child.id = userZones.zoneId')
 			.where('user.id = :id', { id })
 			.getOne();
 	}

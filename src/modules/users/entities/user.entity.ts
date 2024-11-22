@@ -6,6 +6,7 @@ import { Expose } from 'class-transformer';
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { UserCollectionSite } from "./user-collection_site.entity";
+import { UserZone } from "./user-zone.entity";
 
 @Entity({ name: 'usuario' })
 export class User extends CompleteEntity {
@@ -41,9 +42,13 @@ export class User extends CompleteEntity {
 	@OneToMany(() => UserRole, userRole => userRole.user)
 	roles: UserRole[];
 
-	@ApiProperty({ description: 'roles' })
+	@ApiProperty({ description: 'collections_sites' })
 	@OneToMany(() => UserCollectionSite, userCollectionSite => userCollectionSite.user)
 	collectionSites: UserCollectionSite[];
+
+	@ApiProperty({ description: 'zones' })
+	@OneToMany(() => UserZone, userZone => userZone.user)
+	zones: UserZone[];
 
 	@OneToMany(() => PickUpLocation, (pickUpLocation) => pickUpLocation.user)
 	pickUpLocations: PickUpLocation[];
