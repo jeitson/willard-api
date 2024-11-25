@@ -61,7 +61,7 @@ export class AuditGuiaService {
 			let transporterTravel;
 			const _transporterTravel = await this.transporterTravelRepository.findOneBy({ guideId: createAuditGuiaDto.guideNumber })
 			if (_transporterTravel) {
-				transporterTravel = _transporterTravel as any;
+				transporterTravel = _transporterTravel;
 				requestStatusId = 2;
 			}
 

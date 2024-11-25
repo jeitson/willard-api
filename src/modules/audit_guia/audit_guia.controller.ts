@@ -14,7 +14,7 @@ export class AuditGuiaController {
 	constructor(private readonly auditGuiaService: AuditGuiaService) { }
 
 	@Get()
-	@Roles(13, 14, 15, 16, 18)
+	@Roles(19)
 	@ApiOperation({ summary: 'Listado de auditoria de guias' })
 	@ApiResult({ type: [AuditGuia] })
 	async findAll(@Query() query: any): Promise<AuditGuia[]> {
@@ -22,7 +22,7 @@ export class AuditGuiaController {
 	}
 
 	@Get(':id')
-	@Roles(0)
+	@Roles(19)
 	@ApiOperation({ summary: 'Obtener auditoria por ID' })
 	@ApiResult({ type: AuditGuia })
 	async findOne(@IdParam('id') id: string): Promise<AuditGuia> {
