@@ -2,6 +2,7 @@ import { ApiProperty, IntersectionType, PartialType } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsOptional, IsString, IsInt, MaxLength, Matches, Min, Max, ValidateNested, maxLength } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
+import { Product } from "src/modules/products/entities/product.entity";
 
 export class ReceptionDetailDto {
 	@ApiProperty({ description: 'ID del producto' })
@@ -15,6 +16,8 @@ export class ReceptionDetailDto {
 	@Min(1, { message: 'La cantidad mínima es 1.' })
 	@Max(10000, { message: 'La cantidad máxima es 10,000.' })
 	quantity: number;
+
+	product?: Product;
 }
 
 export class ReceptionPhotoDto {

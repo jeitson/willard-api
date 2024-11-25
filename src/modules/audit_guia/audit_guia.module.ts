@@ -7,11 +7,12 @@ import { AuditGuiaDetail } from './entities/audit_guia_detail.entity';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { ProductsModule } from '../products/products.module';
 import { UsersModule } from '../users/users.module';
+import { TransporterTravelModule } from '../transporter_travel/transporter_travel.module';
 
 const providers = [AuditGuiaService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([AuditGuia, AuditGuiaDetail, AuditGuiaRoute]), ProductsModule, UsersModule],
+	imports: [TypeOrmModule.forFeature([AuditGuia, AuditGuiaDetail, AuditGuiaRoute]), ProductsModule, UsersModule, TransporterTravelModule],
 	controllers: [AuditGuiaController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

@@ -2,6 +2,7 @@ import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested } from 'class-validator';
 import { PagerDto } from 'src/core/common/dto/pager.dto';
+import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
 
 export class AuditGuiaDetailCreateDto {
 	@ApiProperty({ description: 'ID de producto' })
@@ -50,20 +51,6 @@ export class AuditGuiaCreateDto {
 	@ApiProperty({ description: 'Total Transportadora' })
 	@IsInt({ message: 'El total de la transportadora debe ser un número entero' })
 	transporterTotal: number;
-
-	@ApiProperty({ description: 'Estado de la auditoría' })
-	@IsInt({ message: 'El ID del estado de la auditoría debe ser un número entero' })
-	requestStatusId: number;
-
-	@ApiProperty({ description: 'A Favor Recuperadora', required: false })
-	@IsOptional()
-	@IsBoolean({ message: 'El campo "A Favor Recuperadora" debe ser un valor booleano' })
-	inFavorRecuperator?: boolean;
-
-	@ApiProperty({ description: 'Comentario de la auditoría', required: false })
-	@IsOptional()
-	@IsString({ message: 'El comentario debe ser una cadena de caracteres' })
-	comment?: string;
 
 	@ApiProperty({ type: [AuditGuiaDetailCreateDto], description: 'Detalles de la auditoría' })
 	@IsArray({ message: 'El campo "auditGuiaDetails" debe ser un arreglo de detalles' })

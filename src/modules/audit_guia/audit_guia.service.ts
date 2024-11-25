@@ -7,6 +7,8 @@ import { AuditGuiaDetail } from './entities/audit_guia_detail.entity';
 import { Product } from 'src/modules/products/entities/product.entity';
 import { UserContextService } from '../users/user-context.service';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { AuditGuiaRoute } from './entities/audit_guia-ruta.entity';
+import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 
 @Injectable()
 export class AuditGuiaService {
@@ -20,7 +22,13 @@ export class AuditGuiaService {
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
 
-		private readonly userContextService: UserContextService
+		private readonly userContextService: UserContextService,
+
+		@InjectRepository(AuditGuiaRoute)
+		private readonly auditGuiaRouteRepository: Repository<AuditGuiaRoute>,
+
+		@InjectRepository(TransporterTravel)
+		private readonly transporterTravelRepository: Repository<TransporterTravel>,
 	) { }
 
 	private createBaseQueryBuilder() {
@@ -47,11 +55,23 @@ export class AuditGuiaService {
 		await queryRunner.startTransaction();
 
 		try {
+			// TODO: Actualizar a los ids correctos
+			let requestStatusId = 1;
+
+			let transporterTravel;
+			const _transporterTravel = await this.transporterTravelRepository.findOneBy({ guideId: createAuditGuiaDto.guideNumber })
+			if (_transporterTravel) {
+				transporterTravel = _transporterTravel as any;
+				requestStatusId = 2;
+			}
+
 			const auditGuia = this.auditGuiaRepository.create({
 				...auditGuiaData,
+				requestStatusId,
 				createdBy: user_id,
 				modifiedBy: user_id,
 			});
+
 			await queryRunner.manager.save(auditGuia);
 
 			for (const detail of auditGuiaDetails) {
@@ -77,6 +97,10 @@ export class AuditGuiaService {
 			await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
 
 			await queryRunner.commitTransaction();
+
+			if (_transporterTravel) {
+				await this.auditGuiaRouteRepository.save({ auditGuia, transporterTravel: _transporterTravel, createdBy: user_id, updatedBy: user_id });
+			}
 
 			return this.auditGuiaRepository.findOne({
 				where: { id: auditGuia.id },
