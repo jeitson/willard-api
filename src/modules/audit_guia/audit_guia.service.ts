@@ -99,7 +99,7 @@ export class AuditGuiaService {
 
 			if (_transporterTravel) {
 				await this.auditGuiaRouteRepository.save({
-					auditGuia,
+					auditGuia: auditGuiaSave,
 					transporterTravel: _transporterTravel,
 					createdBy: user_id,
 					updatedBy: user_id,
