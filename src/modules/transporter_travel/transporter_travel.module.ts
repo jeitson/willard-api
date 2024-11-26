@@ -5,11 +5,12 @@ import { TransporterTravelService } from './transporter_travel.service';
 import { TransporterTravel } from './entities/transporter_travel.entity';
 import { TransporterTravelDetail } from './entities/transporter_travel_detail.entity';
 import { TransporterTravelController } from './transporter_travel.controller';
+import { ProductsModule } from '../products/products.module';
 
 const providers = [TransporterTravelService];
 
 @Module({
-	imports: [TypeOrmModule.forFeature([TransporterTravel, TransporterTravelDetail]), UsersModule],
+	imports: [TypeOrmModule.forFeature([TransporterTravel, TransporterTravelDetail]), UsersModule, ProductsModule],
 	controllers: [TransporterTravelController],
 	providers,
 	exports: [TypeOrmModule, ...providers],
