@@ -48,7 +48,6 @@ export class AuditGuiaService {
 
 	async create(createAuditGuiaDto: AuditGuiaCreateDto): Promise<AuditGuia> {
 		const { id: user_id } = this.userContextService.getUserDetails();
-
 		const { auditGuiaDetails, ...auditGuiaData } = createAuditGuiaDto;
 
 		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
@@ -59,7 +58,7 @@ export class AuditGuiaService {
 			let requestStatusId = 1;
 
 			let transporterTravel;
-			const _transporterTravel = await this.transporterTravelRepository.findOneBy({ guideId: createAuditGuiaDto.guideNumber })
+			const _transporterTravel = await this.transporterTravelRepository.findOneBy({ guideId: createAuditGuiaDto.guideNumber });
 			if (_transporterTravel) {
 				transporterTravel = _transporterTravel;
 				requestStatusId = 2;
@@ -72,8 +71,9 @@ export class AuditGuiaService {
 				modifiedBy: user_id,
 			});
 
-			await queryRunner.manager.save(auditGuia);
+			const auditGuiaSave = await queryRunner.manager.save(auditGuia);
 
+			const detailsToSave = [];
 			for (const detail of auditGuiaDetails) {
 				const product = await this.productRepository.findOneBy({ id: detail.productId });
 				if (!product) {
@@ -83,28 +83,32 @@ export class AuditGuiaService {
 				if (detail.quantity <= 0 || detail.quantityCollection < 0) {
 					throw new BusinessException('La cantidad y la cantidad corregida deben ser números positivos.', 400);
 				}
-			}
 
-			const detailsToSave = auditGuiaDetails.map(detail => {
 				const auditGuiaDetail = this.auditGuiaDetailRepository.create({
 					...detail,
-					auditGuia: auditGuia,
+					product,
+					auditGuia: auditGuiaSave,
 				});
 
-				return auditGuiaDetail;
-			});
+				detailsToSave.push(auditGuiaDetail);
+			}
 
 			await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
 
 			await queryRunner.commitTransaction();
 
 			if (_transporterTravel) {
-				await this.auditGuiaRouteRepository.save({ auditGuia, transporterTravel: _transporterTravel, createdBy: user_id, updatedBy: user_id });
+				await this.auditGuiaRouteRepository.save({
+					auditGuia,
+					transporterTravel: _transporterTravel,
+					createdBy: user_id,
+					updatedBy: user_id,
+				});
 			}
 
 			return this.auditGuiaRepository.findOne({
 				where: { id: auditGuia.id },
-				relations: ['auditGuiaDetails', 'auditsGuiasRoutes'],
+				relations: ['auditGuiaDetails', 'auditGuiaDetails.product', 'auditsGuiasRoutes'],
 			});
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
@@ -113,6 +117,7 @@ export class AuditGuiaService {
 			await queryRunner.release();
 		}
 	}
+
 
 	async findOne(id: string): Promise<AuditGuia> {
 		return this.auditGuiaRepository.findOne({
