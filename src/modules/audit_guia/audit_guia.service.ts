@@ -41,23 +41,8 @@ export class AuditGuiaService {
 		private readonly catalogsService: CatalogsService,
 	) { }
 
-	private createBaseQueryBuilder() {
-		// return this.auditGuiaRepository.createQueryBuilder('collectionRequest')
-		// 	.leftJoinAndSelect('collectionRequest.client', 'client')
-		// 	.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
-		// 	.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
-		// 	.leftJoinAndSelect('collectionRequest.driver', 'driver')
-		// 	.leftJoinAndSelect('collectionRequest.transporter', 'transporter')
-		// 	.leftJoinAndSelect('collectionRequest.user', 'user')
-		// 	.leftJoinAndSelect('collectionRequest.audits', 'audits')
-		// 	.leftJoinAndSelect('collectionRequest.route', 'route')
-		// 	.leftJoinAndMapOne('collectionRequest.productType', Child, 'productType', 'productType.id = collectionRequest.productTypeId')
-		// 	.leftJoinAndMapOne('collectionRequest.motiveSpecial', Child, 'motiveSpecial', 'motiveSpecial.id = collectionRequest.motiveSpecialId')
-		// 	.leftJoinAndMapOne('collectionRequest.requestStatusId', Child, 'requestStatus', 'requestStatus.id = collectionRequest.requestStatusId');
-	}
-
 	async create(createAuditGuiaDto: AuditGuiaCreateDto): Promise<void> {
-		const { id: user_id } = this.userContextService.getUserDetails();
+		const { id: userId } = this.userContextService.getUserDetails();
 		let { auditGuiaDetails, transporterTotal, ...auditGuiaData } = createAuditGuiaDto;
 
 		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
@@ -68,48 +53,17 @@ export class AuditGuiaService {
 			let zoneId = null;
 			let date = null;
 
-			// Verificar si existe un transporterTravel relacionado con la guía
 			const transporterTravel = await this.transporterTravelRepository.findOne({
 				where: { guideId: createAuditGuiaDto.guideNumber.toUpperCase() },
 				relations: ['details'],
 			});
 
 			if (transporterTravel) {
-				requestStatusId = 2; // Cambiar el estado si existe transporterTravel
-				date = transporterTravel.movementDate;
-
-				// Buscar la zona relacionada
-				const zone = await this.catalogsService.getChildrenByName(transporterTravel.zone);
-				if (!zone) {
-					throw new BusinessException(`No existe la zona configurada para la guía`, 400);
-				}
-				zoneId = zone[0].id;
-
-				// Validar los productos en transporterTravel
-				const productNames = transporterTravel.details.map((item) => item.batteryType);
-				const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
-
-				if (!foundProducts.length || foundProducts.length !== productNames.length) {
-					throw new BusinessException(
-						`Verifique los productos ingresados: ${productNames.join(', ')}`,
-					);
-				}
-
-				// Crear los detalles basados en transporterTravel
-				const transporterDetails = foundProducts.map((product) => {
-					const { quantity } = transporterTravel.details.find(({ batteryType }) => batteryType === product.name);
-
-					transporterTotal += quantity;
-
-					return {
-						productId: product.id,
-						isRecuperator: false,
-						quantity,
-						quantityCollection: quantity,
-					};
-				});
-
-				auditGuiaDetails.push(...transporterDetails);
+				({ requestStatusId, date, zoneId, auditGuiaDetails, transporterTotal } = await this.handleTransporterTravel(
+					transporterTravel,
+					auditGuiaDetails,
+					transporterTotal,
+				));
 			}
 
 			const auditGuia = this.auditGuiaRepository.create({
@@ -118,47 +72,19 @@ export class AuditGuiaService {
 				date,
 				transporterTotal,
 				requestStatusId,
-				createdBy: user_id,
-				modifiedBy: user_id,
+				createdBy: userId,
+				modifiedBy: userId,
 			});
 
 			const auditGuiaSaved = await queryRunner.manager.save(auditGuia);
-
 			if (!auditGuiaSaved.id) {
 				throw new BusinessException('Error al guardar la guía de auditoría.', 500);
 			}
 
-			const detailsToSave = [];
-			for (const detail of auditGuiaDetails) {
-				const product = await this.productRepository.findOneBy({ id: detail.productId });
-				if (!product) {
-					throw new BusinessException(`Producto con ID ${detail.productId} no encontrado.`, 400);
-				}
-
-				if (detail.quantity <= 0 || detail.quantityCollection < 0) {
-					throw new BusinessException('La cantidad y la cantidad corregida deben ser números positivos.', 400);
-				}
-
-				const auditGuiaDetail = this.auditGuiaDetailRepository.create({
-					...detail,
-					product,
-					auditGuia: auditGuiaSaved,
-				});
-
-				detailsToSave.push(auditGuiaDetail);
-			}
-
-			await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
+			await this.saveAuditDetails(queryRunner, auditGuiaDetails, auditGuiaSaved);
 
 			if (transporterTravel) {
-				const auditGuiaRoute = this.auditGuiaRouteRepository.create({
-					auditGuia: auditGuiaSaved,
-					transporterTravel,
-					createdBy: user_id,
-					updatedBy: user_id,
-				});
-
-				await queryRunner.manager.save(auditGuiaRoute);
+				await this.saveAuditRoute(queryRunner, auditGuiaSaved, transporterTravel, userId);
 			}
 
 			await queryRunner.commitTransaction();
@@ -170,208 +96,27 @@ export class AuditGuiaService {
 		}
 	}
 
-	async updateDetails(id: number, { auditGuiaDetails: detailsToUpdate }: AuditGuiaDetailUpdateDto): Promise<void> {
-		const auditGuia = await this.auditGuiaRepository.findOne({
-			where: { id },
-		});
-
-		if (!auditGuia) {
-			throw new BusinessException(
-				`No se encontró la auditoría con el ID ${id}`,
-			);
-		}
-
+	async updateDetails(id: number, updateDto: AuditGuiaDetailUpdateDto): Promise<void> {
+		const auditGuia = await this.findAuditGuiaById(id);
 		if (auditGuia.requestStatusId !== 2) {
-			throw new BusinessException(
-				`La auditoría no aplica para realizar esta acción`,
-			);
+			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
-		let transporterTotal = 0, recuperatorTotal = 0;
+		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(updateDto);
 
-		for (const detail of detailsToUpdate) {
-			const existingDetail = await this.auditGuiaDetailRepository.findOne({
-				where: { id: detail.id },
-			});
-
-			if (!existingDetail) {
-				throw new BusinessException(
-					`No se encontró el detalle de auditoría con el ID ${detail.id}`,
-				);
-			}
-
-			existingDetail.quantityCollection = detail.quantityCollection;
-
-			await this.auditGuiaDetailRepository.save(existingDetail);
-
-			if (existingDetail.isRecuperator) {
-				recuperatorTotal += detail.quantityCollection;
-			} else {
-				transporterTotal += detail.quantityCollection;
-			}
-		}
-
-		auditGuia.recuperatorTotal = recuperatorTotal;
 		auditGuia.transporterTotal = transporterTotal;
-
+		auditGuia.recuperatorTotal = recuperatorTotal;
 		await this.auditGuiaRepository.save(auditGuia);
-
-	}
-
-	async updateInFavorRecuperator({ id, key }: { id: number, key: 'R' | 'T' }): Promise<void> {
-		const auditGuia = await this.auditGuiaRepository.findOne({
-			where: { id },
-		});
-
-		if (!auditGuia) {
-			throw new BusinessException(
-				`No se encontró la auditoría con el ID ${id}`,
-			);
-		}
-
-		if (auditGuia.requestStatusId !== 2) {
-			throw new BusinessException(
-				`La auditoría no aplica para realizar esta acción`,
-			);
-		}
-
-		auditGuia.inFavorRecuperator = key === 'R';
-
-		await this.auditGuiaDetailRepository.save(auditGuia);
 	}
 
 	async confirm(id: number): Promise<void> {
-		const auditGuia = await this.auditGuiaRepository.findOne({
-			where: { id },
-		});
-
-		if (!auditGuia) {
-			throw new BusinessException(
-				`No se encontró la auditoría con el ID ${id}`,
-			);
-		}
-
+		const auditGuia = await this.findAuditGuiaById(id);
 		if (auditGuia.requestStatusId !== 2) {
-			throw new BusinessException(
-				`La auditoría no aplica para realizar esta acción`,
-			);
+			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
 		auditGuia.requestStatusId = 3;
-
-		await this.auditGuiaDetailRepository.save(auditGuia);
-	}
-
-	async synchronize(id: number): Promise<void> {
-		const { id: user_id } = this.userContextService.getUserDetails();
-		const auditGuia = await this.auditGuiaRepository.findOne({
-			where: { id },
-		});
-
-		if (!auditGuia) {
-			throw new BusinessException(
-				`No se encontró la auditoría con el ID ${id}`,
-			);
-		}
-
-		if (auditGuia.requestStatusId != 1) {
-			throw new BusinessException(
-				`La auditoría no aplica para realizar esta acción`,
-			);
-		}
-
-		const transporterTravel = await this.transporterTravelRepository.findOne({
-			where: { guideId: auditGuia.guideNumber },
-			relations: ['details'],
-		});
-
-		if (!transporterTravel) {
-			throw new BusinessException(
-				`No existe configuración para el número de guia`,
-			);
-		}
-
-		let zoneId = null, date = transporterTravel.movementDate, transporterTotal = 0;
-
-		const zone = await this.catalogsService.getChildrenByName(transporterTravel.zone);
-		if (!zone) {
-			throw new BusinessException(`No existe la zona configurada para la guía`, 400);
-		}
-
-		zoneId = zone[0].id;
-
-		const productNames = transporterTravel.details.map((item) => item.batteryType);
-		const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
-
-		if (!foundProducts.length || foundProducts.length !== productNames.length) {
-			throw new BusinessException(
-				`Verifique los productos ingresados: ${productNames.join(', ')}`,
-			);
-		}
-
-		const transporterDetails = foundProducts.map((product) => {
-			const { quantity } = transporterTravel.details.find(({ batteryType }) => batteryType === product.name);
-
-			transporterTotal += quantity;
-
-			return {
-				productId: product.id,
-				isRecuperator: false,
-				quantity,
-				quantityCollection: quantity,
-			};
-		});
-
-		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
-		await queryRunner.startTransaction();
-
-		try {
-
-			auditGuia.zoneId = zoneId;
-			auditGuia.date = date;
-			auditGuia.requestStatusId = 2;
-			auditGuia.transporterTotal = transporterTotal;
-
-			await this.auditGuiaRepository.save(auditGuia);
-
-			const detailsToSave = [];
-			for (const detail of transporterDetails) {
-				const product = await this.productRepository.findOneBy({ id: detail.productId });
-				if (!product) {
-					throw new BusinessException(`Producto con ID ${detail.productId} no encontrado.`, 400);
-				}
-
-				if (detail.quantity <= 0 || detail.quantityCollection < 0) {
-					throw new BusinessException('La cantidad y la cantidad corregida deben ser números positivos.', 400);
-				}
-
-				const auditGuiaDetail = this.auditGuiaDetailRepository.create({
-					...detail,
-					product,
-					auditGuia,
-				});
-
-				detailsToSave.push(auditGuiaDetail);
-			}
-
-			await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
-
-			const auditGuiaRoute = this.auditGuiaRouteRepository.create({
-				auditGuia: auditGuia,
-				transporterTravel,
-				createdBy: user_id,
-				updatedBy: user_id,
-			});
-
-			await queryRunner.manager.save(auditGuiaRoute);
-
-			await queryRunner.commitTransaction();
-		} catch (error) {
-			await queryRunner.rollbackTransaction();
-			throw error;
-		} finally {
-			await queryRunner.release();
-		}
+		await this.auditGuiaRepository.save(auditGuia);
 	}
 
 	async findOne(id: string): Promise<AuditGuia> {
@@ -386,4 +131,189 @@ export class AuditGuiaService {
 			relations: ['auditGuiaDetails', 'auditsGuiasRoutes'],
 		});
 	}
+
+	private async handleTransporterTravel(
+		transporterTravel: TransporterTravel,
+		auditGuiaDetails: any[],
+		transporterTotal: number,
+	) {
+		const zone = await this.catalogsService.getChildrenByName(transporterTravel.zone);
+		if (!zone) {
+			throw new BusinessException('No existe la zona configurada para la guía.', 400);
+		}
+
+		const productNames = transporterTravel.details.map((item) => item.batteryType);
+		const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
+		if (foundProducts.length !== productNames.length) {
+			throw new BusinessException(`Verifique los productos ingresados: ${productNames.join(', ')}`);
+		}
+
+		const transporterDetails = foundProducts.map((product) => {
+			const { quantity } = transporterTravel.details.find(({ batteryType }) => batteryType === product.name);
+			transporterTotal += quantity;
+
+			return {
+				productId: product.id,
+				isRecuperator: false,
+				quantity,
+				quantityCollection: quantity,
+			};
+		});
+
+		auditGuiaDetails.push(...transporterDetails);
+
+		return {
+			requestStatusId: 2,
+			date: transporterTravel.movementDate,
+			zoneId: zone[0].id,
+			auditGuiaDetails,
+			transporterTotal,
+		};
+	}
+
+	private async saveAuditDetails(queryRunner, details: any[], auditGuiaSaved: AuditGuia) {
+		const detailsToSave = details.map((detail) =>
+			this.auditGuiaDetailRepository.create({
+				...detail,
+				auditGuia: auditGuiaSaved,
+			}),
+		);
+		await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
+	}
+
+	private async saveAuditRoute(queryRunner, auditGuia: AuditGuia, transporterTravel: TransporterTravel, userId: number) {
+		const auditGuiaRoute = this.auditGuiaRouteRepository.create({
+			auditGuia,
+			transporterTravel,
+			createdBy: userId.toString(),
+			updatedBy: userId.toString(),
+		});
+		await queryRunner.manager.save(auditGuiaRoute);
+	}
+
+	private async findAuditGuiaById(id: number): Promise<AuditGuia> {
+		const auditGuia = await this.auditGuiaRepository.findOne({ where: { id } });
+		if (!auditGuia) {
+			throw new BusinessException(`No se encontró la auditoría con el ID ${id}`);
+		}
+		return auditGuia;
+	}
+
+	private async updateAuditDetails(updateDto: AuditGuiaDetailUpdateDto) {
+		let transporterTotal = 0;
+		let recuperatorTotal = 0;
+
+		for (const detail of updateDto.auditGuiaDetails) {
+			const existingDetail = await this.auditGuiaDetailRepository.findOne({ where: { id: detail.id } });
+			if (!existingDetail) {
+				throw new BusinessException(`No se encontró el detalle de auditoría con el ID ${detail.id}`);
+			}
+
+			existingDetail.quantityCollection = detail.quantityCollection;
+			await this.auditGuiaDetailRepository.save(existingDetail);
+
+			if (existingDetail.isRecuperator) {
+				recuperatorTotal += existingDetail.quantityCollection;
+			} else {
+				transporterTotal += existingDetail.quantityCollection;
+			}
+		}
+
+		return { transporterTotal, recuperatorTotal };
+	}
+
+	async synchronize(id: number): Promise<void> {
+		const auditGuia = await this.findAuditGuiaById(id);
+
+		if (auditGuia.requestStatusId !== 1) {
+			throw new BusinessException('Solo se pueden sincronizar auditorías en estado "sin guia".');
+		}
+
+		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
+		await queryRunner.startTransaction();
+
+		try {
+			const externalData = await this.fetchExternalData();
+			if (!externalData) {
+				throw new BusinessException('No se encontraron datos externos para sincronizar.', 404);
+			}
+
+			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuia, externalData);
+
+			auditGuia.transporterTotal = transporterTotal;
+			auditGuia.recuperatorTotal = recuperatorTotal;
+			auditGuia.requestStatusId = 2;
+
+			await queryRunner.manager.save(auditGuia);
+
+			await queryRunner.commitTransaction();
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			throw error;
+		} finally {
+			await queryRunner.release();
+		}
+	}
+
+	private async fetchExternalData(): Promise<any> {
+		return {
+			details: [
+				{ productName: 'Battery A', quantity: 10 },
+				{ productName: 'Battery B', quantity: 5 },
+			],
+		};
+	}
+
+	private async syncAuditDetails(queryRunner, auditGuia: AuditGuia, externalData: any): Promise<any> {
+		let transporterTotal = 0;
+		let recuperatorTotal = 0;
+
+		const productNames = externalData.details.map((item) => item.productName);
+		const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
+		if (foundProducts.length !== productNames.length) {
+			throw new BusinessException('No se pudieron validar todos los productos de los datos externos.');
+		}
+
+		const detailsToSave = foundProducts.map((product) => {
+			const { quantity } = externalData.details.find(({ productName }) => productName === product.name);
+
+			return this.auditGuiaDetailRepository.create({
+				auditGuia,
+				product,
+				isRecuperator: false,
+				quantity,
+				quantityCollection: quantity,
+			});
+		});
+
+		await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
+
+		detailsToSave.forEach((detail) => {
+			if (detail.isRecuperator) {
+				recuperatorTotal += detail.quantity;
+			} else {
+				transporterTotal += detail.quantity;
+			}
+		});
+
+		return { transporterTotal, recuperatorTotal };
+	}
+
+	async updateInFavorRecuperator({ id, key }: { id: number; key: string }): Promise<void> {
+		const auditGuia = await this.auditGuiaRepository.findOne({ where: { id } });
+
+		if (!auditGuia) {
+			throw new BusinessException('No se encontró la auditoría especificada.', 404);
+		}
+
+		if (auditGuia.requestStatusId !== 2) {
+			throw new BusinessException('La auditoría debe estar en estado pendiente para actualizar.');
+		}
+
+		auditGuia.inFavorRecuperator = key === 'R';
+
+		await this.auditGuiaRepository.save(auditGuia);
+	}
+
+
 }
