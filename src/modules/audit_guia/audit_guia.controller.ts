@@ -62,7 +62,7 @@ export class AuditGuiaController {
 	}
 
 	@Post('synchronize/:id')
-	@Roles(19)
+	@Roles(0)
 	@ApiOperation({ summary: 'Sincronizar' })
 	async synchronize(
 		@IdParam('id') id: number,

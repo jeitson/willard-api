@@ -263,7 +263,115 @@ export class AuditGuiaService {
 	}
 
 	async synchronize(id: number): Promise<void> {
-		return;
+		const { id: user_id } = this.userContextService.getUserDetails();
+		const auditGuia = await this.auditGuiaRepository.findOne({
+			where: { id },
+		});
+
+		if (!auditGuia) {
+			throw new BusinessException(
+				`No se encontró la auditoría con el ID ${id}`,
+			);
+		}
+
+		if (auditGuia.requestStatusId != 1) {
+			throw new BusinessException(
+				`La auditoría no aplica para realizar esta acción`,
+			);
+		}
+
+		const transporterTravel = await this.transporterTravelRepository.findOne({
+			where: { guideId: auditGuia.guideNumber },
+			relations: ['details'],
+		});
+
+		if (!transporterTravel) {
+			throw new BusinessException(
+				`No existe configuración para el número de guia`,
+			);
+		}
+
+		let zoneId = null, date = transporterTravel.movementDate, transporterTotal = 0;
+
+		const zone = await this.catalogsService.getChildrenByName(transporterTravel.zone);
+		if (!zone) {
+			throw new BusinessException(`No existe la zona configurada para la guía`, 400);
+		}
+
+		zoneId = zone[0].id;
+
+		const productNames = transporterTravel.details.map((item) => item.batteryType);
+		const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
+
+		if (!foundProducts.length || foundProducts.length !== productNames.length) {
+			throw new BusinessException(
+				`Verifique los productos ingresados: ${productNames.join(', ')}`,
+			);
+		}
+
+		const transporterDetails = foundProducts.map((product) => {
+			const { quantity } = transporterTravel.details.find(({ batteryType }) => batteryType === product.name);
+
+			transporterTotal += quantity;
+
+			return {
+				productId: product.id,
+				isRecuperator: false,
+				quantity,
+				quantityCollection: quantity,
+			};
+		});
+
+		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
+		await queryRunner.startTransaction();
+
+		try {
+
+			auditGuia.zoneId = zoneId;
+			auditGuia.date = date;
+			auditGuia.requestStatusId = 2;
+			auditGuia.transporterTotal = transporterTotal;
+
+			await this.auditGuiaRepository.save(auditGuia);
+
+			const detailsToSave = [];
+			for (const detail of transporterDetails) {
+				const product = await this.productRepository.findOneBy({ id: detail.productId });
+				if (!product) {
+					throw new BusinessException(`Producto con ID ${detail.productId} no encontrado.`, 400);
+				}
+
+				if (detail.quantity <= 0 || detail.quantityCollection < 0) {
+					throw new BusinessException('La cantidad y la cantidad corregida deben ser números positivos.', 400);
+				}
+
+				const auditGuiaDetail = this.auditGuiaDetailRepository.create({
+					...detail,
+					product,
+					auditGuia,
+				});
+
+				detailsToSave.push(auditGuiaDetail);
+			}
+
+			await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
+
+			const auditGuiaRoute = this.auditGuiaRouteRepository.create({
+				auditGuia: auditGuia,
+				transporterTravel,
+				createdBy: user_id,
+				updatedBy: user_id,
+			});
+
+			await queryRunner.manager.save(auditGuiaRoute);
+
+			await queryRunner.commitTransaction();
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			throw error;
+		} finally {
+			await queryRunner.release();
+		}
 	}
 
 	async findOne(id: string): Promise<AuditGuia> {
