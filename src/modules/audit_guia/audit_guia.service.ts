@@ -51,7 +51,7 @@ export class AuditGuiaService {
 
 	async create(createAuditGuiaDto: AuditGuiaCreateDto): Promise<void> {
 		const { id: user_id } = this.userContextService.getUserDetails();
-		const { auditGuiaDetails, ...auditGuiaData } = createAuditGuiaDto;
+		let { auditGuiaDetails, transporterTotal, ...auditGuiaData } = createAuditGuiaDto;
 
 		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
 		await queryRunner.startTransaction();
@@ -90,13 +90,15 @@ export class AuditGuiaService {
 
 				// Crear los detalles basados en transporterTravel
 				const transporterDetails = foundProducts.map((product) => {
-					const detail = transporterTravel.details.find(({ batteryType }) => batteryType === product.name);
+					const { quantity } = transporterTravel.details.find(({ batteryType }) => batteryType === product.name);
+
+					transporterTotal += quantity;
 
 					return {
 						productId: product.id,
 						isRecuperator: false,
-						quantity: detail.quantity,
-						quantityCollection: detail.quantity,
+						quantity,
+						quantityCollection: quantity,
 					};
 				});
 
@@ -107,6 +109,7 @@ export class AuditGuiaService {
 				...auditGuiaData,
 				zoneId,
 				date,
+				transporterTotal,
 				requestStatusId,
 				createdBy: user_id,
 				modifiedBy: user_id,
