@@ -187,6 +187,8 @@ export class AuditGuiaService {
 			);
 		}
 
+		let transporterTotal = 0, recuperatorTotal = 0;
+
 		for (const detail of detailsToUpdate) {
 			const existingDetail = await this.auditGuiaDetailRepository.findOne({
 				where: { id: detail.id },
@@ -201,7 +203,19 @@ export class AuditGuiaService {
 			existingDetail.quantityCollection = detail.quantityCollection;
 
 			await this.auditGuiaDetailRepository.save(existingDetail);
+
+			if (existingDetail.isRecuperator) {
+				recuperatorTotal += detail.quantityCollection;
+			} else {
+				transporterTotal += detail.quantityCollection;
+			}
 		}
+
+		auditGuia.recuperatorTotal = recuperatorTotal;
+		auditGuia.transporterTotal = transporterTotal;
+
+		await this.auditGuiaRepository.save(auditGuia);
+
 	}
 
 	async updateInFavorRecuperator({ id, key }: { id: number, key: 'R' | 'T' }): Promise<void> {
