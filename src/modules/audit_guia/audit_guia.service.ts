@@ -11,6 +11,7 @@ import { AuditGuiaRoute } from './entities/audit_guia-ruta.entity';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 import { CatalogsService } from '../catalogs/catalogs.service';
 
+// TODO: Actualizar los ids de los estados
 /** Estados ID
  * 1 = Sin GUIA
  * 2 = Pendiente
@@ -236,6 +237,28 @@ export class AuditGuiaService {
 		}
 
 		auditGuia.inFavorRecuperator = key === 'R';
+
+		await this.auditGuiaDetailRepository.save(auditGuia);
+	}
+
+	async confirm(id: number): Promise<void> {
+		const auditGuia = await this.auditGuiaRepository.findOne({
+			where: { id },
+		});
+
+		if (!auditGuia) {
+			throw new BusinessException(
+				`No se encontró la auditoría con el ID ${id}`,
+			);
+		}
+
+		if (auditGuia.requestStatusId !== 2) {
+			throw new BusinessException(
+				`La auditoría no aplica para realizar esta acción`,
+			);
+		}
+
+		auditGuia.requestStatusId = 3;
 
 		await this.auditGuiaDetailRepository.save(auditGuia);
 	}

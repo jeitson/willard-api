@@ -52,4 +52,13 @@ export class AuditGuiaController {
 		await this.auditGuiaService.updateInFavorRecuperator({ id, key });
 	}
 
+	@Patch('confirm/:id')
+	@Roles(19)
+	@ApiOperation({ summary: 'Confirmar' })
+	async confirm(
+		@IdParam('id') id: number,
+	): Promise<void> {
+		await this.auditGuiaService.confirm(id);
+	}
+
 }
