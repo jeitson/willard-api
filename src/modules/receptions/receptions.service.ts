@@ -38,34 +38,17 @@ export class ReceptionsService {
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
 		private readonly auditGuiaService: AuditGuiaService,
-		private readonly catalogsService: CatalogsService,
 		private readonly userContextService: UserContextService
 	) { }
 
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
-		let { collectionSites, id: user_id, roles, zones, ...content } = this.userContextService.getUserDetails();
+		let { collectionSites, id: user_id, roles } = this.userContextService.getUserDetails();
+		roles = roles.map(({ roleId }) => +roleId);
 
 		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites.map(({ collectionSiteId }) => collectionSiteId)) });
 
 		if (!collectionSite) {
 			throw new BadRequestException('El usuario no tiene vinculado una sede de acopio.');
-		}
-
-		let zoneId;
-		roles = roles.map(({ roleId }) => +roleId);
-		zones = zones.map(({ zoneId }) => +zoneId);
-		if (roles.includes(20)) {
-			if (!zones) {
-				throw new BadRequestException('El usuario no tiene vinculado una zona.');
-			}
-
-			const { id } = await this.catalogsService.getChildById(zones[0]);
-
-			if (!id) {
-				throw new BadRequestException('La zona vinculada, no existe.');
-			}
-
-			zoneId = id;
 		}
 
 		// aplica si la sede de acopio es una agencia
@@ -104,11 +87,10 @@ export class ReceptionsService {
 				await this.saveReceptionPhotos(savedReception, (createReceptionDto.photos as any[]).map(url => ({ url })));
 			}
 
-			if (roles.includes(20) && zones) {
-				this.auditGuiaService.create({
+			if (roles.includes(20)) {
+				await this.auditGuiaService.create({
+					reception: savedReception,
 					guideNumber: reception.guideNumber,
-					date: formatToDate(new Date().getTime()),
-					zoneId,
 					recuperatorId: user_id,
 					recuperatorTotal: createReceptionDto.details.reduce((acc, item) => acc += item.quantity, 0),
 					transporterId: transporter.id,

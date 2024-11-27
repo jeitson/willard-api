@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { AuditGuiaCreateDto, AuditGuiaDetailUpdateDto } from './dto/audit_guia.dto';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { AuditGuiaDetail } from './entities/audit_guia_detail.entity';
@@ -9,6 +9,7 @@ import { UserContextService } from '../users/user-context.service';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { AuditGuiaRoute } from './entities/audit_guia-ruta.entity';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
+import { CatalogsService } from '../catalogs/catalogs.service';
 
 @Injectable()
 export class AuditGuiaService {
@@ -29,6 +30,8 @@ export class AuditGuiaService {
 
 		@InjectRepository(TransporterTravel)
 		private readonly transporterTravelRepository: Repository<TransporterTravel>,
+
+		private readonly catalogsService: CatalogsService,
 	) { }
 
 	private createBaseQueryBuilder() {
@@ -46,7 +49,7 @@ export class AuditGuiaService {
 		// 	.leftJoinAndMapOne('collectionRequest.requestStatusId', Child, 'requestStatus', 'requestStatus.id = collectionRequest.requestStatusId');
 	}
 
-	async create(createAuditGuiaDto: AuditGuiaCreateDto): Promise<AuditGuia> {
+	async create(createAuditGuiaDto: AuditGuiaCreateDto): Promise<void> {
 		const { id: user_id } = this.userContextService.getUserDetails();
 		const { auditGuiaDetails, ...auditGuiaData } = createAuditGuiaDto;
 
@@ -54,24 +57,66 @@ export class AuditGuiaService {
 		await queryRunner.startTransaction();
 
 		try {
-			// TODO: Actualizar a los ids correctos
 			let requestStatusId = 1;
+			let zoneId = null;
+			let date = null;
 
-			let transporterTravel;
-			const _transporterTravel = await this.transporterTravelRepository.findOneBy({ guideId: createAuditGuiaDto.guideNumber.toUpperCase() });
-			if (_transporterTravel) {
-				transporterTravel = _transporterTravel;
-				requestStatusId = 2;
+			// Verificar si existe un transporterTravel relacionado con la guía
+			const transporterTravel = await this.transporterTravelRepository.findOne({
+				where: { guideId: createAuditGuiaDto.guideNumber.toUpperCase() },
+				relations: ['details'],
+			});
+
+			if (transporterTravel) {
+				requestStatusId = 2; // Cambiar el estado si existe transporterTravel
+				date = transporterTravel.movementDate;
+
+				// Buscar la zona relacionada
+				const zone = await this.catalogsService.getChildrenByName(transporterTravel.zone);
+				if (!zone) {
+					throw new BusinessException(`No existe la zona configurada para la guía`, 400);
+				}
+				zoneId = zone[0].id;
+
+				// Validar los productos en transporterTravel
+				const productNames = transporterTravel.details.map((item) => item.batteryType);
+				const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
+
+				if (!foundProducts.length || foundProducts.length !== productNames.length) {
+					throw new BusinessException(
+						`Verifique los productos ingresados: ${productNames.join(', ')}`,
+					);
+				}
+
+				// Crear los detalles basados en transporterTravel
+				const transporterDetails = foundProducts.map((product) => {
+					const detail = transporterTravel.details.find(({ batteryType }) => batteryType === product.name);
+
+					return {
+						productId: product.id,
+						isRecuperator: false,
+						quantity: detail.quantity,
+						quantityCollection: detail.quantity,
+					};
+				});
+
+				auditGuiaDetails.push(...transporterDetails);
 			}
 
 			const auditGuia = this.auditGuiaRepository.create({
 				...auditGuiaData,
+				zoneId,
+				date,
 				requestStatusId,
 				createdBy: user_id,
 				modifiedBy: user_id,
 			});
 
-			const auditGuiaSave = await queryRunner.manager.save(auditGuia);
+			const auditGuiaSaved = await queryRunner.manager.save(auditGuia);
+
+			if (!auditGuiaSaved.id) {
+				throw new BusinessException('Error al guardar la guía de auditoría.', 500);
+			}
 
 			const detailsToSave = [];
 			for (const detail of auditGuiaDetails) {
@@ -87,7 +132,7 @@ export class AuditGuiaService {
 				const auditGuiaDetail = this.auditGuiaDetailRepository.create({
 					...detail,
 					product,
-					auditGuia: auditGuiaSave,
+					auditGuia: auditGuiaSaved,
 				});
 
 				detailsToSave.push(auditGuiaDetail);
@@ -95,21 +140,18 @@ export class AuditGuiaService {
 
 			await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
 
-			await queryRunner.commitTransaction();
-
-			if (_transporterTravel) {
-				await this.auditGuiaRouteRepository.save({
-					auditGuia: auditGuiaSave,
-					transporterTravel: _transporterTravel,
+			if (transporterTravel) {
+				const auditGuiaRoute = this.auditGuiaRouteRepository.create({
+					auditGuia: auditGuiaSaved,
+					transporterTravel,
 					createdBy: user_id,
 					updatedBy: user_id,
 				});
+
+				await queryRunner.manager.save(auditGuiaRoute);
 			}
 
-			return this.auditGuiaRepository.findOne({
-				where: { id: auditGuia.id },
-				relations: ['auditGuiaDetails', 'auditGuiaDetails.product', 'auditsGuiasRoutes'],
-			});
+			await queryRunner.commitTransaction();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
 			throw error;
@@ -117,6 +159,7 @@ export class AuditGuiaService {
 			await queryRunner.release();
 		}
 	}
+
 
 	async updateDetails({ auditGuiaDetails: detailsToUpdate }: AuditGuiaDetailUpdateDto): Promise<void> {
 		for (const detail of detailsToUpdate) {

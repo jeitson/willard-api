@@ -2,7 +2,9 @@ import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested } from 'class-validator';
 import { PagerDto } from 'src/core/common/dto/pager.dto';
+import { Reception } from 'src/modules/receptions/entities/reception.entity';
 import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
+import { JoinColumn, OneToOne } from 'typeorm';
 
 export class AuditGuiaDetailCreateDto {
 	@ApiProperty({ description: 'ID de producto' })
@@ -28,13 +30,10 @@ export class AuditGuiaCreateDto {
 	@IsString({ message: 'El número de guía debe ser una cadena de caracteres' })
 	guideNumber: string;
 
-	@ApiProperty({ description: 'Fecha de la auditoría' })
-	@IsDateString({}, { message: 'La fecha debe ser una cadena de fecha válida en formato ISO' })
-	date: string;
-
-	@ApiProperty({ description: 'Zona ID' })
-	@IsInt({ message: 'El ID de la zona debe ser un número entero' })
-	zoneId: number;
+	@ApiProperty({ type: Reception, description: 'Recepción' })
+	@ValidateNested({ each: true })
+	@Type(() => Reception)
+	reception: Reception;
 
 	@ApiProperty({ description: 'Recuperadora ID' })
 	@IsInt({ message: 'El ID de la recuperadora debe ser un número entero' })

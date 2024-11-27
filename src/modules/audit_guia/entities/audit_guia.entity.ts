@@ -16,11 +16,11 @@ export class AuditGuia extends CompleteEntity {
 	guideNumber: string;
 
 	@ApiProperty({ description: 'Fecha' })
-	@Column({ type: 'varchar', length: 20, name: 'Fecha' })
+	@Column({ type: 'varchar', length: 20, name: 'Fecha', nullable: true })
 	date: string;
 
 	@ApiProperty({ description: 'Zona ID' })
-	@Column({ type: 'bigint', name: 'ZonaId' })
+	@Column({ type: 'bigint', name: 'ZonaId', nullable: true })
 	zoneId: number;
 
 	@ApiProperty({ description: 'Recuperadora ID' })
