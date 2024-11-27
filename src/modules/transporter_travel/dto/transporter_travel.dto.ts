@@ -9,7 +9,7 @@ export class TransporterTravelDetailDto {
 
 	@IsInt({ message: 'La cantidad debe ser un número entero.' })
 	@Min(1, { message: 'La cantidad mínima debe ser 1.' })
-	cantidades: number;
+	cantidad: number;
 }
 
 export class TransporterTravelDto {

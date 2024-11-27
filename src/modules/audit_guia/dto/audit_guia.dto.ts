@@ -60,6 +60,26 @@ export class AuditGuiaCreateDto {
 	auditGuiaDetails: AuditGuiaDetailCreateDto[];
 }
 
+export class AuditGuiaDetailContentUpdateDto {
+	@ApiProperty({ description: 'ID del detalle de la auditoría', required: true })
+	@IsInt({ message: 'El ID del detalle debe ser un número entero' })
+	id: number;
+
+	@ApiProperty({ description: 'Cantidad Corregida', required: true })
+	@IsInt({ message: 'La cantidad corregida debe ser un número entero' })
+	quantityCollection: number;
+}
+
+export class AuditGuiaDetailUpdateDto {
+	@ApiProperty({ type: [AuditGuiaDetailContentUpdateDto], description: 'Detalles de la auditoría' })
+	@IsArray({ message: 'El campo "auditGuiaDetails" debe ser un arreglo de detalles' })
+	@ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
+	@ValidateNested({ each: true, message: 'Cada detalle de la auditoría debe ser válido' })
+	@Type(() => AuditGuiaDetailContentUpdateDto)
+	auditGuiaDetails: AuditGuiaDetailContentUpdateDto[];
+}
+
+
 export class AuditGuiaQueryDto extends IntersectionType(
 	PagerDto<AuditGuiaCreateDto>,
 	PartialType(AuditGuiaCreateDto),

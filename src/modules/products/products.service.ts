@@ -27,7 +27,7 @@ export class ProductsService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const product = this.productsRepository.create({ ...productCreateDto, createdBy: user_id, modifiedBy: user_id });
+		const product = this.productsRepository.create({ ...productCreateDto, name: productCreateDto.name.toUpperCase(), createdBy: user_id, modifiedBy: user_id });
 		return await this.productsRepository.save(product);
 	}
 
@@ -41,7 +41,7 @@ export class ProductsService {
 		updatedData = Object.assign(product, updatedData);
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
-		return await this.productsRepository.save({ ...updatedData, modifiedBy });
+		return await this.productsRepository.save({ ...updatedData, name: updatedData.name.toUpperCase(), modifiedBy });
 	}
 
 	async findAll({

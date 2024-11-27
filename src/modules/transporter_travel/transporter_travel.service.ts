@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
@@ -8,12 +8,18 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { excelDateToJSDate, excelTimeToJSDate } from 'src/core/utils';
 import { TransporterTravel } from './entities/transporter_travel.entity';
 import { TransporterTravelDto } from './dto/transporter_travel.dto';
+import { Product } from '../products/entities/product.entity';
+import { Child } from '../catalogs/entities/child.entity';
 
 @Injectable()
 export class TransporterTravelService {
 	constructor(
 		@InjectRepository(TransporterTravel)
 		private readonly transporterTravelRepository: Repository<TransporterTravel>,
+		@InjectRepository(Product)
+		private readonly productRepository: Repository<Product>,
+		@InjectRepository(Child)
+		private readonly childrensRepository: Repository<Child>,
 	) { }
 
 	async createFromJson(data: TransporterTravelDto): Promise<TransporterTravel[]> {
@@ -40,9 +46,15 @@ export class TransporterTravelService {
 
 		try {
 			const item = this.mapRowToTransporterTravelDto(data);
+			item.details = this.convertDetail(data.detalles);
+			console.log(item);
+
+			await this.validateRelations([item]);
+
 			const travelRecord = this.transporterTravelRepository.create(item);
 			return await this.transporterTravelRepository.save(travelRecord);
 		} catch (error) {
+			console.log(error);
 			throw new BusinessException('Error al procesar el objeto JSON: ' + error.message);
 		}
 	}
@@ -69,7 +81,7 @@ export class TransporterTravelService {
 				}
 				acc[idGuia].push({
 					tipoBat: detail['tipoBat'],
-					cantidades: detail['cantidades'],
+					cantidad: detail['cantidad'],
 				});
 				return acc;
 			}, {});
@@ -80,8 +92,9 @@ export class TransporterTravelService {
 
 				const record = this.mapRowToTransporterTravelDto(row);
 
-				const details = detailsByGuide[record.idGuia] || [];
-				record.detalles = details.map(detail => this.mapRowToTransporterTravelDto(detail));
+				const details = detailsByGuide[record.guideId] || [];
+
+				record.details = this.convertDetail(details);
 
 				const errors = await validate(record);
 				if (errors.length > 0) {
@@ -105,6 +118,8 @@ export class TransporterTravelService {
 					errors: validationErrors,
 				});
 			}
+
+			await this.validateRelations(records);
 
 			return await this.transporterTravelRepository.save(records);
 
@@ -131,6 +146,37 @@ export class TransporterTravelService {
 		return [];
 	}
 
+	async validateRelations(records: TransporterTravel[]) {
+		// Zonas
+		const zones = records.flatMap(item => item.zone.toUpperCase());
+
+		const _zones = await this.childrensRepository.find({ where: { name: In(zones) } });
+
+		if (!_zones) {
+			throw new BusinessException('No existen las zonas ingresadas');
+		}
+
+		if (_zones.length !== zones.length) {
+			throw new BusinessException('Verifique las zonas ingresadas - ' + zones.join(', '));
+		}
+
+		// Productos
+		const products = records.reduce((acc, item) => {
+			acc = [...acc, ...item.details.map((r: { batteryType: string; }) => r.batteryType.toUpperCase())]
+			return acc;
+		}, []);
+
+		const _products = await this.productRepository.find({ where: { name: In(products) } });
+
+		if (!_products) {
+			throw new BusinessException('No existen los productos ingresados');
+		}
+
+		if (_products.length !== products.length) {
+			throw new BusinessException('Verifique los productos ingresados - ' + products.join(', '));
+		}
+	}
+
 	private mapRowToTransporterTravelDto(row: any): any {
 		return {
 			routeId: row['idRuta'],
@@ -152,14 +198,14 @@ export class TransporterTravelService {
 			referenceDocument: row['docReferencia'],
 			referenceDocument2: row['docReferencia2'],
 			supportUrls: row['urlSoportes'] || [],
-			details: Array.isArray(row['detalles']) ? this.convertDetail(row['detalles']) : this.convertDetail(JSON.parse(row['detalles']))
+			details: []
 		};
 	}
 
 	convertDetail(details: any): any[] {
 		return details.map((d: any) => ({
-			batteryType: d.tipoBat,
-			quantity: d.cantidades,
+			batteryType: d.tipoBat.toUpperCase(),
+			quantity: d.cantidad,
 		})) || [];
 	}
 }

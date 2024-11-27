@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AuditGuiaCreateDto } from './dto/audit_guia.dto';
+import { AuditGuiaCreateDto, AuditGuiaDetailUpdateDto } from './dto/audit_guia.dto';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { AuditGuiaDetail } from './entities/audit_guia_detail.entity';
 import { Product } from 'src/modules/products/entities/product.entity';
@@ -118,6 +118,23 @@ export class AuditGuiaService {
 		}
 	}
 
+	async updateDetails({ auditGuiaDetails: detailsToUpdate }: AuditGuiaDetailUpdateDto): Promise<void> {
+		for (const detail of detailsToUpdate) {
+			const existingDetail = await this.auditGuiaDetailRepository.findOne({
+				where: { id: detail.id },
+			});
+
+			if (!existingDetail) {
+				throw new BusinessException(
+					`No se encontró el detalle de auditoría con el ID ${detail.id}`,
+				);
+			}
+
+			existingDetail.quantityCollection = detail.quantityCollection;
+
+			await this.auditGuiaDetailRepository.save(existingDetail);
+		}
+	}
 
 	async findOne(id: string): Promise<AuditGuia> {
 		return this.auditGuiaRepository.findOne({

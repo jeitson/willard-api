@@ -6,6 +6,7 @@ import { Roles } from 'src/core/common/decorators/role.decorator';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
+import { AuditGuiaDetailUpdateDto } from './dto/audit_guia.dto';
 
 @ApiTags('Negocio - Auditoria de Guias')
 @Controller('audit_guia')
@@ -27,5 +28,15 @@ export class AuditGuiaController {
 	@ApiResult({ type: AuditGuia })
 	async findOne(@IdParam('id') id: string): Promise<AuditGuia> {
 		return this.auditGuiaService.findOne(id);
+	}
+
+	@Patch('details')
+	@Roles(19)
+	@ApiOperation({ summary: 'Actualizar detalle de auditoria por ID' })
+	@ApiResult({ type: AuditGuia })
+	async updateAuditGuiaDetails(
+		@Body() detailsToUpdate: AuditGuiaDetailUpdateDto,
+	): Promise<void> {
+		await this.auditGuiaService.updateDetails(detailsToUpdate);
 	}
 }
