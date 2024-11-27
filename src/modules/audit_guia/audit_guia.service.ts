@@ -170,7 +170,6 @@ export class AuditGuiaService {
 		}
 	}
 
-
 	async updateDetails(id: number, { auditGuiaDetails: detailsToUpdate }: AuditGuiaDetailUpdateDto): Promise<void> {
 		const auditGuia = await this.auditGuiaRepository.findOne({
 			where: { id },
@@ -261,6 +260,10 @@ export class AuditGuiaService {
 		auditGuia.requestStatusId = 3;
 
 		await this.auditGuiaDetailRepository.save(auditGuia);
+	}
+
+	async synchronize(id: number): Promise<void> {
+		return;
 	}
 
 	async findOne(id: string): Promise<AuditGuia> {

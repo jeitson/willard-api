@@ -61,4 +61,13 @@ export class AuditGuiaController {
 		await this.auditGuiaService.confirm(id);
 	}
 
+	@Post('synchronize/:id')
+	@Roles(19)
+	@ApiOperation({ summary: 'Sincronizar' })
+	async synchronize(
+		@IdParam('id') id: number,
+	): Promise<void> {
+		await this.auditGuiaService.synchronize(id);
+	}
+
 }
