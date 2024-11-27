@@ -11,6 +11,12 @@ import { AuditGuiaRoute } from './entities/audit_guia-ruta.entity';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 import { CatalogsService } from '../catalogs/catalogs.service';
 
+/** Estados ID
+ * 1 = Sin GUIA
+ * 2 = Pendiente
+ * 3 = Confirmado
+ *  **/
+
 @Injectable()
 export class AuditGuiaService {
 	constructor(
@@ -164,7 +170,23 @@ export class AuditGuiaService {
 	}
 
 
-	async updateDetails({ auditGuiaDetails: detailsToUpdate }: AuditGuiaDetailUpdateDto): Promise<void> {
+	async updateDetails(id: number, { auditGuiaDetails: detailsToUpdate }: AuditGuiaDetailUpdateDto): Promise<void> {
+		const auditGuia = await this.auditGuiaRepository.findOne({
+			where: { id },
+		});
+
+		if (!auditGuia) {
+			throw new BusinessException(
+				`No se encontró la auditoría con el ID ${id}`,
+			);
+		}
+
+		if (auditGuia.requestStatusId !== 2) {
+			throw new BusinessException(
+				`La auditoría no aplica para realizar esta acción`,
+			);
+		}
+
 		for (const detail of detailsToUpdate) {
 			const existingDetail = await this.auditGuiaDetailRepository.findOne({
 				where: { id: detail.id },
@@ -180,6 +202,28 @@ export class AuditGuiaService {
 
 			await this.auditGuiaDetailRepository.save(existingDetail);
 		}
+	}
+
+	async updateInFavorRecuperator({ id, key }: { id: number, key: 'R' | 'T' }): Promise<void> {
+		const auditGuia = await this.auditGuiaRepository.findOne({
+			where: { id },
+		});
+
+		if (!auditGuia) {
+			throw new BusinessException(
+				`No se encontró la auditoría con el ID ${id}`,
+			);
+		}
+
+		if (auditGuia.requestStatusId !== 2) {
+			throw new BusinessException(
+				`La auditoría no aplica para realizar esta acción`,
+			);
+		}
+
+		auditGuia.inFavorRecuperator = key === 'R';
+
+		await this.auditGuiaDetailRepository.save(auditGuia);
 	}
 
 	async findOne(id: string): Promise<AuditGuia> {

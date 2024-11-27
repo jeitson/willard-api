@@ -1,6 +1,6 @@
 import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested } from 'class-validator';
+import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested, IsIn } from 'class-validator';
 import { PagerDto } from 'src/core/common/dto/pager.dto';
 import { Reception } from 'src/modules/receptions/entities/reception.entity';
 import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
@@ -78,6 +78,11 @@ export class AuditGuiaDetailUpdateDto {
 	auditGuiaDetails: AuditGuiaDetailContentUpdateDto[];
 }
 
+export class UpdateReasonDto {
+	@ApiProperty({ description: 'Clave que indica la razón, debe ser "R" o "T"', enum: ['R', 'T'] })
+	@IsIn(['R', 'T'], { message: 'La clave debe ser "R" o "T"' })
+	key: 'R' | 'T';
+}
 
 export class AuditGuiaQueryDto extends IntersectionType(
 	PagerDto<AuditGuiaCreateDto>,

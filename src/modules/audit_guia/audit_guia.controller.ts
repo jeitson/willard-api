@@ -6,7 +6,7 @@ import { Roles } from 'src/core/common/decorators/role.decorator';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { AuditGuiaDetailUpdateDto } from './dto/audit_guia.dto';
+import { AuditGuiaDetailUpdateDto, UpdateReasonDto } from './dto/audit_guia.dto';
 
 @ApiTags('Negocio - Auditoria de Guias')
 @Controller('audit_guia')
@@ -30,13 +30,26 @@ export class AuditGuiaController {
 		return this.auditGuiaService.findOne(id);
 	}
 
-	@Patch('details')
+	@Patch('details/:id')
 	@Roles(19)
 	@ApiOperation({ summary: 'Actualizar detalle de auditoria por ID' })
 	@ApiResult({ type: AuditGuia })
 	async updateAuditGuiaDetails(
+		@IdParam('id') id: number,
 		@Body() detailsToUpdate: AuditGuiaDetailUpdateDto,
 	): Promise<void> {
-		await this.auditGuiaService.updateDetails(detailsToUpdate);
+		await this.auditGuiaService.updateDetails(id, detailsToUpdate);
 	}
+
+	@Patch('give-reason/:id/:key')
+	@Roles(19)
+	@ApiOperation({ summary: 'Dar la razón a una auditoria' })
+	async updateInFavorRecuperator(
+		@IdParam('id') id: number,
+		@Param() params: UpdateReasonDto,
+	): Promise<void> {
+		const { key } = params;
+		await this.auditGuiaService.updateInFavorRecuperator({ id, key });
+	}
+
 }
