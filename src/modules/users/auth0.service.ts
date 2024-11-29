@@ -81,7 +81,7 @@ export class Auth0Service {
 		try {
 			const response = await axios.get(url, {
 				headers: {
-					Authorization: `Bearer ${this.userContextService.getToken()}`,
+					Authorization: `Bearer ${await this.getTokenAPI()}`,
 				},
 			});
 
