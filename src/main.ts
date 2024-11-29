@@ -30,7 +30,8 @@ async function bootstrap() {
 				const errorMessages = errors.map(error => {
 					const constraints = error.constraints
 						? Object.values(error.constraints)
-						: [];
+						: error.children.flatMap(({ constraints }) => Object.values(constraints));
+
 					return {
 						property: error.property,
 						errors: constraints,

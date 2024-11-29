@@ -4,7 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { User } from './entities/user.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { PasswordUpdateDto, UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
+import { PasswordUpdateDto, UserDto, UserOAuthDto, UserQueryDto, UserSearchByRoleDto, UserUpdateDto } from './dto/user.dto';
 import { Roles } from 'src/core/common/decorators/role.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Public } from 'src/core/common/decorators/public.decorator';
@@ -85,5 +85,13 @@ export class UsersController {
 	@ApiOperation({ summary: 'Asignar sede de acopio a usuario' })
 	async addCollectionSiteToUser(@IdParam('id') id: string, @IdParam('collection_site_id') collection_site_id: string): Promise<void> {
 		await this.usersService.addCollectionSiteToUser(+id, +collection_site_id);
+	}
+
+	@Post('search')
+	@Roles(0)
+	@ApiOperation({ summary: 'Consultar usuarios por sus diversas relaciones' })
+	@ApiResult({ type: [User], isPage: true })
+	async findByIds(@Query() dto: UserQueryDto, @Body() content: UserSearchByRoleDto) {
+		return this.usersService.findByIds(dto, content);
 	}
 }

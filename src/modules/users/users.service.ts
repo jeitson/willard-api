@@ -6,7 +6,7 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ErrorEnum } from 'src/core/constants/error-code.constant';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
-import { PasswordUpdateDto, UserDto, UserOAuthDto, UserQueryDto, UserUpdateDto } from './dto/user.dto';
+import { PasswordUpdateDto, UserDto, UserOAuthDto, UserQueryDto, UserSearchByRoleDto, UserUpdateDto } from './dto/user.dto';
 import { Role } from '../roles/entities/rol.entity';
 import { UserRole } from './entities/user-rol.entity';
 import { UserContextService } from './user-context.service';
@@ -43,6 +43,7 @@ export class UsersService {
 		pageSize,
 		email,
 		name,
+		oauthId,
 	}: UserQueryDto): Promise<Pagination<User>> {
 		const queryBuilder = this.userRepository
 			.createQueryBuilder('user')
@@ -62,12 +63,15 @@ export class UsersService {
 			queryBuilder.andWhere('user.email LIKE :email', { email: `%${email}%` });
 		}
 
+		if (oauthId) {
+			queryBuilder.andWhere('user.oauthId LIKE :oauthId', { oauthId: `%${oauthId}%` });
+		}
+
 		return paginate<User>(queryBuilder, {
 			page,
 			pageSize,
 		});
 	}
-
 
 	async findUserById(id: string): Promise<User | undefined> {
 		return this.userRepository
@@ -81,7 +85,6 @@ export class UsersService {
 			.where('user.id = :id', { id })
 			.getOne();
 	}
-
 
 	async getProfile(): Promise<User | undefined> {
 		const id = this.userContextService.getUserDetails().id;
@@ -167,7 +170,7 @@ export class UsersService {
 				}
 
 				if (zones && zones.length > 0) {
-					const _zones = await this.childrensRepository.find({ where: { id: In(zones), catalogCode: 'ZONA' }});
+					const _zones = await this.childrensRepository.find({ where: { id: In(zones), catalogCode: 'ZONA' } });
 
 					for (const { id: zone } of _zones) {
 						const userZone = manager.create(UserZone, {
@@ -217,7 +220,7 @@ export class UsersService {
 				email = data.email;
 				complete = { email: data.email }
 			} if (data.cellphone) {
-				complete = { phone_number: '+' + this.getNumber(data.cellphone || user.cellphone)}
+				complete = { phone_number: '+' + this.getNumber(data.cellphone || user.cellphone) }
 			}
 
 			try {
@@ -347,8 +350,8 @@ export class UsersService {
 			.leftJoinAndSelect('user.roles', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.leftJoinAndSelect('user.zones', 'userZones')
-		.where('user.oauthId = :id', { id })
-		.getOne()
+			.where('user.oauthId = :id', { id })
+			.getOne()
 	}
 
 	async getUserRoles({ sub: id, ...content }: any): Promise<string[]> {
@@ -376,5 +379,38 @@ export class UsersService {
 
 	private getNumber(cellphone: string): string {
 		return cellphone.toString().slice(0, 1) === '57' ? cellphone.toString() : 57 + cellphone.toString()
+	}
+
+	async findByIds(
+		{ page, pageSize, name, email, oauthId }: UserQueryDto,
+		{ roles }: UserSearchByRoleDto
+	): Promise<Pagination<User>> {
+		const queryBuilder = this.userRepository
+			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.roles', 'userRol')
+			.leftJoinAndSelect('userRol.role', 'role')
+			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
+			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
+			.leftJoinAndSelect('user.zones', 'userZones')
+			.leftJoinAndMapOne('userZones.zone', Child, 'child', 'child.id = userZones.zoneId')
+			.where('1=1');
+
+		if (name) {
+			queryBuilder.andWhere('user.name LIKE :name', { name: `%${name}%` });
+		}
+
+		if (email) {
+			queryBuilder.andWhere('user.email LIKE :email', { email: `%${email}%` });
+		}
+
+		if (oauthId) {
+			queryBuilder.andWhere('user.oauthId LIKE :oauthId', { oauthId: `%${oauthId}%` });
+		}
+
+		if (roles && roles.length > 0) {
+			queryBuilder.andWhere('role.id IN (:...roles)', { roles });
+		}
+
+		return paginate<User>(queryBuilder, { page, pageSize });
 	}
 }
