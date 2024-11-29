@@ -1,7 +1,10 @@
 import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested } from 'class-validator';
+import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested, IsIn } from 'class-validator';
 import { PagerDto } from 'src/core/common/dto/pager.dto';
+import { Reception } from 'src/modules/receptions/entities/reception.entity';
+import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
+import { JoinColumn, OneToOne } from 'typeorm';
 
 export class AuditGuiaDetailCreateDto {
 	@ApiProperty({ description: 'ID de producto' })
@@ -27,13 +30,10 @@ export class AuditGuiaCreateDto {
 	@IsString({ message: 'El número de guía debe ser una cadena de caracteres' })
 	guideNumber: string;
 
-	@ApiProperty({ description: 'Fecha de la auditoría' })
-	@IsDateString({}, { message: 'La fecha debe ser una cadena de fecha válida en formato ISO' })
-	date: string;
-
-	@ApiProperty({ description: 'Zona ID' })
-	@IsInt({ message: 'El ID de la zona debe ser un número entero' })
-	zoneId: number;
+	@ApiProperty({ type: Reception, description: 'Recepción' })
+	@ValidateNested({ each: true })
+	@Type(() => Reception)
+	reception: Reception;
 
 	@ApiProperty({ description: 'Recuperadora ID' })
 	@IsInt({ message: 'El ID de la recuperadora debe ser un número entero' })
@@ -51,26 +51,37 @@ export class AuditGuiaCreateDto {
 	@IsInt({ message: 'El total de la transportadora debe ser un número entero' })
 	transporterTotal: number;
 
-	@ApiProperty({ description: 'Estado de la auditoría' })
-	@IsInt({ message: 'El ID del estado de la auditoría debe ser un número entero' })
-	requestStatusId: number;
-
-	@ApiProperty({ description: 'A Favor Recuperadora', required: false })
-	@IsOptional()
-	@IsBoolean({ message: 'El campo "A Favor Recuperadora" debe ser un valor booleano' })
-	inFavorRecuperator?: boolean;
-
-	@ApiProperty({ description: 'Comentario de la auditoría', required: false })
-	@IsOptional()
-	@IsString({ message: 'El comentario debe ser una cadena de caracteres' })
-	comment?: string;
-
 	@ApiProperty({ type: [AuditGuiaDetailCreateDto], description: 'Detalles de la auditoría' })
 	@IsArray({ message: 'El campo "auditGuiaDetails" debe ser un arreglo de detalles' })
 	@ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
 	@ValidateNested({ each: true, message: 'Cada detalle de la auditoría debe ser válido' })
 	@Type(() => AuditGuiaDetailCreateDto)
 	auditGuiaDetails: AuditGuiaDetailCreateDto[];
+}
+
+export class AuditGuiaDetailContentUpdateDto {
+	@ApiProperty({ description: 'ID del detalle de la auditoría', required: true })
+	@IsInt({ message: 'El ID del detalle debe ser un número entero' })
+	id: number;
+
+	@ApiProperty({ description: 'Cantidad Corregida', required: true })
+	@IsInt({ message: 'La cantidad corregida debe ser un número entero' })
+	quantityCollection: number;
+}
+
+export class AuditGuiaDetailUpdateDto {
+	@ApiProperty({ type: [AuditGuiaDetailContentUpdateDto], description: 'Detalles de la auditoría' })
+	@IsArray({ message: 'El campo "auditGuiaDetails" debe ser un arreglo de detalles' })
+	@ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
+	@ValidateNested({ each: true, message: 'Cada detalle de la auditoría debe ser válido' })
+	@Type(() => AuditGuiaDetailContentUpdateDto)
+	auditGuiaDetails: AuditGuiaDetailContentUpdateDto[];
+}
+
+export class UpdateReasonDto {
+	@ApiProperty({ description: 'Clave que indica la razón, debe ser "R" o "T"', enum: ['R', 'T'] })
+	@IsIn(['R', 'T'], { message: 'La clave debe ser "R" o "T"' })
+	key: 'R' | 'T';
 }
 
 export class AuditGuiaQueryDto extends IntersectionType(

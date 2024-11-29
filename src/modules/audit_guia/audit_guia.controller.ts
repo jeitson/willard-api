@@ -6,6 +6,7 @@ import { Roles } from 'src/core/common/decorators/role.decorator';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
+import { AuditGuiaDetailUpdateDto, UpdateReasonDto } from './dto/audit_guia.dto';
 
 @ApiTags('Negocio - Auditoria de Guias')
 @Controller('audit_guia')
@@ -14,7 +15,7 @@ export class AuditGuiaController {
 	constructor(private readonly auditGuiaService: AuditGuiaService) { }
 
 	@Get()
-	@Roles(13, 14, 15, 16, 18)
+	@Roles(19)
 	@ApiOperation({ summary: 'Listado de auditoria de guias' })
 	@ApiResult({ type: [AuditGuia] })
 	async findAll(@Query() query: any): Promise<AuditGuia[]> {
@@ -22,10 +23,51 @@ export class AuditGuiaController {
 	}
 
 	@Get(':id')
-	@Roles(0)
+	@Roles(19)
 	@ApiOperation({ summary: 'Obtener auditoria por ID' })
 	@ApiResult({ type: AuditGuia })
 	async findOne(@IdParam('id') id: string): Promise<AuditGuia> {
 		return this.auditGuiaService.findOne(id);
 	}
+
+	@Patch('details/:id')
+	@Roles(19)
+	@ApiOperation({ summary: 'Actualizar detalle de auditoria por ID' })
+	@ApiResult({ type: AuditGuia })
+	async updateAuditGuiaDetails(
+		@IdParam('id') id: number,
+		@Body() detailsToUpdate: AuditGuiaDetailUpdateDto,
+	): Promise<void> {
+		await this.auditGuiaService.updateDetails(id, detailsToUpdate);
+	}
+
+	@Patch('give-reason/:id/:key')
+	@Roles(19)
+	@ApiOperation({ summary: 'Dar la razón a una auditoria' })
+	async updateInFavorRecuperator(
+		@IdParam('id') id: number,
+		@Param() params: UpdateReasonDto,
+	): Promise<void> {
+		const { key } = params;
+		await this.auditGuiaService.updateInFavorRecuperator({ id, key });
+	}
+
+	@Patch('confirm/:id')
+	@Roles(19)
+	@ApiOperation({ summary: 'Confirmar' })
+	async confirm(
+		@IdParam('id') id: number,
+	): Promise<void> {
+		await this.auditGuiaService.confirm(id);
+	}
+
+	@Post('synchronize/:id')
+	@Roles(0)
+	@ApiOperation({ summary: 'Sincronizar' })
+	async synchronize(
+		@IdParam('id') id: number,
+	): Promise<void> {
+		await this.auditGuiaService.synchronize(id);
+	}
+
 }

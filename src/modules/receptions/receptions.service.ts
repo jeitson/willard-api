@@ -13,6 +13,9 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { Child } from '../catalogs/entities/child.entity';
+import { AuditGuiaService } from '../audit_guia/audit_guia.service';
+import { CatalogsService } from '../catalogs/catalogs.service';
+import { formatToDate } from 'src/core/utils';
 
 
 /** Estados ID
@@ -34,11 +37,13 @@ export class ReceptionsService {
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
+		private readonly auditGuiaService: AuditGuiaService,
 		private readonly userContextService: UserContextService
 	) { }
 
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
-		const { collectionSites, id: user_id, roles } = this.userContextService.getUserDetails();
+		let { collectionSites, id: user_id, roles } = this.userContextService.getUserDetails();
+		roles = roles.map(({ roleId }) => +roleId);
 
 		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites.map(({ collectionSiteId }) => collectionSiteId)) });
 
@@ -61,29 +66,47 @@ export class ReceptionsService {
 			throw new BadRequestException('La transportadora no es válida.');
 		}
 
+		let details = [];
 		if (createReceptionDto.details) {
-			await this.validateReceptionDetails(createReceptionDto.details);
+			details = await this.validateReceptionDetails(createReceptionDto.details);
+			if (details.length !== createReceptionDto.details.length) {
+				throw new BadRequestException(`Verifique la información ingresada en el detalle`);
+			}
 		}
 
+
 		const reception = this.receptionRepository.create(createReceptionDto);
-		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id, receptionStatusId: 67, collectionSite });
+		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id, receptionStatusId: 67, collectionSite, transporter });
 
 		try {
-			if (createReceptionDto.details) {
-				await this.saveReceptionDetails(savedReception, createReceptionDto.details);
+			if (details.length === createReceptionDto.details.length) {
+				await this.saveReceptionDetails(savedReception, details.map((product: any) => ({ product, productId: product.id, quantity: (createReceptionDto.details as any).find((element: { productId: any; }) => element.productId === +product.id).quantity })));
 			}
 
 			if (createReceptionDto.photos) {
 				await this.saveReceptionPhotos(savedReception, (createReceptionDto.photos as any[]).map(url => ({ url })));
 			}
 
-			if (roles.includes('20')) {
-				// creación de la auditoria de la guia
+			if (roles.includes(20)) {
+				await this.auditGuiaService.create({
+					reception: savedReception,
+					guideNumber: reception.guideNumber,
+					recuperatorId: user_id,
+					recuperatorTotal: createReceptionDto.details.reduce((acc, item) => acc += item.quantity, 0),
+					transporterId: transporter.id,
+					transporterTotal: 0,
+					auditGuiaDetails: createReceptionDto.details.map((item) => ({
+						productId: item.productId,
+						isRecuperator: true,
+						quantity: item.quantity,
+						quantityCollection: item.quantity
+					}))
+				});
 			}
 
 		} catch (error) {
-			await this.receptionDetailRepository.delete({ reception });
-			await this.receptionPhotoRepository.delete({ reception });
+			await this.receptionDetailRepository.delete({ reception: savedReception });
+			await this.receptionPhotoRepository.delete({ reception: savedReception });
 			await this.receptionRepository.delete(savedReception.id);
 			throw new BadRequestException('Error al crear la recepción: ' + error.message);
 		}
@@ -91,20 +114,17 @@ export class ReceptionsService {
 		return savedReception;
 	}
 
-	private async validateReceptionDetails(details: ReceptionDetailDto[]): Promise<void> {
-		for (const detail of details) {
-			const product = await this.receptionDetailRepository.findOneBy({ id: detail.productId });
-			if (!product) {
-				throw new BadRequestException(`El producto con ID ${detail.productId} no es válido.`);
-			}
-
-			if (detail.quantity < 1 || detail.quantity > 10000) {
-				throw new BadRequestException(`La cantidad del producto ${detail.productId} debe estar entre 1 y 10,000.`);
+	private async validateReceptionDetails(details: ReceptionDetailDto[]): Promise<Product[]> {
+		for (const { productId: id, quantity: qty } of details) {
+			if (qty < 1 || qty > 10000) {
+				throw new BadRequestException(`La cantidad del producto ${id} debe estar entre 1 y 10,000.`);
 			}
 		}
+
+		return Promise.all(details.map(async ({ productId: id, quantity: qty }) => await this.productRepository.findOneBy({ id })));
 	}
 
-	private async saveReceptionDetails(reception: Reception, details: ReceptionDetailDto[]): Promise<void> {
+	private async saveReceptionDetails(reception: Reception, details: ReceptionDetailDto[]): Promise<ReceptionDetail[]> {
 		const user_id = this.userContextService.getUserDetails().id;
 
 		const receptionDetails = details.map(detail => {
@@ -116,10 +136,10 @@ export class ReceptionsService {
 			return receptionDetail;
 		});
 
-		await this.receptionDetailRepository.save(receptionDetails);
+		return await this.receptionDetailRepository.save(receptionDetails);
 	}
 
-	private async saveReceptionPhotos(reception: Reception, photos: ReceptionPhotoDto[]): Promise<void> {
+	private async saveReceptionPhotos(reception: Reception, photos: ReceptionPhotoDto[]): Promise<ReceptionPhoto[]> {
 		const user_id = this.userContextService.getUserDetails().id;
 
 		const receptionPhotos = photos.map(({ url }) => {
@@ -132,7 +152,7 @@ export class ReceptionsService {
 		});
 
 
-		await this.receptionPhotoRepository.save(receptionPhotos);
+		return this.receptionPhotoRepository.save(receptionPhotos);
 	}
 
 	async update(id: number, updateReceptionDto: ReceptionUpdateDto): Promise<Reception> {

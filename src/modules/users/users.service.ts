@@ -50,8 +50,8 @@ export class UsersService {
 			.leftJoinAndSelect('userRol.role', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
-			.leftJoinAndSelect('user.zones', 'zones')
-			.leftJoinAndSelect('zones.zone', 'zone')
+			.leftJoinAndSelect('user.zones', 'userZones')
+			.leftJoinAndMapOne('userZones.zone', Child, 'child', 'child.id = userZones.zoneId')
 			.where('1=1')
 
 		if (name) {
@@ -341,25 +341,23 @@ export class UsersService {
 		return this.userRolRepository.save(userRol);
 	}
 
-	async getUserRoles({ sub: id, ...content }: any): Promise<string[]> {
-		let user = await this.userRepository
+	private async getUserByOauthId(id: string): Promise<User | undefined> {
+		return this.userRepository
 			.createQueryBuilder('user')
 			.leftJoinAndSelect('user.roles', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
-			.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
-			.where('user.oauthId = :id', { id })
-			.getOne();
+			.leftJoinAndSelect('user.zones', 'userZones')
+		.where('user.oauthId = :id', { id })
+		.getOne()
+	}
+
+	async getUserRoles({ sub: id, ...content }: any): Promise<string[]> {
+		let user = await this.getUserByOauthId(id);
 
 		if (!user) {
 			await this.createByOAuth0({ user_id: id, ...content });
 
-			user = await this.userRepository
-				.createQueryBuilder('user')
-				.leftJoinAndSelect('user.roles', 'role')
-				.leftJoinAndSelect('user.collectionSites', 'collectionSites')
-				.leftJoinAndSelect('collectionSites.collectionSite', 'collectionSite')
-				.where('user.oauthId = :id', { id })
-				.getOne();
+			user = await this.getUserByOauthId(id);
 
 			if (!user) {
 				throw new Error('Error al crear el usuario');

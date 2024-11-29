@@ -19,7 +19,8 @@ export class CatalogsService {
 	) { }
 
 	async createChild(createChildDto: ChildDto): Promise<Child> {
-		const { catalogCode, name, ...childData } = createChildDto;
+		let { catalogCode, name, ...childData } = createChildDto;
+		name = name.toUpperCase();
 
 		const existChild = await this.childrensRepository.findOne({ where: { name } });
 		if (existChild) {
@@ -68,7 +69,7 @@ export class CatalogsService {
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		updatedData = Object.assign(child, updatedData);
-		return await this.childrensRepository.save({ ...updatedData, modifiedBy });
+		return await this.childrensRepository.save({ ...updatedData, name: updateData.name.toUpperCase(), modifiedBy });
 	}
 
 	async changeOrder(id: number, order: number): Promise<Child> {
@@ -139,6 +140,10 @@ export class CatalogsService {
 
 	async getChildrenByKey(key: string): Promise<Child[]> {
 		return await this.childrensRepository.find({ where: { catalogCode: key } });
+	}
+
+	async getChildrenByName(name: string): Promise<Child[]> {
+		return await this.childrensRepository.find({ where: { name: name } });
 	}
 
 	async getChildrenByKeyAndParent(key: string, parentId: number): Promise<Child[]> {
