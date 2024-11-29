@@ -10,7 +10,7 @@ export class UserZone {
 	userId: string;
 
 	@PrimaryColumn({ type: 'bigint', name: 'ZonaId' })
-	zoneId: string;
+	zoneId: number;
 
 	@ManyToOne(() => User, user => user.collectionSites)
 	@JoinColumn({ name: 'UsuarioId' })

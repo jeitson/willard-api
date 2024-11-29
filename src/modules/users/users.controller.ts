@@ -40,7 +40,7 @@ export class UsersController {
 	}
 
 	@Post()
-	@Roles(22)
+	@Roles(0)
 	@ApiOperation({ summary: 'Crear usuario' })
 	async create(@Body() dto: UserDto): Promise<void> {
 		await this.usersService.create(dto);

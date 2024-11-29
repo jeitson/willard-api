@@ -172,10 +172,10 @@ export class UsersService {
 				if (zones && zones.length > 0) {
 					const _zones = await this.childrensRepository.find({ where: { id: In(zones), catalogCode: 'ZONA' } });
 
-					for (const { id: zone } of _zones) {
+					for (const { id: zoneId } of _zones) {
 						const userZone = manager.create(UserZone, {
 							user,
-							zone,
+							zoneId,
 							createdBy: user_id,
 							modifiedBy: user_id,
 						});
