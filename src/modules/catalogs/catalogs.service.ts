@@ -21,6 +21,7 @@ export class CatalogsService {
 	async createChild(createChildDto: ChildDto): Promise<Child> {
 		let { catalogCode, name, ...childData } = createChildDto;
 		name = name.toUpperCase();
+		catalogCode = catalogCode.toUpperCase();
 
 		const existChild = await this.childrensRepository.findOne({ where: { name, catalogCode } });
 		if (existChild) {
@@ -58,7 +59,16 @@ export class CatalogsService {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
 
-		const { catalogCode, ...updateData } = updatedData;
+		let { catalogCode, name, ...updateData } = updatedData;
+		catalogCode = catalogCode.toUpperCase();
+		name = name.toUpperCase();
+
+		const existChild = await this.childrensRepository.findOne({ where: { name, catalogCode } });
+
+		if (existChild.id !== child.id) {
+			throw new BusinessException('Ya existe un catálogo con esa configuración', 400);
+		}
+
 		if (catalogCode) {
 			const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
 			if (parent) {
@@ -69,7 +79,7 @@ export class CatalogsService {
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		updatedData = Object.assign(child, updatedData);
-		return await this.childrensRepository.save({ ...updatedData, name: updateData.name.toUpperCase(), modifiedBy });
+		return await this.childrensRepository.save({ ...updatedData, catalogCode, name, modifiedBy });
 	}
 
 	async changeOrder(id: number, order: number): Promise<Child> {
