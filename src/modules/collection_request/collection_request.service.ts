@@ -264,7 +264,8 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.route', 'route')
 			.leftJoinAndMapOne('collectionRequest.productType', Child, 'productType', 'productType.id = collectionRequest.productTypeId')
 			.leftJoinAndMapOne('collectionRequest.motiveSpecial', Child, 'motiveSpecial', 'motiveSpecial.id = collectionRequest.motiveSpecialId')
-			.leftJoinAndMapOne('collectionRequest.requestStatusId', Child, 'requestStatus', 'requestStatus.id = collectionRequest.requestStatusId');
+			.leftJoinAndMapOne('collectionRequest.requestStatusId', Child, 'requestStatus', 'requestStatus.id = collectionRequest.requestStatusId')
+			.leftJoinAndMapOne('collectionSite.cityId', Child, 'city', 'city.id = collectionSite.cityId');
 	}
 
 	async findAll(query: any): Promise<Pagination<CollectionRequest>> {
