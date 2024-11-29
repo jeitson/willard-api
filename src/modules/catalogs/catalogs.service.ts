@@ -22,7 +22,7 @@ export class CatalogsService {
 		let { catalogCode, name, ...childData } = createChildDto;
 		name = name.toUpperCase();
 
-		const existChild = await this.childrensRepository.findOne({ where: { name } });
+		const existChild = await this.childrensRepository.findOne({ where: { name, catalogCode } });
 		if (existChild) {
 			throw new BusinessException('Ya existe el catálogo', 400);
 		}
@@ -124,9 +124,17 @@ export class CatalogsService {
 	}
 
 	async deleteChild(id: number): Promise<void> {
-		const result = await this.childrensRepository.delete(id);
-		if (result.affected === 0) {
-			throw new BusinessException('Hijo no encontrado', 400);
+		try {
+			const result = await this.childrensRepository.delete(id);
+
+			if (result.affected === 0) {
+				throw new BusinessException('Hijo no encontrado', 400);
+			}
+		} catch (error) {
+			if (error.code === '23503') {
+				throw new BusinessException('No se puede eliminar el hijo porque ya cuenta con una relación.', 400);
+			}
+			throw error;
 		}
 	}
 
