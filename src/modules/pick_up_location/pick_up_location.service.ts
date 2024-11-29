@@ -81,13 +81,16 @@ export class PickUpLocationsService {
 		return await this.pickUpLocationsRepository.save({ ...updatedData, modifiedBy });
 	}
 
-	async findAll(query: PickUpLocationQueryDto): Promise<Pagination<PickUpLocation>> {
-		const { page, pageSize, } = query;
+	async findAll({ page, pageSize, clientId}: PickUpLocationQueryDto): Promise<Pagination<PickUpLocation>> {
 		const queryBuilder = this.pickUpLocationsRepository
-			.createQueryBuilder('lugar_recogida')
+			.createQueryBuilder('pick_up_locations')
 		//   .where({
 		//     ...(name ? { name: Like(`%${name}%`) } : null),
 		//   });
+
+		if (clientId) {
+			queryBuilder.andWhere('pick_up_locations.clientId LIKE :clientId', { clientId: `%${clientId}%` });
+		}
 
 		return paginate<PickUpLocation>(queryBuilder, { page, pageSize });
 	}
