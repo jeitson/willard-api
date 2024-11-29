@@ -7,19 +7,35 @@ import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { UserContextService } from '../users/user-context.service';
+import { ClientsService } from '../clients/clients.service';
+import { CollectionSitesService } from '../collection_sites/collection_sites.service';
 
 @Injectable()
 export class PickUpLocationsService {
 	constructor(
 		@InjectRepository(PickUpLocation)
 		private readonly pickUpLocationsRepository: Repository<PickUpLocation>,
-		private readonly userContextService: UserContextService
+		private readonly userContextService: UserContextService,
+		private readonly clientsService: ClientsService,
+		private readonly collectionSitesService: CollectionSitesService,
 	) { }
 
-	async create(createPickUpLocationDto: PickUpLocationCreateDto): Promise<PickUpLocation> {
+	async create({ clientId, collectionSiteId, ...content }: PickUpLocationCreateDto): Promise<PickUpLocation> {
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const pickUpLocation = this.pickUpLocationsRepository.create({ ...createPickUpLocationDto, createdBy: user_id, modifiedBy: user_id });
+		const client = await this.clientsService.findOne(clientId);
+
+		if (!client) {
+			throw new BusinessException('Cliente no encontrado', 400);
+		}
+
+		const collectionSite = await this.collectionSitesService.findOne(collectionSiteId);
+
+		if (!collectionSite) {
+			throw new BusinessException('Sede de acopio no encontrado', 400);
+		}
+
+		const pickUpLocation = this.pickUpLocationsRepository.create({ ...content, client, collectionSite, createdBy: user_id, modifiedBy: user_id });
 		return await this.pickUpLocationsRepository.save(pickUpLocation);
 	}
 
@@ -28,6 +44,25 @@ export class PickUpLocationsService {
 
 		if (!pickUpLocation) {
 			throw new BusinessException('Lugar de recogida no encontrado', 400);
+		}
+
+		if (updatedData.clientId) {
+			const client = await this.clientsService.findOne(updatedData.clientId);
+
+			if (!client) {
+				throw new BusinessException('Cliente no encontrado', 400);
+			}
+
+			pickUpLocation.client = client;
+		}
+
+		if (updatedData.collectionSiteId) {
+			const collectionSite = await this.collectionSitesService.findOne(updatedData.collectionSiteId);
+
+			if (!collectionSite) {
+				throw new BusinessException('Sede de acopio no encontrado', 400);
+			}
+			pickUpLocation.collectionSite = collectionSite;
 		}
 
 		updatedData = Object.assign(pickUpLocation, updatedData);
