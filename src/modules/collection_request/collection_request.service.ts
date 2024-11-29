@@ -287,8 +287,9 @@ export class CollectionRequestService {
 		}
 
 		if (roles.includes(15)) {
-			queryBuilder.where('collectionRequest.requestStatusId = 66');
-//			queryBuilder.andWhere('user.id = :id', { id });
+			// queryBuilder.where('collectionRequest.requestStatusId = 66');
+			queryBuilder.where('collectionRequest.isSpecial = true');
+			//queryBuilder.andWhere('user.id = :id', { id });
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
