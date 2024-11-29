@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Client } from './entities/client.entity';
-import { Like, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { ClientCreateDto, ClientQueryDto, ClientUpdateDto } from './dto/client.dto';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
@@ -16,21 +16,33 @@ export class ClientsService {
 		private readonly userContextService: UserContextService
 	) { }
 
-	async create(clientCreateDto: ClientCreateDto): Promise<Client> {
+	async create({ name, businessName, ...clientCreateDto}: ClientCreateDto): Promise<Client> {
+		name = name.toUpperCase();
+		businessName = businessName.toUpperCase();
+
+		const isExist = await this.clientsRepository.findOne({ where: { name: In([name, businessName]) }});
+
+		if (!isExist) {
+			throw new BusinessException('Ya existe el cliente');
+		}
+
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const client = this.clientsRepository.create({ ...clientCreateDto, createdBy: user_id, modifiedBy: user_id });
+		const client = this.clientsRepository.create({ ...clientCreateDto, name, businessName, createdBy: user_id, modifiedBy: user_id });
 		return await this.clientsRepository.save(client);
 	}
 
-	async update(id: number, updatedData: ClientUpdateDto): Promise<Client> {
+	async update(id: number, { name, businessName, ...updatedData }: ClientUpdateDto): Promise<Client> {
 		const client = await this.clientsRepository.findOne({ where: { id } });
 
 		if (!client) {
 			throw new BusinessException('Cliente no encontrado');
 		}
 
-		updatedData = Object.assign(client, updatedData);
+		name = name.toUpperCase();
+		businessName = businessName.toUpperCase();
+
+		updatedData = Object.assign(client, { name, businessName, ...updatedData });
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		return await this.clientsRepository.save({ ...updatedData, modifiedBy });
