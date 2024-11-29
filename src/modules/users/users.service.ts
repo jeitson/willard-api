@@ -273,10 +273,10 @@ export class UsersService {
 
 					const _zones = await this.childrensRepository.find({ where: { id: In(zones), catalogCode: 'ZONA' } });
 
-					for (const { id: zone } of _zones) {
+					for (const { id: zoneId } of _zones) {
 						const userZone = manager.create(UserZone, {
 							user,
-							zone,
+							zoneId,
 							createdBy: user_id,
 							modifiedBy: user_id,
 						});
@@ -342,6 +342,25 @@ export class UsersService {
 		userRol.updatedBy = user_id;
 
 		return this.userRolRepository.save(userRol);
+	}
+
+	async addZoneToUser(userId: number, zoneId: number): Promise<UserZone> {
+		const user = await this.userRepository.findOneBy({ id: userId });
+		const zone = await this.childrensRepository.findOneBy({ id: zoneId, catalogCode: 'ZONA' });
+
+		if (!user || !zone) {
+			throw new Error('Usuario o Zona no encontrado');
+		}
+
+		const user_id = this.userContextService.getUserDetails().id;
+
+		const userZone = new UserZone();
+		userZone.user = user;
+		userZone.zoneId = zone.id;
+		userZone.createdBy = user_id;
+		userZone.updatedBy = user_id;
+
+		return this.userZoneRepository.save(userZone);
 	}
 
 	private async getUserByOauthId(id: string): Promise<User | undefined> {

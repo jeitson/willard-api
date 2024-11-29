@@ -87,6 +87,13 @@ export class UsersController {
 		await this.usersService.addCollectionSiteToUser(+id, +collection_site_id);
 	}
 
+	@Post(':id/zone/:zone_id')
+	@Roles(22)
+	@ApiOperation({ summary: 'Asignar zona a usuario' })
+	async addZoneToUser(@IdParam('id') id: string, @IdParam('zone_id') zone_id: string): Promise<void> {
+		await this.usersService.addZoneToUser(+id, +zone_id);
+	}
+
 	@Post('search')
 	@Roles(0)
 	@ApiOperation({ summary: 'Consultar usuarios por sus diversas relaciones' })
