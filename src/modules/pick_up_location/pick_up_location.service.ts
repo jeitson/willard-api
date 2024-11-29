@@ -9,6 +9,7 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { UserContextService } from '../users/user-context.service';
 import { ClientsService } from '../clients/clients.service';
 import { CollectionSitesService } from '../collection_sites/collection_sites.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PickUpLocationsService {
@@ -18,9 +19,10 @@ export class PickUpLocationsService {
 		private readonly userContextService: UserContextService,
 		private readonly clientsService: ClientsService,
 		private readonly collectionSitesService: CollectionSitesService,
+		private readonly usersSitesService: UsersService,
 	) { }
 
-	async create({ clientId, collectionSiteId, ...content }: PickUpLocationCreateDto): Promise<PickUpLocation> {
+	async create({ clientId, collectionSiteId, consultantId, ...content }: PickUpLocationCreateDto): Promise<PickUpLocation> {
 		const user_id = this.userContextService.getUserDetails().id;
 
 		const client = await this.clientsService.findOne(clientId);
@@ -35,7 +37,15 @@ export class PickUpLocationsService {
 			throw new BusinessException('Sede de acopio no encontrado', 400);
 		}
 
-		const pickUpLocation = this.pickUpLocationsRepository.create({ ...content, client, collectionSite, createdBy: user_id, modifiedBy: user_id });
+		const user = await this.usersSitesService.findUserById(consultantId.toString());
+
+		if (!user) {
+			throw new BusinessException('Asesor no encontrado', 400);
+		}
+
+		// TODO: validar el rol del usuario
+
+		const pickUpLocation = this.pickUpLocationsRepository.create({ ...content, client, collectionSite, user, createdBy: user_id, modifiedBy: user_id });
 		return await this.pickUpLocationsRepository.save(pickUpLocation);
 	}
 
