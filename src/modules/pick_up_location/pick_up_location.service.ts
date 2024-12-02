@@ -81,27 +81,40 @@ export class PickUpLocationsService {
 		return await this.pickUpLocationsRepository.save({ ...updatedData, modifiedBy });
 	}
 
-	async findAll({ page, pageSize, clientId}: PickUpLocationQueryDto): Promise<Pagination<PickUpLocation>> {
+	async findAll({ page, pageSize, clientId }: PickUpLocationQueryDto): Promise<Pagination<PickUpLocation>> {
 		const queryBuilder = this.pickUpLocationsRepository
 			.createQueryBuilder('pick_up_locations')
-		//   .where({
-		//     ...(name ? { name: Like(`%${name}%`) } : null),
-		//   });
+			.leftJoinAndSelect('pick_up_locations.client', 'client')
+			.leftJoinAndSelect('pick_up_locations.collectionSite', 'collectionSite')
+			.leftJoinAndSelect('pick_up_locations.user', 'consultant')
+			.leftJoinAndSelect('pick_up_locations.collectionsRequests', 'collectionsRequests');
 
 		if (clientId) {
-			queryBuilder.andWhere('pick_up_locations.clientId LIKE :clientId', { clientId: `%${clientId}%` });
+			queryBuilder.andWhere('pick_up_locations.clientId = :clientId', { clientId });
 		}
 
 		return paginate<PickUpLocation>(queryBuilder, { page, pageSize });
 	}
 
 	async findOne(id: number): Promise<PickUpLocation> {
-		const pickUpLocation = await this.pickUpLocationsRepository.findOne({ where: { id } });
+		const queryBuilder = this.pickUpLocationsRepository
+			.createQueryBuilder('pick_up_locations')
+			.leftJoinAndSelect('pick_up_locations.client', 'client')
+			.leftJoinAndSelect('pick_up_locations.collectionSite', 'collectionSite')
+			.leftJoinAndSelect('pick_up_locations.user', 'consultant')
+			.leftJoinAndSelect('pick_up_locations.collectionsRequests', 'collectionsRequests')
+
+			.where('pick_up_locations.id = :id', { id });
+
+		const pickUpLocation = await queryBuilder.getOne();
+
 		if (!pickUpLocation) {
 			throw new BusinessException('Lugar de recogida no encontrado', 400);
 		}
+
 		return pickUpLocation;
 	}
+
 
 	async changeStatus(id: number): Promise<PickUpLocation> {
 		const pickUpLocation = await this.findOne(id);
