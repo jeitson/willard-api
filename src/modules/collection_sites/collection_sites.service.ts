@@ -72,6 +72,16 @@ export class CollectionSitesService {
 
 	async remove(id: number): Promise<void> {
 		const consultant = await this.findOne(id);
-		await this.collectionSiteRepository.remove(consultant);
+
+		try {
+			await this.collectionSiteRepository.remove(consultant);
+		} catch (error) {
+			if (error?.code === '23503') {
+				throw new BusinessException(
+					`No se puede eliminar el registro con ID ${id} porque tiene relaciones existentes.`,
+				);
+			}
+			throw error;
+		}
 	}
 }

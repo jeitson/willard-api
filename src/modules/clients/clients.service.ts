@@ -22,7 +22,7 @@ export class ClientsService {
 
 		const isExist = await this.clientsRepository.findOne({ where: { name: In([name, businessName]) }});
 
-		if (!isExist) {
+		if (isExist) {
 			throw new BusinessException('Ya existe el cliente');
 		}
 
@@ -41,6 +41,12 @@ export class ClientsService {
 
 		name = name.toUpperCase();
 		businessName = businessName.toUpperCase();
+
+		const clientByName = await this.clientsRepository.findOne({ where: { name } });
+
+		if (clientByName) {
+			throw new BusinessException('Ya existe un cliente con ese nombre');
+		}
 
 		updatedData = Object.assign(client, { name, businessName, ...updatedData });
 		const modifiedBy = this.userContextService.getUserDetails().id;
