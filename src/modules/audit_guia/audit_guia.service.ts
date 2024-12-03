@@ -133,6 +133,7 @@ export class AuditGuiaService {
 	async findAll(query: any): Promise<Pagination<AuditGuia>> {
 		const queryBuilder = this.auditGuiaRepository.createQueryBuilder('auditGuia')
 			.leftJoinAndSelect('auditGuia.auditGuiaDetails', 'auditGuiaDetails')
+			.leftJoinAndSelect('auditGuiaDetails.product', 'product')
 			.leftJoinAndSelect('auditGuia.reception', 'reception')
 			.leftJoinAndSelect('auditGuia.auditsGuiasRoutes', 'auditsGuiasRoutes')
 			.leftJoinAndSelect('auditsGuiasRoutes.transporterTravel', 'transporterTravel')
@@ -141,10 +142,35 @@ export class AuditGuiaService {
 			.leftJoinAndMapOne('auditGuia.recuperator', User, 'recuperator', 'recuperator.id = auditGuia.recuperatorId')
 			.leftJoinAndMapOne('auditGuia.transporter', Transporter, 'transporter', 'transporter.id = auditGuia.transporterId');
 
-		return paginate<AuditGuia>(queryBuilder, {
+		const rawResults = await paginate<AuditGuia>(queryBuilder, {
 			page: query.page,
 			pageSize: query.pageSize,
 		});
+
+		const groupedResults: any = rawResults.items.map(auditGuia => {
+			const groupedDetails = auditGuia.auditGuiaDetails.reduce((acc, detail) => {
+				if (detail.isRecuperator) {
+					acc.recuperator.detail = [...acc.recuperator.detail, detail]
+					acc.recuperator.quantity += detail.quantity;
+					acc.recuperator.quantityCollection += detail.quantityCollection;
+				} else {
+					acc.transporter.detail = [...acc.transporter.detail, detail]
+					acc.transporter.quantity += detail.quantity;
+					acc.transporter.quantityCollection += detail.quantityCollection;
+				}
+
+				return acc;
+			}, {recuperator: { detail: [], quantity: 0, quantityCollection: 0 }, transporter: { detail: [], quantity: 0, quantityCollection: 0 }});
+			return {
+				...auditGuia,
+				auditGuiaDetails: groupedDetails || [],
+			};
+		});
+
+		return {
+			...rawResults,
+			items: groupedResults,
+		};
 	}
 
 	private async handleTransporterTravel(
