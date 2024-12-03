@@ -136,7 +136,7 @@ export class AuditGuiaService {
 			.leftJoinAndSelect('auditGuia.auditsGuiasRoutes', 'auditsGuiasRoutes')
 			.leftJoinAndSelect('auditsGuiasRoutes.transporterTravel', 'transporterTravel')
 			.leftJoinAndMapOne('auditGuia.requestStatusId', Child, 'requestStatus', 'requestStatus.id = auditGuia.requestStatusId')
-			// .leftJoinAndMapOne('auditGuia.zoneId', Child, 'zone', 'zone.id = auditGuia.zonedId');
+			.leftJoinAndMapOne('auditGuia.zoneId', Child, 'zone', 'zone.id = auditGuia.zoneId');
 
 		return paginate<AuditGuia>(queryBuilder, {
 			page: query.page,
