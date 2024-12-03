@@ -18,8 +18,8 @@ export class AuditGuiaController {
 	@Roles(19)
 	@ApiOperation({ summary: 'Listado de auditoria de guias' })
 	@ApiResult({ type: [AuditGuia] })
-	async findAll(@Query() query: any): Promise<AuditGuia[]> {
-		return this.auditGuiaService.findAll();
+	async findAll(@Query() query: any) {
+		return this.auditGuiaService.findAll(query);
 	}
 
 	@Get(':id')

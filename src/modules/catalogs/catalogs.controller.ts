@@ -14,7 +14,7 @@ export class CatalogsController {
 	constructor(private readonly catalogsService: CatalogsService) { }
 
 	@Post()
-	@Roles(22)
+	@Roles(0)
 	@ApiOperation({ summary: 'Crear hijos de catalogos' })
 	async create(@Body() dto: ChildDto): Promise<void> {
 		await this.catalogsService.createChild(dto);

@@ -10,12 +10,15 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { AuditGuiaRoute } from './entities/audit_guia-ruta.entity';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 import { CatalogsService } from '../catalogs/catalogs.service';
+import { Pagination } from 'src/core/helper/paginate/pagination';
+import { paginate } from 'src/core/helper/paginate';
+import { Child } from '../catalogs/entities/child.entity';
 
 // TODO: Actualizar los ids de los estados
 /** Estados ID
- * 1 = Sin GUIA
- * 2 = Pendiente
- * 3 = Confirmado
+ * 101 = Sin GUIA
+ * 102 = Pendiente
+ * 103 = Confirmado
  *  **/
 
 @Injectable()
@@ -49,7 +52,7 @@ export class AuditGuiaService {
 		await queryRunner.startTransaction();
 
 		try {
-			let requestStatusId = 1;
+			let requestStatusId = 101;
 			let zoneId = null;
 			let date = null;
 
@@ -98,7 +101,7 @@ export class AuditGuiaService {
 
 	async updateDetails(id: number, updateDto: AuditGuiaDetailUpdateDto): Promise<void> {
 		const auditGuia = await this.findAuditGuiaById(id);
-		if (auditGuia.requestStatusId !== 2) {
+		if (auditGuia.requestStatusId !== 102) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
@@ -111,24 +114,33 @@ export class AuditGuiaService {
 
 	async confirm(id: number): Promise<void> {
 		const auditGuia = await this.findAuditGuiaById(id);
-		if (auditGuia.requestStatusId !== 2) {
+		if (auditGuia.requestStatusId !== 102) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
-		auditGuia.requestStatusId = 3;
+		auditGuia.requestStatusId = 103;
 		await this.auditGuiaRepository.save(auditGuia);
 	}
 
 	async findOne(id: string): Promise<AuditGuia> {
 		return this.auditGuiaRepository.findOne({
 			where: { id: +id },
-			relations: ['auditGuiaDetails', 'auditsGuiasRoutes'],
+			relations: ['auditGuiaDetails', 'auditsGuiasRoutes', 'reception', 'transporterTravel'],
 		});
 	}
 
-	async findAll(): Promise<AuditGuia[]> {
-		return this.auditGuiaRepository.find({
-			relations: ['auditGuiaDetails', 'auditsGuiasRoutes'],
+	async findAll(query: any): Promise<Pagination<AuditGuia>> {
+		const queryBuilder = this.auditGuiaRepository.createQueryBuilder('auditGuia')
+			.leftJoinAndSelect('auditGuia.auditGuiaDetails', 'auditGuiaDetails')
+			.leftJoinAndSelect('auditGuia.reception', 'reception')
+			.leftJoinAndSelect('auditGuia.auditsGuiasRoutes', 'auditsGuiasRoutes')
+			.leftJoinAndSelect('auditsGuiasRoutes.transporterTravel', 'transporterTravel')
+			.leftJoinAndMapOne('auditGuia.requestStatusId', Child, 'requestStatus', 'requestStatus.id = auditGuia.requestStatusId')
+			// .leftJoinAndMapOne('auditGuia.zoneId', Child, 'zone', 'zone.id = auditGuia.zonedId');
+
+		return paginate<AuditGuia>(queryBuilder, {
+			page: query.page,
+			pageSize: query.pageSize,
 		});
 	}
 
@@ -163,7 +175,7 @@ export class AuditGuiaService {
 		auditGuiaDetails.push(...transporterDetails);
 
 		return {
-			requestStatusId: 2,
+			requestStatusId: 102,
 			date: transporterTravel.movementDate,
 			zoneId: zone[0].id,
 			auditGuiaDetails,
@@ -225,7 +237,7 @@ export class AuditGuiaService {
 	async synchronize(id: number): Promise<void> {
 		const auditGuia = await this.findAuditGuiaById(id);
 
-		if (auditGuia.requestStatusId !== 1) {
+		if (auditGuia.requestStatusId !== 101) {
 			throw new BusinessException('Solo se pueden sincronizar auditorías en estado "sin guia".');
 		}
 
@@ -242,7 +254,7 @@ export class AuditGuiaService {
 
 			auditGuia.transporterTotal = transporterTotal;
 			auditGuia.recuperatorTotal = recuperatorTotal;
-			auditGuia.requestStatusId = 2;
+			auditGuia.requestStatusId = 102;
 
 			await queryRunner.manager.save(auditGuia);
 
@@ -306,7 +318,7 @@ export class AuditGuiaService {
 			throw new BusinessException('No se encontró la auditoría especificada.', 404);
 		}
 
-		if (auditGuia.requestStatusId !== 2) {
+		if (auditGuia.requestStatusId !== 102) {
 			throw new BusinessException('La auditoría debe estar en estado pendiente para actualizar.');
 		}
 
