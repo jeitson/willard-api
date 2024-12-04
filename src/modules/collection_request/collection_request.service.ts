@@ -242,7 +242,7 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, requestStatusId: 1, modifiedBy: user_id });
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, requestStatusId: 61, modifiedBy: user_id });
 
 		if (!updated) {
 			throw new BusinessException('No se pudó actualizar la información', 400);
