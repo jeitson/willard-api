@@ -89,4 +89,9 @@ export class CollectionSiteUpdateDto extends PartialType(CollectionSiteCreateDto
 export class CollectionSiteQueryDto extends IntersectionType(
 	PagerDto<CollectionSiteCreateDto>,
 	PartialType(PickType(CollectionSiteCreateDto, ['siteTypeId', 'countryId', 'cityId', 'name', 'nit'])),
-) { }
+) {
+	@ApiProperty({ description: 'ID de la ubicación de recolección, opcional, debe ser un número.' })
+	@IsOptional()
+	@IsNumber({}, { message: 'pickUpLocationId debe ser un número.' })
+	pickUpLocationId?: number;
+}

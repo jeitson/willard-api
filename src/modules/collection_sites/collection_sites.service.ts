@@ -23,22 +23,22 @@ export class CollectionSitesService {
 		return await this.collectionSiteRepository.save(collectionSite);
 	}
 
-	async findAll({
-		page,
-		pageSize,
-		name
-	}: CollectionSiteQueryDto): Promise<Pagination<CollectionSite>> {
+	async findAll({ page, pageSize, name, pickUpLocationId }: CollectionSiteQueryDto): Promise<Pagination<CollectionSite>> {
 		const queryBuilder = this.collectionSiteRepository
-			.createQueryBuilder('sedes_acopio')
-			.where({
-				...(name ? { name: Like(`%${name}%`) } : null),
-			});
+			.createQueryBuilder('collection_sites')
+			.leftJoinAndSelect('collection_sites.pickUpLocation', 'pickUpLocation')
 
-		return paginate<CollectionSite>(queryBuilder, {
-			page,
-			pageSize,
-		});
+		if (name) {
+			queryBuilder.andWhere('collection_sites.name LIKE :name', { name: `%${name}%` });
+		}
+
+		if (pickUpLocationId) {
+			queryBuilder.andWhere('pickUpLocation.id = :pickUpLocationId', { pickUpLocationId });
+		}
+
+		return paginate<CollectionSite>(queryBuilder, { page, pageSize });
 	}
+
 
 	async findOne(id: number): Promise<CollectionSite> {
 		const collectionSite = await this.collectionSiteRepository.findOneBy({ id });

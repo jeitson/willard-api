@@ -81,7 +81,7 @@ export class PickUpLocationsService {
 		return await this.pickUpLocationsRepository.save({ ...updatedData, modifiedBy });
 	}
 
-	async findAll({ page, pageSize, clientId }: PickUpLocationQueryDto): Promise<Pagination<PickUpLocation>> {
+	async findAll({ page, pageSize, clientId, placeTypeId }: PickUpLocationQueryDto): Promise<Pagination<PickUpLocation>> {
 		const queryBuilder = this.pickUpLocationsRepository
 			.createQueryBuilder('pick_up_locations')
 			.leftJoinAndSelect('pick_up_locations.client', 'client')
