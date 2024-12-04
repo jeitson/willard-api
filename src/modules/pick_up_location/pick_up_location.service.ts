@@ -90,7 +90,7 @@ export class PickUpLocationsService {
 			.leftJoinAndSelect('pick_up_locations.collectionsRequests', 'collectionsRequests');
 
 		if (clientId) {
-			queryBuilder.andWhere('pick_up_locations.clientId = :clientId', { clientId });
+			queryBuilder.andWhere('client.id = :clientId', { clientId });
 		}
 
 		return paginate<PickUpLocation>(queryBuilder, { page, pageSize });

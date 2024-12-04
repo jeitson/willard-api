@@ -290,7 +290,7 @@ export class CollectionRequestService {
 
 		if (roles.includes(15)) {
 			// queryBuilder.where('collectionRequest.requestStatusId = 66');
-			queryBuilder.where('collectionRequest.isSpecial = true AND requestStatusId = 66');
+			queryBuilder.where('collectionRequest.isSpecial = true AND collectionRequest.requestStatusId = 66');
 			//queryBuilder.andWhere('user.id = :id', { id });
 		}
 
