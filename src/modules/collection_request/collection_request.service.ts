@@ -285,7 +285,7 @@ export class CollectionRequestService {
 		}
 
 		if (roles.includes(14)) {
-			queryBuilder.where('collectionRequest.requestStatusId IN (61, 62)');
+			queryBuilder.where('collectionRequest.requestStatusId IN (61, 62)'); // Agregar el filtro de la zona y que solamente se le liste lo que esté pendiente por confirmación (61)
 		}
 
 		if (roles.includes(15)) {
