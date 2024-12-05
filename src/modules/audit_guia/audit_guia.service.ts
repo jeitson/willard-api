@@ -15,6 +15,7 @@ import { paginate } from 'src/core/helper/paginate';
 import { Child } from '../catalogs/entities/child.entity';
 import { User } from '../users/entities/user.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
+import { Shipment } from '../shipments/entities/shipment.entity';
 
 /** Estados ID
  * 101 = Sin GUIA
@@ -140,7 +141,8 @@ export class AuditGuiaService {
 			.leftJoinAndMapOne('auditGuia.requestStatus', Child, 'requestStatus', 'requestStatus.id = auditGuia.requestStatusId')
 			.leftJoinAndMapOne('auditGuia.zone', Child, 'zone', 'zone.id = auditGuia.zoneId')
 			.leftJoinAndMapOne('auditGuia.recuperator', User, 'recuperator', 'recuperator.id = auditGuia.recuperatorId')
-			.leftJoinAndMapOne('auditGuia.transporter', Transporter, 'transporter', 'transporter.id = auditGuia.transporterId');
+			.leftJoinAndMapOne('auditGuia.transporter', Transporter, 'transporter', 'transporter.id = auditGuia.transporterId')
+			.leftJoinAndMapMany('auditGuia.shipments', Shipment, 'shipment', 'shipment.guideNumber = auditGuia.guideNumber')
 
 		const rawResults = await paginate<AuditGuia>(queryBuilder, {
 			page: query.page,
