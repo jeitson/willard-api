@@ -143,6 +143,7 @@ export class AuditGuiaService {
 			.leftJoinAndMapOne('auditGuia.recuperator', User, 'recuperator', 'recuperator.id = auditGuia.recuperatorId')
 			.leftJoinAndMapOne('auditGuia.transporter', Transporter, 'transporter', 'transporter.id = auditGuia.transporterId')
 			.leftJoinAndMapMany('auditGuia.shipments', Shipment, 'shipment', 'shipment.guideNumber = auditGuia.guideNumber')
+			.leftJoinAndSelect('shipment.collectionSite', 'collectionSite');
 
 		const rawResults = await paginate<AuditGuia>(queryBuilder, {
 			page: query.page,
