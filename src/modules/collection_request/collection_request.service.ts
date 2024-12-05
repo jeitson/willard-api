@@ -277,21 +277,22 @@ export class CollectionRequestService {
 		// 15 => ROL Willard Logistica
 		// 16 => ROL Fabrica
 		// 18 => ROL Agencia
-		let { roles, id } = this.userContextService.getUserDetails();
+		let { roles, id, zones } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId);
+		zones = zones.map(({ zoneId }) => +zoneId);
 
 		if (roles.find((role: number) => [13, 16, 18].includes(role))) {
 			queryBuilder.where('collectionRequest.createdBy = :id', { id });
 		}
 
 		if (roles.includes(14)) {
-			queryBuilder.where('collectionRequest.requestStatusId IN (61, 62)'); // Agregar el filtro de la zona y que solamente se le liste lo que esté pendiente por confirmación (61)
+			queryBuilder.where('collectionRequest.requestStatusId = 61')
+			.andWhere('zone.id IN (:...zones)', { zones });
 		}
 
 		if (roles.includes(15)) {
-			// queryBuilder.where('collectionRequest.requestStatusId = 66');
-			queryBuilder.where('collectionRequest.isSpecial = true AND collectionRequest.requestStatusId = 66');
-			//queryBuilder.andWhere('user.id = :id', { id });
+			queryBuilder.where('collectionRequest.isSpecial = true')
+			.andWhere('collectionRequest.requestStatusId = 66');
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
