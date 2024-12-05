@@ -9,4 +9,5 @@ export enum ROL {
 	'ASESOR_PH' = 13,
 	'AGENCIA_PH' = 18,
 	'RECUPERADORA' = 20,
+	'TODOS' = 0,
 }
