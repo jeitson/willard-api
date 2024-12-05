@@ -128,7 +128,19 @@ export class UserQueryDto extends IntersectionType(
 export class UserSearchByRoleDto {
 	@ApiProperty({ type: [Number], description: 'Consulta usuarios por varios roles' })
 	@IsArray({ message: 'El campo "roles" debe ser un arreglo de id\'s' })
-	@ArrayNotEmpty({ message: 'El arreglo de roles no puede estar vacío' })
+	// @ArrayNotEmpty({ message: 'El arreglo de roles no puede estar vacío' })
 	@IsNumber({}, { each: true, message: 'Cada elemento en "roles" debe ser un número' })
 	roles: number[];
+
+	@ApiProperty({ type: [Number], description: 'Consulta usuarios por varias sedes de acopio' })
+	@IsArray({ message: 'El campo "sedes de acopio" debe ser un arreglo de id\'s' })
+	// @ArrayNotEmpty({ message: 'El arreglo de sedes de acopios no puede estar vacío' })
+	@IsNumber({}, { each: true, message: 'Cada elemento en "collectionSites" debe ser un número' })
+	collectionSites: number[];
+
+	@ApiProperty({ type: [Number], description: 'Consulta usuarios por varias zonas' })
+	@IsArray({ message: 'El campo "zonas" debe ser un arreglo de id\'s' })
+	// @ArrayNotEmpty({ message: 'El arreglo de sedes de acopios no puede estar vacío' })
+	@IsNumber({}, { each: true, message: 'Cada elemento en "zonas" debe ser un número' })
+	zones: number[];
 }

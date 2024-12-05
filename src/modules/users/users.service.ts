@@ -402,7 +402,7 @@ export class UsersService {
 
 	async findByIds(
 		{ page, pageSize, name, email, oauthId }: UserQueryDto,
-		{ roles }: UserSearchByRoleDto
+		{ roles, collectionSites, zones }: UserSearchByRoleDto
 	): Promise<Pagination<User>> {
 		const queryBuilder = this.userRepository
 			.createQueryBuilder('user')
@@ -428,6 +428,14 @@ export class UsersService {
 
 		if (roles && roles.length > 0) {
 			queryBuilder.andWhere('role.id IN (:...roles)', { roles });
+		}
+
+		if (collectionSites && collectionSites.length > 0) {
+			queryBuilder.andWhere('collectionSite.id IN (:...collectionSites)', { collectionSites });
+		}
+
+		if (zones && zones.length > 0) {
+			queryBuilder.andWhere('child.id IN (:...zones)', { zones });
 		}
 
 		return paginate<User>(queryBuilder, { page, pageSize });

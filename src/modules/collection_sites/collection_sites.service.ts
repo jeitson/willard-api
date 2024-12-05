@@ -26,14 +26,14 @@ export class CollectionSitesService {
 	async findAll({ page, pageSize, name, pickUpLocationId }: CollectionSiteQueryDto): Promise<Pagination<CollectionSite>> {
 		const queryBuilder = this.collectionSiteRepository
 			.createQueryBuilder('collection_sites')
-			.leftJoinAndSelect('collection_sites.pickUpLocation', 'pickUpLocation')
+			.leftJoinAndSelect('collection_sites.pickUpLocations', 'pickUpLocations')
 
 		if (name) {
 			queryBuilder.andWhere('collection_sites.name LIKE :name', { name: `%${name}%` });
 		}
 
 		if (pickUpLocationId) {
-			queryBuilder.andWhere('pickUpLocation.id = :pickUpLocationId', { pickUpLocationId });
+			queryBuilder.andWhere('pickUpLocations.id = :pickUpLocationId', { pickUpLocationId });
 		}
 
 		return paginate<CollectionSite>(queryBuilder, { page, pageSize });
