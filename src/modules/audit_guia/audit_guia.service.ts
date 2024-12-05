@@ -88,6 +88,8 @@ export class AuditGuiaService {
 
 			await this.saveAuditDetails(queryRunner, auditGuiaDetails, auditGuiaSaved);
 
+			await this.verifyAndConfirmDetails(auditGuiaDetails, auditGuiaSaved);
+
 			if (transporterTravel) {
 				await this.saveAuditRoute(queryRunner, auditGuiaSaved, transporterTravel, userId);
 			}
@@ -163,7 +165,7 @@ export class AuditGuiaService {
 				}
 
 				return acc;
-			}, {recuperator: { detail: [], quantity: 0, quantityCollection: 0 }, transporter: { detail: [], quantity: 0, quantityCollection: 0 }});
+			}, { recuperator: { detail: [], quantity: 0, quantityCollection: 0 }, transporter: { detail: [], quantity: 0, quantityCollection: 0 } });
 			return {
 				...auditGuia,
 				auditGuiaDetails: groupedDetails || [],
@@ -174,6 +176,21 @@ export class AuditGuiaService {
 			...rawResults,
 			items: groupedResults,
 		};
+	}
+
+	private async verifyAndConfirmDetails(
+		auditGuiaDetails: any[],
+		auditGuiaSaved: AuditGuia,
+	): Promise<void> {
+		const totalQuantity = auditGuiaDetails.reduce((sum, detail) => sum + detail.quantity, 0);
+		const totalProducts = await this.productRepository.count({
+			where: { id: In(auditGuiaDetails.map(detail => detail.product.id)) },
+		});
+
+		if (auditGuiaDetails.length === totalProducts && totalQuantity === auditGuiaSaved.transporterTotal) {
+			auditGuiaSaved.requestStatusId = 103;
+			await this.auditGuiaRepository.save(auditGuiaSaved);
+		}
 	}
 
 	private async handleTransporterTravel(
