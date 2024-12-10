@@ -7,6 +7,7 @@ import { ReceptionDto, ReceptionQueryDto, ReceptionUpdateDto } from './dto/creat
 import { Reception } from './entities/reception.entity';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Recepción')
 @UseGuards(RolesGuard)
@@ -15,14 +16,14 @@ export class ReceptionsController {
 	constructor(private readonly receptionsService: ReceptionsService) { }
 
 	@Post()
-	@Roles(18, 20)
+	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
 	@ApiOperation({ summary: 'Creación' })
 	create(@Body() createDto: ReceptionDto): Promise<Reception> {
 		return this.receptionsService.create(createDto);
 	}
 
 	@Get()
-	@Roles(18, 20)
+	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
 	@ApiOperation({ summary: 'Obtener listado - Paginación' })
 	@ApiResult({ type: [Reception], isPage: true })
 	async findAll(@Query() dto: ReceptionQueryDto) {
@@ -30,14 +31,14 @@ export class ReceptionsController {
 	}
 
 	@Get(':id')
-	@Roles(18, 20)
+	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
 	@ApiOperation({ summary: 'Obtener por ID' })
 	findOne(@IdParam('id') id: string): Promise<Reception> {
 		return this.receptionsService.findOne(+id);
 	}
 
 	// @Put(':id')
-	// @Roles(18, 20)
+	// 	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
 	// @ApiOperation({ summary: 'Actualizar' })
 	// async update(@IdParam('id') id: string, @Body() updateDto: ReceptionUpdateDto): Promise<Reception> {
 	// 	return this.receptionsService.update(+id, updateDto);

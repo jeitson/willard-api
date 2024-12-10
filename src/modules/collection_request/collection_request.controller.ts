@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Put, UseGuards } from '@nestjs/common';
 import { CollectionRequestService } from './collection_request.service';
 
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -8,6 +8,7 @@ import { CollectionRequest } from './entities/collection_request.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/common/decorators/role.decorator';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Solicitudes')
 @Controller('collection-request')
@@ -16,7 +17,7 @@ export class CollectionRequestController {
 	constructor(private readonly collectionsRequestervice: CollectionRequestService) { }
 
 	@Post()
-	@Roles(13, 16, 18)
+	@Roles(ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH)
 	@ApiOperation({ summary: 'Crear solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async create(@Body() createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -24,7 +25,7 @@ export class CollectionRequestController {
 	}
 
 	@Get()
-	@Roles(13, 14, 15, 16, 18)
+	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH)
 	@ApiOperation({ summary: 'Listar solicitudes' })
 	@ApiResult({ type: [CollectionRequest] })
 	async findAll(@Query() query: any): Promise<any> {
@@ -32,7 +33,7 @@ export class CollectionRequestController {
 	}
 
 	@Get(':id')
-	@Roles(0)
+	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH)
 	@ApiOperation({ summary: 'Obtener solicitud por ID' })
 	@ApiResult({ type: CollectionRequest })
 	async findOne(@IdParam('id') id: number): Promise<CollectionRequest> {
@@ -40,7 +41,7 @@ export class CollectionRequestController {
 	}
 
 	@Patch(':id')
-	@Roles(15)
+	@Roles(ROL.WILLARD_LOGISTICA)
 	@ApiOperation({ summary: 'Completar información de la solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCompleteDto): Promise<void> {
@@ -48,7 +49,7 @@ export class CollectionRequestController {
 	}
 
 	@Post(':id/reject')
-	@Roles(14)
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
 	@ApiOperation({ summary: 'Rechazar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async reject(@IdParam('id') id: number): Promise<void> {
@@ -56,7 +57,7 @@ export class CollectionRequestController {
 	}
 
 	@Put(':id')
-	@Roles(13, 16, 18)
+	@Roles(ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH)
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
@@ -64,14 +65,14 @@ export class CollectionRequestController {
 	}
 
 	@Post(':id/cancel')
-	@Roles(13, 18)
+	@Roles(ROL.ASESOR_PH, ROL.AGENCIA_PH)
 	@ApiOperation({ summary: 'Cancelar solicitud' })
 	async cancel(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.cancel(id);
 	}
 
 	@Delete(':id')
-	@Roles(13, 18)
+	@Roles(ROL.ASESOR_PH, ROL.AGENCIA_PH)
 	@ApiOperation({ summary: 'Eliminar solicitud' })
 	async delete(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.delete(id);

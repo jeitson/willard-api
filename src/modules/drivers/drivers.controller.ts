@@ -6,6 +6,7 @@ import { Roles } from 'src/core/common/decorators/role.decorator';
 import { DriversService } from './drivers.service';
 import { DriverUpdateDto } from './dto/driver.dto';
 import { Driver } from 'typeorm';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Conductor')
 @UseGuards(RolesGuard)
@@ -14,7 +15,7 @@ export class DriversController {
 	constructor(private readonly driversServices: DriversService) { }
 
 	@Put(':id')
-	@Roles(0)
+	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Actualización de conductor' })
 	create(@IdParam('id') id: string, @Body() createDto: DriverUpdateDto): Promise<Driver> {
 		return this.driversServices.update(+id, createDto);

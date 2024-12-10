@@ -7,7 +7,7 @@ import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { PasswordUpdateDto, UserDto, UserOAuthDto, UserQueryDto, UserSearchByRoleDto, UserUpdateDto } from './dto/user.dto';
 import { Roles } from 'src/core/common/decorators/role.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
-import { Public } from 'src/core/common/decorators/public.decorator';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Sistema - Usuarios')
 @Controller('users')
@@ -16,7 +16,6 @@ export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
 	@Get()
-	@Roles(0)
 	@ApiOperation({ summary: 'Obtener listado de todos los usuarios - Paginación' })
 	@ApiResult({ type: [User], isPage: true })
 	async findAll(@Query() dto: UserQueryDto) {
@@ -24,7 +23,6 @@ export class UsersController {
 	}
 
 	@Get('profile')
-	@Roles(0)
 	@ApiOperation({ summary: 'Obtener información del usuario' })
 	@ApiResult({ type: User })
 	async getProfile() {
@@ -32,7 +30,6 @@ export class UsersController {
 	}
 
 	@Get(':id')
-	@Roles(0)
 	@ApiOperation({ summary: 'Obtener usuario por su ID' })
 	@ApiResult({ type: User })
 	async findOneById(@IdParam() id: string) {
@@ -40,7 +37,6 @@ export class UsersController {
 	}
 
 	@Post()
-	@Roles(0)
 	@ApiOperation({ summary: 'Crear usuario' })
 	async create(@Body() dto: UserDto): Promise<void> {
 		await this.usersService.create(dto);
@@ -54,7 +50,7 @@ export class UsersController {
 	// }
 
 	@Put(':id')
-	@Roles(22)
+	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Actualizar usuario' })
 	async update(
 		@IdParam() id: string,
@@ -64,7 +60,6 @@ export class UsersController {
 	}
 
 	@Patch('password/:id')
-	@Roles(0)
 	@ApiOperation({ summary: 'Actualizar contraseña de usuario' })
 	async updatePassword(
 		@IdParam() id: string,
@@ -74,28 +69,27 @@ export class UsersController {
 	}
 
 	@Post(':id/role/:rol_id')
-	@Roles(22)
+	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Asignar role a usuario' })
 	async addRolToUser(@IdParam('id') id: string, @IdParam('rol_id') rol_id: string): Promise<void> {
 		await this.usersService.addRolToUser(+id, +rol_id);
 	}
 
 	@Post(':id/collection_site/:collection_site_id')
-	@Roles(22)
+	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Asignar sede de acopio a usuario' })
 	async addCollectionSiteToUser(@IdParam('id') id: string, @IdParam('collection_site_id') collection_site_id: string): Promise<void> {
 		await this.usersService.addCollectionSiteToUser(+id, +collection_site_id);
 	}
 
 	@Post(':id/zone/:zone_id')
-	@Roles(22)
+	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Asignar zona a usuario' })
 	async addZoneToUser(@IdParam('id') id: string, @IdParam('zone_id') zone_id: string): Promise<void> {
 		await this.usersService.addZoneToUser(+id, +zone_id);
 	}
 
 	@Post('search')
-	@Roles(0)
 	@ApiOperation({ summary: 'Consultar usuarios por sus diversas relaciones' })
 	@ApiResult({ type: [User], isPage: true })
 	async findByIds(@Query() dto: UserQueryDto, @Body() content: UserSearchByRoleDto) {

@@ -7,6 +7,7 @@ import { PickUpLocation } from './entities/pick_up_location.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/common/decorators/role.decorator';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Lugares de Recogida')
 @UseGuards(RolesGuard)
@@ -15,14 +16,13 @@ export class PickUpLocationsController {
 	constructor(private readonly pickUpLocationsService: PickUpLocationsService) { }
 
 	@Post()
-	@Roles(0)
+	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Creación de lugar de recogida' })
 	create(@Body() createPickUpLocationDto: PickUpLocationCreateDto): Promise<PickUpLocation> {
 		return this.pickUpLocationsService.create(createPickUpLocationDto);
 	}
 
 	@Get()
-	@Roles(0)
 	@ApiOperation({ summary: 'Obtener listado de lugares de recogida - Paginación' })
 	@ApiResult({ type: [PickUpLocation], isPage: true })
 	async findAll(@Query() query: PickUpLocationQueryDto) {
@@ -30,28 +30,29 @@ export class PickUpLocationsController {
 	}
 
 	@Get(':id')
-	@Roles(0)
 	@ApiOperation({ summary: 'Obtener lugar de recogida por su ID' })
 	findOne(@IdParam('id') id: string): Promise<PickUpLocation> {
 		return this.pickUpLocationsService.findOne(+id);
 	}
 
 	@Put(':id')
-	@Roles(0)
+	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Actualizar lugar de recogida' })
 	update(@IdParam('id') id: string, @Body() updatePickUpLocationDto: PickUpLocationUpdateDto): Promise<PickUpLocation> {
 		return this.pickUpLocationsService.update(+id, updatePickUpLocationDto);
 	}
 
 	@Patch(':id/change-status')
-	@Roles(0)
+	@Roles(ROL.ADMINISTRATOR)
+
 	@ApiOperation({ summary: 'Cambiar estado del lugar de recogida' })
 	changeStatus(@IdParam('id') id: string): Promise<PickUpLocation> {
 		return this.pickUpLocationsService.changeStatus(+id);
 	}
 
 	@Delete(':id')
-	@Roles(0)
+	@Roles(ROL.ADMINISTRATOR)
+
 	@ApiOperation({ summary: 'Eliminar lugar de recogida' })
 	remove(@IdParam('id') id: string): Promise<void> {
 		return this.pickUpLocationsService.remove(+id);

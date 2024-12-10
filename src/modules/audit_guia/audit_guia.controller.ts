@@ -7,6 +7,7 @@ import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { AuditGuiaDetailUpdateDto, UpdateReasonDto } from './dto/audit_guia.dto';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Auditoria de Guias')
 @Controller('audit_guia')
@@ -15,7 +16,7 @@ export class AuditGuiaController {
 	constructor(private readonly auditGuiaService: AuditGuiaService) { }
 
 	@Get()
-	@Roles(0)
+	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Listado de auditoria de guias' })
 	@ApiResult({ type: [AuditGuia] })
 	async findAll(@Query() query: any) {
@@ -23,7 +24,7 @@ export class AuditGuiaController {
 	}
 
 	@Get(':id')
-	@Roles(19)
+	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Obtener auditoria por ID' })
 	@ApiResult({ type: AuditGuia })
 	async findOne(@IdParam('id') id: string): Promise<AuditGuia> {
@@ -31,7 +32,7 @@ export class AuditGuiaController {
 	}
 
 	@Patch('details/:id')
-	@Roles(19)
+	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Actualizar detalle de auditoria por ID' })
 	@ApiResult({ type: AuditGuia })
 	async updateAuditGuiaDetails(
@@ -42,7 +43,7 @@ export class AuditGuiaController {
 	}
 
 	@Patch('give-reason/:id/:key')
-	@Roles(19)
+	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Dar la razón a una auditoria' })
 	async updateInFavorRecuperator(
 		@IdParam('id') id: number,
@@ -53,7 +54,7 @@ export class AuditGuiaController {
 	}
 
 	@Patch('confirm/:id')
-	@Roles(19)
+	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Confirmar' })
 	async confirm(
 		@IdParam('id') id: number,
@@ -62,7 +63,7 @@ export class AuditGuiaController {
 	}
 
 	@Post('synchronize/:id')
-	@Roles(0)
+	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Sincronizar' })
 	async synchronize(
 		@IdParam('id') id: number,

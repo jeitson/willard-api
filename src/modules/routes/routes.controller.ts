@@ -7,6 +7,7 @@ import { Route } from './entities/route.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/common/decorators/role.decorator';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Rutas')
 @UseGuards(RolesGuard)
@@ -15,7 +16,7 @@ export class RoutesController {
 	constructor(private readonly routesServices: RoutesService) { }
 
 	@Post()
-	@Roles(0)
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
 	@ApiOperation({ summary: 'Crear una nueva ruta' })
 	create(@IdParam('id') id: string, @Body() createRutaDto: CreateRouteDto): Promise<Route> {
 		return this.routesServices.create(+id, createRutaDto);

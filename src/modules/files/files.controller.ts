@@ -13,7 +13,6 @@ export class FilesController {
 	constructor(private readonly firebaseService: FirebaseService) { }
 
 	@Post('upload')
-	@Roles(0)
 	@UseInterceptors(AllFilesInterceptor)
 	async uploadFile(@UploadedFiles(FileSizeValidationPipe)
 	files: Array<any>,) {
