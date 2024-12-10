@@ -11,6 +11,7 @@ import { DriversService } from '../drivers/drivers.service';
 import { MailerService } from 'src/core/shared/mailer/mailer.service';
 import { validateEmail } from 'src/core/utils';
 import { NotificationsService } from '../notifications/notifications.service';
+import { REQUEST_STATUS, ROUTE_STATE } from 'src/core/constants/status.constant';
 
 
 @Injectable()
@@ -40,16 +41,16 @@ export class RoutesService {
 				throw new BusinessException('Solicitud no encontrada', 400);
 			}
 
-			if (collectionRequest.requestStatusId !== 1 || collectionRequest.route || collectionRequest.driver) {
+			if (collectionRequest.requestStatusId !== REQUEST_STATUS.PENDING || collectionRequest.route || collectionRequest.driver) {
 				throw new BusinessException('La solicitud no aplica para la acción a ejecutar', 400);
 			}
 
 			const userId = this.userContextService.getUserDetails().id;
 
-			const route = this.routeRepository.create({ collectionRequest, ...dto, createdBy: userId, modifiedBy: userId });
+			const route = this.routeRepository.create({ collectionRequest, routeStatusId: ROUTE_STATE.CONFIRMED, ...dto, createdBy: userId, modifiedBy: userId });
 			const routeSaved = await queryRunner.manager.save(Route, route);
 
-			await queryRunner.manager.update(CollectionRequest, id, { transporter: null, requestStatusId: 2, createdBy: userId, modifiedBy: userId });
+			await queryRunner.manager.update(CollectionRequest, id, { transporter: null, requestStatusId: REQUEST_STATUS.CONFIRMED, createdBy: userId, modifiedBy: userId });
 
 			await this.driversService.create({ ...transporter, collectionRequestId: id });
 
@@ -58,7 +59,7 @@ export class RoutesService {
 					collectionRequest,
 					name: 'ROUTE_ASSIGNMENT',
 					description: 'IMPLEMENTED ROUTE',
-					statusId: collectionRequest.requestStatusId || 1,
+					statusId: collectionRequest.requestStatusId || REQUEST_STATUS.PENDING,
 					createdBy: userId,
 					modifiedBy: userId
 				},
@@ -66,7 +67,7 @@ export class RoutesService {
 					collectionRequest,
 					name: 'DRIVER_ASSIGNMENT',
 					description: 'IMPLEMENTED DRIVER ASSIGN',
-					statusId: collectionRequest.requestStatusId || 1,
+					statusId: collectionRequest.requestStatusId || REQUEST_STATUS.PENDING,
 					createdBy: userId,
 					modifiedBy: userId
 				}
@@ -96,7 +97,7 @@ export class RoutesService {
 				collectionRequest,
 				name: 'MAIL_SENT',
 				description: 'NOTIFICATION BY MAIL',
-				statusId: collectionRequest.requestStatusId || 1,
+				statusId: collectionRequest.requestStatusId || REQUEST_STATUS.PENDING,
 				createdBy: userId,
 				modifiedBy: userId
 			});

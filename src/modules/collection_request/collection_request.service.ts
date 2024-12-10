@@ -14,16 +14,7 @@ import { Client } from "../clients/entities/client.entity";
 import { UserContextService } from "../users/user-context.service";
 import { User } from "../users/entities/user.entity";
 import { Child } from "../catalogs/entities/child.entity";
-
-/** Estados ID
- * 1 = Pendiente
- * 2 = Confirmado
- * 3 = Rechazado
- * 4 = Cancelado
- * 5 = Seguimiento
- * 6 = Incompleta
- *  **/
-
+import { REQUEST_STATUS } from "src/core/constants/status.constant";
 
 @Injectable()
 export class CollectionRequestService {
@@ -77,7 +68,7 @@ export class CollectionRequestService {
 			throw new BusinessException('No existe el lugar de recogida', 400);
 		}
 
-		let requestStatusId = 61;
+		let requestStatusId = REQUEST_STATUS.PENDING;
 		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation });
 
 		if (isSpecial) {
@@ -87,7 +78,7 @@ export class CollectionRequestService {
 				throw new BusinessException('El motivo especial no existe', 400);
 			}
 
-			requestStatusId = 66;
+			requestStatusId = REQUEST_STATUS.INCOMPLETE;
 		} else {
 			const transporter = await this.transporterRepository.findOneBy({ id: +createDto.transporterId })
 
@@ -117,7 +108,7 @@ export class CollectionRequestService {
 			collectionRequest: collectionRequestSaved,
 			name: 'CREATED',
 			description: `CREATION - ${createDto.isSpecial ? 'SPECIAL' : 'NORMAL'}`,
-			statusId: requestStatusId || 61,
+			statusId: requestStatusId || REQUEST_STATUS.PENDING,
 			createdBy: user_id, modifiedBy: user_id
 		});
 
@@ -133,7 +124,7 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
-		if (collectionRequest.requestStatusId === 62) {
+		if (collectionRequest.requestStatusId === REQUEST_STATUS.CONFIRMED) {
 			throw new BusinessException('La solicitud no puede ser actualizada, ya fue confirmada', 400);
 		}
 
@@ -149,7 +140,7 @@ export class CollectionRequestService {
 			throw new BusinessException('El tipo de producto no existe', 400);
 		}
 
-		let requestStatusId = 61, pickUpLocation = null, transporter = null;
+		let requestStatusId = REQUEST_STATUS.PENDING, pickUpLocation = null, transporter = null;
 
 		pickUpLocation = await this.pickUpLocationRepository.findOne({
 			where: { id: updatedDto.pickUpLocationId, status: true },
@@ -166,7 +157,7 @@ export class CollectionRequestService {
 				throw new BusinessException('El motivo especial no existe', 400);
 			}
 
-			requestStatusId = 66;
+			requestStatusId = REQUEST_STATUS.INCOMPLETE;
 		} else {
 			transporter = await this.transporterRepository.findOneBy({ id: +updatedDto.transporterId })
 
@@ -218,7 +209,7 @@ export class CollectionRequestService {
 			throw new BusinessException('La configuración de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
-		if (collectionRequest.requestStatusId !== 66) {
+		if (collectionRequest.requestStatusId !== REQUEST_STATUS.INCOMPLETE) {
 			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
@@ -242,7 +233,7 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, requestStatusId: 61, modifiedBy: user_id });
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, requestStatusId: REQUEST_STATUS.PENDING, modifiedBy: user_id });
 
 		if (!updated) {
 			throw new BusinessException('No se pudó actualizar la información', 400);
@@ -286,13 +277,13 @@ export class CollectionRequestService {
 		}
 
 		if (roles.includes(14)) {
-			queryBuilder.where('collectionRequest.requestStatusId = 61')
+			queryBuilder.where('collectionRequest.requestStatusId = REQUEST_STATUS.PENDING')
 			.andWhere('zone.id IN (:...zones)', { zones });
 		}
 
 		if (roles.includes(15)) {
 			queryBuilder.where('collectionRequest.isSpecial = true')
-			.andWhere('collectionRequest.requestStatusId = 66');
+			.andWhere('collectionRequest.requestStatusId = REQUEST_STATUS.INCOMPLETE');
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
@@ -317,16 +308,16 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
-		if (collectionRequest.requestStatusId !== 61) {
+		if (collectionRequest.requestStatusId !== REQUEST_STATUS.PENDING) {
 			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: 66, createdBy: user_id, modifiedBy: user_id });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'REJECTED', description: '', statusId: REQUEST_STATUS.INCOMPLETE, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { requestStatusId: 66, collectionSite: null, user: null, transporter: null, isSpecial: true, modifiedBy: user_id });
+		await this.collectionRequestRepository.update(id, { requestStatusId: REQUEST_STATUS.INCOMPLETE, collectionSite: null, user: null, transporter: null, isSpecial: true, modifiedBy: user_id });
 	}
 
 	async approve(id: number): Promise<void> {
@@ -335,13 +326,13 @@ export class CollectionRequestService {
 			throw new BusinessException('Solicitud no encontrada', 404);
 		}
 
-		if (collectionRequest.requestStatusId !== 61) {
+		if (collectionRequest.requestStatusId !== REQUEST_STATUS.PENDING) {
 			throw new BusinessException('El estado actual de la solicitud, no permite la acción a ejecutar', 400);
 		}
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'APPROVED', description: '', statusId: 62, createdBy: user_id, modifiedBy: user_id });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'APPROVED', description: '', statusId: REQUEST_STATUS.CONFIRMED, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
 		await this.collectionRequestRepository.update(id, { requestStatusId: 2, modifiedBy: user_id });
@@ -355,10 +346,10 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'CANCELLED', description: '', statusId: 64, createdBy: user_id, modifiedBy: user_id });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'CANCELLED', description: '', statusId: REQUEST_STATUS.CANCELLED, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
-		await this.collectionRequestRepository.update(id, { requestStatusId: 64, modifiedBy: user_id });
+		await this.collectionRequestRepository.update(id, { requestStatusId: REQUEST_STATUS.CANCELLED, modifiedBy: user_id });
 	}
 
 	async delete(id: number): Promise<void> {
@@ -369,7 +360,7 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'DELETED', description: '', statusId: 65, createdBy: user_id, modifiedBy: user_id });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'DELETED', description: '', statusId: REQUEST_STATUS.FOLLOW_UP, createdBy: user_id, modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
 		await this.collectionRequestRepository.update(id, { status: false, modifiedBy: user_id });

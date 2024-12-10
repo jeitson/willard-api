@@ -16,6 +16,7 @@ import { Child } from '../catalogs/entities/child.entity';
 import { AuditGuiaService } from '../audit_guia/audit_guia.service';
 import { CatalogsService } from '../catalogs/catalogs.service';
 import { formatToDate } from 'src/core/utils';
+import { RECEIPT_STATUS } from 'src/core/constants/status.constant';
 
 
 /** Estados ID
@@ -76,7 +77,7 @@ export class ReceptionsService {
 
 
 		const reception = this.receptionRepository.create(createReceptionDto);
-		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id, receptionStatusId: 67, collectionSite, transporter });
+		const savedReception = await this.receptionRepository.save({ ...reception, createdBy: user_id, modifiedBy: user_id, receptionStatusId: RECEIPT_STATUS.REGISTERED, collectionSite, transporter });
 
 		try {
 			if (details.length === createReceptionDto.details.length) {

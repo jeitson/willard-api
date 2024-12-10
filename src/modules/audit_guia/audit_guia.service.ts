@@ -16,12 +16,7 @@ import { Child } from '../catalogs/entities/child.entity';
 import { User } from '../users/entities/user.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
 import { Shipment } from '../shipments/entities/shipment.entity';
-
-/** Estados ID
- * 101 = Sin GUIA
- * 102 = Pendiente
- * 103 = Confirmado
- *  **/
+import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
 
 @Injectable()
 export class AuditGuiaService {
@@ -54,7 +49,7 @@ export class AuditGuiaService {
 		await queryRunner.startTransaction();
 
 		try {
-			let requestStatusId = 101;
+			let requestStatusId = AUDIT_GUIDE_STATUS.WITHOUT_GUIDE;
 			let zoneId = null;
 			let date = null;
 
@@ -105,7 +100,7 @@ export class AuditGuiaService {
 
 	async updateDetails(id: number, updateDto: AuditGuiaDetailUpdateDto): Promise<void> {
 		const auditGuia = await this.findAuditGuiaById(id);
-		if (auditGuia.requestStatusId !== 102) {
+		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
@@ -118,11 +113,11 @@ export class AuditGuiaService {
 
 	async confirm(id: number): Promise<void> {
 		const auditGuia = await this.findAuditGuiaById(id);
-		if (auditGuia.requestStatusId !== 102) {
+		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
-		auditGuia.requestStatusId = 103;
+		auditGuia.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
 		await this.auditGuiaRepository.save(auditGuia);
 	}
 
@@ -188,7 +183,7 @@ export class AuditGuiaService {
 		});
 
 		if (auditGuiaDetails.length === totalProducts && totalQuantity === auditGuiaSaved.transporterTotal) {
-			auditGuiaSaved.requestStatusId = 103;
+			auditGuiaSaved.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
 			await this.auditGuiaRepository.save(auditGuiaSaved);
 		}
 	}
@@ -224,7 +219,7 @@ export class AuditGuiaService {
 		auditGuiaDetails.push(...transporterDetails);
 
 		return {
-			requestStatusId: 102,
+			requestStatusId: AUDIT_GUIDE_STATUS.PENDING,
 			date: transporterTravel.movementDate,
 			zoneId: zone[0].id,
 			auditGuiaDetails,
@@ -286,7 +281,7 @@ export class AuditGuiaService {
 	async synchronize(id: number): Promise<void> {
 		const auditGuia = await this.findAuditGuiaById(id);
 
-		if (auditGuia.requestStatusId !== 101) {
+		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.WITHOUT_GUIDE) {
 			throw new BusinessException('Solo se pueden sincronizar auditorías en estado "sin guia".');
 		}
 
@@ -303,7 +298,7 @@ export class AuditGuiaService {
 
 			auditGuia.transporterTotal = transporterTotal;
 			auditGuia.recuperatorTotal = recuperatorTotal;
-			auditGuia.requestStatusId = 102;
+			auditGuia.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
 
 			await queryRunner.manager.save(auditGuia);
 
@@ -367,7 +362,7 @@ export class AuditGuiaService {
 			throw new BusinessException('No se encontró la auditoría especificada.', 404);
 		}
 
-		if (auditGuia.requestStatusId !== 102) {
+		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
 			throw new BusinessException('La auditoría debe estar en estado pendiente para actualizar.');
 		}
 
