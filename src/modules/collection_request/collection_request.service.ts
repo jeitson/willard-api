@@ -274,13 +274,18 @@ export class CollectionRequestService {
 		}
 
 		if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
-			queryBuilder.where('collectionRequest.requestStatusId = REQUEST_STATUS.PENDING')
+
+			if (zones.length === 0) {
+				throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+			}
+
+			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING })
 			.andWhere('zone.id IN (:...zones)', { zones });
 		}
 
 		if (roles.includes(ROL.WILLARD_LOGISTICA)) {
-			queryBuilder.where('collectionRequest.isSpecial = true')
-			.andWhere('collectionRequest.requestStatusId = REQUEST_STATUS.INCOMPLETE');
+			queryBuilder.where('collectionRequest.isSpecial = :status', { status: true })
+			.andWhere('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.INCOMPLETE });
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
