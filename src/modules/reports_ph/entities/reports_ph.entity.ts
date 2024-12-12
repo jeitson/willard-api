@@ -33,9 +33,9 @@ export class ReportsPh extends CompleteEntity {
 	@Column({ type: 'boolean', name: 'Consultado', nullable: true, default: null })
 	consulted: boolean;
 
-	@ApiProperty({ description: 'ID de la sede de acopio' })
-	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.reportsPh)
-	@JoinColumn({ name: 'SedeAcopioId' })
-	collectionSite: CollectionSite;
+	// @ApiProperty({ description: 'ID de la sede de acopio' })
+	// @ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.reportsPh)
+	// @JoinColumn({ name: 'SedeAcopioId' })
+	// collectionSite: CollectionSite;
 }
 
