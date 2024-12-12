@@ -30,6 +30,7 @@ import { FilesModule } from './modules/files/files.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
 import { AuditGuiaModule } from './modules/audit_guia/audit_guia.module';
 import { SeedModule } from './modules/seed/seed.module';
+import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 
 @Module({
 	imports: [
@@ -62,6 +63,7 @@ import { SeedModule } from './modules/seed/seed.module';
 		FilesModule,
 		ShipmentsModule,
 		AuditGuiaModule,
+		ReportsPhModule,
 		// SeedModule
 	],
 	controllers: [],

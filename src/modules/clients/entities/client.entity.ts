@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
+import { ReportsPh } from "src/modules/reports_ph/entities/reports_ph.entity";
 import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity({ name: 'cliente' })
@@ -43,4 +44,7 @@ export class Client extends CompleteEntity {
 
 	@OneToMany(() => CollectionRequest, collectionsRequests => collectionsRequests.client)
     collectionsRequests: CollectionRequest[];
+
+	@OneToMany(() => ReportsPh, reportsPh => reportsPh.client)
+    reportsPh: ReportsPh[];
 }
