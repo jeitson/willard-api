@@ -10,6 +10,7 @@ import { TransporterTravel } from './entities/transporter_travel.entity';
 import { TransporterTravelDto } from './dto/transporter_travel.dto';
 import { Product } from '../products/entities/product.entity';
 import { Child } from '../catalogs/entities/child.entity';
+import { ResponseCodeTransporterTravel } from './entities/response';
 
 @Injectable()
 export class TransporterTravelService {
@@ -22,7 +23,7 @@ export class TransporterTravelService {
 		private readonly childrensRepository: Repository<Child>,
 	) { }
 
-	async createFromJson(data: TransporterTravelDto): Promise<TransporterTravel[]> {
+	async createFromJson(data: TransporterTravelDto): Promise<ResponseCodeTransporterTravel[]> {
 		const travelRecordDto = plainToClass(TransporterTravelDto, data);
 
 		const errors = await validate(travelRecordDto);
@@ -47,19 +48,19 @@ export class TransporterTravelService {
 		try {
 			const item = this.mapRowToTransporterTravelDto(data);
 			item.details = this.convertDetail(data.detalles);
-			console.log(item);
 
 			await this.validateRelations([item]);
 
 			const travelRecord = this.transporterTravelRepository.create(item);
-			return await this.transporterTravelRepository.save(travelRecord);
+			const savedRecord = await this.transporterTravelRepository.save(travelRecord);
+
+			return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {
-			console.log(error);
 			throw new BusinessException('Error al procesar el objeto JSON: ' + error.message);
 		}
 	}
 
-	async createFromExcel(file: any): Promise<TransporterTravel[]> {
+	async createFromExcel(file: any): Promise<ResponseCodeTransporterTravel[]> {
 		try {
 			const workbook = XLSX.read(file.buffer, { type: 'buffer' });
 
@@ -121,7 +122,9 @@ export class TransporterTravelService {
 
 			await this.validateRelations(records);
 
-			return await this.transporterTravelRepository.save(records);
+			const savedRecord = await this.transporterTravelRepository.save(records);
+
+			return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 
 		} catch (error) {
 			throw new BadRequestException('Error al procesar el archivo Excel: ' + error.message);

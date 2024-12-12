@@ -6,20 +6,23 @@ import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Public } from 'src/core/common/decorators/public.decorator';
 import { TransporterTravelService } from './transporter_travel.service';
 import { TransporterTravelDto } from './dto/transporter_travel.dto';
+import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
+import { ResponseCodeTransporterTravel } from './entities/response';
 
 @ApiTags('Negocio - Transportadora Viaje')
 // @UseGuards(RolesGuard)
-@Controller('transporter_travel')
+@Controller('registro')
 export class TransporterTravelController {
 	constructor(private readonly transporterTravelService: TransporterTravelService) { }
 
 	@Post()
 	@Public()
 	@UseInterceptors(FileInterceptor('file'))
+	@ApiResult({ type: [ResponseCodeTransporterTravel] })
 	async createRecord(
 		@UploadedFile() file: any,
 		@Body() body: any
-	) {
+	): Promise<ResponseCodeTransporterTravel[]> {
 		if (file) {
 			return await this.transporterTravelService.createFromExcel(file);
 		}
