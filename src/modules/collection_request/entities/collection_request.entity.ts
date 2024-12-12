@@ -22,7 +22,6 @@ export class CollectionRequest extends CompleteEntity {
 	@JoinColumn({ name: 'LugarRecogidaId' })
 	pickUpLocation: PickUpLocation;
 
-	@ApiProperty({ description: 'productTypeId' })
 	@Column({ type: 'bigint', name: 'TipoProductoId' })
 	productTypeId: number;
 
@@ -38,19 +37,15 @@ export class CollectionRequest extends CompleteEntity {
 	@JoinColumn({ name: 'AsesorId' })
 	user: User;
 
-	@ApiProperty({ description: 'Nombre' })
 	@Column({ type: 'varchar', length: 50, name: 'Nombre', nullable: true, default: 'SOLICITUD DE RECOGIDA' })
 	name: string = 'SOLICITUD DE RECOGIDA';
 
-	@ApiProperty({ description: 'Descripción' })
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Descripcion' })
 	description: string;
 
-	@ApiProperty({ description: 'Motivo Especial' })
 	@Column({ type: 'bigint', nullable: true, name: 'MotivoEspecialId' })
 	motiveSpecialId: number;
 
-	@ApiProperty({ description: 'Fecha de solicitud' })
 	@Expose()
 	@CreateDateColumn({
 		type: 'date',
@@ -60,7 +55,6 @@ export class CollectionRequest extends CompleteEntity {
 	})
 	requestDate: Date;
 
-	@ApiProperty({ description: 'Hora de solicitud' })
 	@Column({
 		type: 'time',
 		name: 'HoraSolicitud',
@@ -69,37 +63,32 @@ export class CollectionRequest extends CompleteEntity {
 	})
 	requestTime: string;
 
-	@ApiProperty({ description: 'Cantidad estimada' })
 	@Column({ type: 'int', name: 'CantidadEstimada' })
 	estimatedQuantity: number;
 
-	@ApiProperty({ description: 'KG estimados' })
 	@Column({ type: 'int', name: 'KGEstimados' })
 	estimatedKG: number;
 
-	@ApiProperty({ description: 'Es especial' })
 	@Column({ type: 'boolean', name: 'EsEspecial' })
 	isSpecial: boolean;
 
-	@ApiProperty({ description: 'Estado de la solicitud' })
 	@Column({ type: 'int', name: 'EstadoSolicitudId' })
 	requestStatusId: number;
 
-	@ApiProperty({ description: 'Fecha estimada de recogida' })
 	@Column({ type: 'date', nullable: true, name: 'FechaEstimadaRecogida' })
 	estimatedPickUpDate: string;
 
-	@ApiProperty({ description: 'Hora estimada de recogida' })
 	@Column({ type: 'time', nullable: true, name: 'HoraEstimadaRecogida' })
 	estimatedPickUpTime: string;
 
-	@ApiProperty({ description: 'Observaciones' })
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Observaciones' })
 	observations: string;
 
-	@ApiProperty({ description: 'Recomendaciones' })
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Recomendaciones' })
 	recommendations: string;
+
+	@Column({ type: 'varchar', length: 10, name: 'IdRuta', nullable: true })
+    routeId: string;
 
 	@OneToMany(() => CollectionRequestAudit, (collectionRequestAudit) => collectionRequestAudit.collectionRequest)
 	audits: CollectionRequestAudit[];

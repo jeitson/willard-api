@@ -41,7 +41,7 @@ export class CollectionRequestController {
 	}
 
 	@Patch(':id')
-	@Roles(ROL.WILLARD_LOGISTICA)
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
 	@ApiOperation({ summary: 'Completar información de la solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCompleteDto): Promise<void> {

@@ -22,23 +22,23 @@ import { PagerDto } from 'src/core/common/dto/pager.dto';
 export class UserDto {
 	@ApiProperty({ description: 'OauthId', example: '123...' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	oauthId?: string;
 
 	@ApiProperty({ description: 'Nombre', example: 'Jon Doe' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	name: string = null;
 
 	@ApiProperty({ description: 'Descripción', example: 'Jon Doe, usuario de prueba' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	description: string = '';
 
 	@ApiProperty({ description: 'Celular' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
 	cellphone: string = '';
 
@@ -49,7 +49,7 @@ export class UserDto {
 
 	@ApiProperty({ description: 'Contraseña' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	password?: string;
 
 	@ApiProperty({ description: 'Referencia WLL del usuario, debe ser un texto.' })
@@ -81,12 +81,12 @@ export class UserDto {
 export class UserOAuthDto {
 	@ApiProperty({ description: 'OauthId' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	user_id?: string;
 
 	@ApiProperty({ description: 'Nombre' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	name: string = null;
@@ -97,7 +97,7 @@ export class UserOAuthDto {
 	email: string;
 
 	@ApiProperty({ description: 'Celular' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
 	cellphone: string = '';
 }

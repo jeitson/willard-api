@@ -5,7 +5,7 @@ import { IsInt, IsOptional, Max, Min } from 'class-validator';
 export class CursorDto {
 	@ApiProperty({ minimum: 0, default: 0 })
 	@Min(0)
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Expose()
 	@IsOptional({ always: true })
 	@Transform(({ value: val }) => (val ? Number.parseInt(val) : 0), {
@@ -16,7 +16,7 @@ export class CursorDto {
 	@ApiProperty({ minimum: 1, maximum: 100, default: 10 })
 	@Min(1)
 	@Max(100)
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@IsOptional({ always: true })
 	@Expose()
 	@Transform(({ value: val }) => (val ? Number.parseInt(val) : 10), {

@@ -15,6 +15,7 @@ import { UserContextService } from "../users/user-context.service";
 import { User } from "../users/entities/user.entity";
 import { Child } from "../catalogs/entities/child.entity";
 import { REQUEST_STATUS } from "src/core/constants/status.constant";
+import { ROL } from "src/core/constants/rol.constant";
 
 @Injectable()
 export class CollectionRequestService {
@@ -43,7 +44,7 @@ export class CollectionRequestService {
 
 		const { id: user_id, roles } = this.userContextService.getUserDetails();
 
-		const isFactory = roles.map(({ roleId }) => +roleId).includes(16);
+		const isFactory = roles.map(({ roleId }) => +roleId).includes(ROL.FABRICA_BW);
 
 		isSpecial = isFactory ? true : isSpecial;
 
@@ -198,7 +199,7 @@ export class CollectionRequestService {
 		return collectionRequestSaved;
 	}
 
-	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId }: CollectionRequestCompleteDto): Promise<void> {
+	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId, routeId }: CollectionRequestCompleteDto): Promise<void> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
 		if (!collectionRequest) {
@@ -233,13 +234,13 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, requestStatusId: REQUEST_STATUS.PENDING, modifiedBy: user_id });
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, routeId, requestStatusId: REQUEST_STATUS.PENDING, modifiedBy: user_id });
 
 		if (!updated) {
 			throw new BusinessException('No se pudó actualizar la información', 400);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', statusId: 1, modifiedBy: user_id });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', modifiedBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 	}
 
@@ -263,25 +264,21 @@ export class CollectionRequestService {
 	async findAll(query: any): Promise<Pagination<CollectionRequest>> {
 		const queryBuilder = this.createBaseQueryBuilder();
 
-		// 13 => ROL PH Asesor
-		// 14 => ROL Planeador
-		// 15 => ROL Willard Logistica
-		// 16 => ROL Fabrica
-		// 18 => ROL Agencia
+
 		let { roles, id, zones } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId);
 		zones = zones.map(({ zoneId }) => +zoneId);
 
-		if (roles.find((role: number) => [13, 16, 18].includes(role))) {
+		if (roles.find((role: number) => [ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH].includes(role))) {
 			queryBuilder.where('collectionRequest.createdBy = :id', { id });
 		}
 
-		if (roles.includes(14)) {
+		if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
 			queryBuilder.where('collectionRequest.requestStatusId = REQUEST_STATUS.PENDING')
 			.andWhere('zone.id IN (:...zones)', { zones });
 		}
 
-		if (roles.includes(15)) {
+		if (roles.includes(ROL.WILLARD_LOGISTICA)) {
 			queryBuilder.where('collectionRequest.isSpecial = true')
 			.andWhere('collectionRequest.requestStatusId = REQUEST_STATUS.INCOMPLETE');
 		}

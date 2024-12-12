@@ -23,7 +23,7 @@ export class RolesGuard implements CanActivate {
 			const roles = this.reflector.getAllAndOverride<number[]>(ROLES_KEY, [
 				context.getHandler(),
 				context.getClass(),
-			]);
+			]) || [];
 
 			const request = context.switchToHttp().getRequest();
 			const user = request.user;

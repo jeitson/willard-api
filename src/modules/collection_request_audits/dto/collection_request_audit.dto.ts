@@ -14,23 +14,23 @@ export class CollectionRequestAuditCreateDto {
 
 	@ApiProperty({ description: 'Nombre del estado', example: 'Estado inicial' })
 	@IsNotEmpty()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	readonly name: string;
 
 	@ApiProperty({ description: 'Descripción adicional', example: 'Descripción detallada del estado' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	readonly description?: string;
 }
 
 export class CollectionRequestAuditUpdateDto {
 	@ApiProperty({ description: 'Nombre del estado', example: 'Estado actualizado' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	readonly name?: string;
 
 	@ApiProperty({ description: 'Descripción adicional', example: 'Descripción actualizada del estado' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	readonly description?: string;
 }

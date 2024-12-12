@@ -4,12 +4,12 @@ import { PagerDto } from "src/core/common/dto/pager.dto";
 
 export class CollectionRequestCreateDto {
 	@ApiProperty({ description: 'Cliente asociado' })
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Min(1, { message: 'El ID del cliente no puede ser 0' })
 	clientId: number;
 
 	@ApiProperty({ description: 'Lugar de recogida asociado' })
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
@@ -20,7 +20,7 @@ export class CollectionRequestCreateDto {
 
 	@ApiProperty({ description: 'Descripción' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255)
 	description?: string;
 
@@ -48,18 +48,18 @@ export class CollectionRequestCreateDto {
 
 	@ApiProperty({ description: 'Hora estimada de recogida' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	estimatedPickUpTime?: string;
 
 	@ApiProperty({ description: 'Observaciones' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255)
 	observations?: string;
 
 	@ApiProperty({ description: 'Recomendaciones' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255)
 	recommendations?: string;
 
@@ -70,29 +70,34 @@ export class CollectionRequestCreateDto {
 
 export class CollectionRequestCompleteDto {
 	@ApiProperty({ description: 'Sede de acopio' })
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Min(1, { message: 'El ID de la sede de acopio no puede ser 0' })
 	collectionSiteId: number;
 
 	@ApiProperty({ description: 'Asesor' })
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Min(1, { message: 'El ID del asesor no puede ser 0' })
 	consultantId: number;
 
 	@ApiProperty({ description: 'Transportadora asociada' })
 	@IsOptional()
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	transporterId: number = null;
+
+	@ApiProperty({ description: 'Id de Ruta' })
+	@IsOptional()
+	@IsString({ message: 'Debe de ser un texto' })
+	routeId: string = null;
 }
 
 export class CollectionRequestUpdateDto {
 	@ApiProperty({ description: 'Cliente asociado' })
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Min(1, { message: 'El ID del cliente no puede ser 0' })
 	clientId: number;
 
 	@ApiProperty({ description: 'Lugar de recogida asociado' })
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
@@ -102,13 +107,13 @@ export class CollectionRequestUpdateDto {
 	productTypeId: number;
 
 	@ApiProperty({ description: 'Nombre' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(50)
 	name: string;
 
 	@ApiProperty({ description: 'Descripción' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255)
 	description?: string;
 
@@ -122,7 +127,7 @@ export class CollectionRequestUpdateDto {
 	requestDate: string;
 
 	@ApiProperty({ description: 'Hora de solicitud' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	requestTime: string;
 
 	@ApiProperty({ description: 'Cantidad estimada' })
@@ -140,24 +145,24 @@ export class CollectionRequestUpdateDto {
 
 	@ApiProperty({ description: 'Hora estimada de recogida' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	estimatedPickUpTime?: string;
 
 	@ApiProperty({ description: 'Observaciones' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255)
 	observations?: string;
 
 	@ApiProperty({ description: 'Recomendaciones' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255)
 	recommendations?: string;
 
 	@ApiProperty({ description: 'Transportadora asociada' })
 	@IsOptional()
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	transporterId: number = null;
 }
 

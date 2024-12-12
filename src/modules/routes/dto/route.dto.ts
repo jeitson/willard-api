@@ -10,12 +10,12 @@ export class CreateRouteDto {
 
 	@ApiProperty({ description: 'Nombre' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	name: string = '';
 
 	@ApiProperty({ description: 'Descripción', required: false })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	description?: string = '';
 
 	@ApiProperty({ description: 'Fecha de confirmación de recogida', required: true })
@@ -30,7 +30,7 @@ export class CreateRouteDto {
 
 	@ApiProperty({ description: 'Hora de apertura del viaje', required: true })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	tripStartTime: string;
 
 	@ApiProperty({ description: 'Fecha de cierre del viaje', required: true })
@@ -40,12 +40,12 @@ export class CreateRouteDto {
 
 	@ApiProperty({ description: 'Hora de cierre del viaje', required: true })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	tripEndTime: string;
 
 	@ApiProperty({ description: 'Placa' })
 	@IsNotEmpty()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	plate: string;
 
 	@ApiProperty({ description: 'Tipo de camión' })
@@ -66,12 +66,12 @@ export class CreateRouteDto {
 export class UpdateRouteDto {
 	@ApiProperty({ description: 'Nombre', required: false })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	name?: string;
 
 	@ApiProperty({ description: 'Descripción', required: false })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	description?: string;
 
 	@ApiProperty({ description: 'Fecha de confirmación de recogida', required: false })
@@ -86,7 +86,7 @@ export class UpdateRouteDto {
 
 	@ApiProperty({ description: 'Hora de apertura del viaje', required: false })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	tripStartTime?: string;
 
 	@ApiProperty({ description: 'Fecha de cierre del viaje', required: false })
@@ -96,12 +96,12 @@ export class UpdateRouteDto {
 
 	@ApiProperty({ description: 'Hora de cierre del viaje', required: false })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	tripEndTime?: string;
 
 	@ApiProperty({ description: 'Placa', required: false })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	plate?: string;
 
 	@ApiProperty({ description: 'Tipo de camión', required: false })

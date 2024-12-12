@@ -13,7 +13,7 @@ import { PagerDto } from 'src/core/common/dto/pager.dto';
 
 export class ChildDto {
 	@ApiProperty({ description: 'Codigo del Padre' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	catalogCode: string;
@@ -22,48 +22,48 @@ export class ChildDto {
 	parentId: number;
 
 	@ApiProperty({ description: 'Nombre', example: 'Administrador' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	name: string;
 
 	@ApiProperty({ description: 'Descripción', example: 'Descripicón del hijo' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	description: string = '';
 
 	@ApiProperty({ description: 'Orden', example: 'Orden de los items' })
 	@IsOptional()
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	order?: number = null;
 
 	@ApiProperty({ description: 'Extra 1' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	extra1: string = '';
 
 	@ApiProperty({ description: 'Extra 2' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	extra2: string = '';
 
 	@ApiProperty({ description: 'Extra 3' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	extra3: string = '';
 
 	@ApiProperty({ description: 'Extra 4' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	extra4: string = '';
 
 	@ApiProperty({ description: 'Extra 5' })
 	@IsOptional()
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	extra5: string = '';
 }

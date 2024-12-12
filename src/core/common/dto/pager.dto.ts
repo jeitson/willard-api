@@ -18,7 +18,7 @@ export enum Order {
 export class PagerDto<T> {
 	@ApiProperty({ minimum: 1, default: 1 })
 	@Min(1)
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@Expose()
 	@IsOptional({ always: true })
 	@Transform(({ value: val }) => (val ? Number.parseInt(val) : 1), {
@@ -29,7 +29,7 @@ export class PagerDto<T> {
 	@ApiProperty({ minimum: 1, maximum: 100, default: 10 })
 	@Min(1)
 	@Max(100)
-	@IsInt()
+	@IsInt({ message: 'Debe de ser un número' })
 	@IsOptional({ always: true })
 	@Expose()
 	@Transform(({ value: val }) => (val ? Number.parseInt(val) : 10), {
@@ -38,7 +38,7 @@ export class PagerDto<T> {
 	pageSize?: number;
 
 	// @ApiProperty()
-	// @IsString()
+	// @IsString({ message: 'Debe de ser un texto' })
 	// @IsOptional()
 	// field?: string; // | keyof T
 

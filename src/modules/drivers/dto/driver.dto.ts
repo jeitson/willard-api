@@ -18,18 +18,18 @@ export class DriverDto {
 	collectionRequestId: number;
 
 	@ApiProperty({ description: 'Nombre', example: 'Jon Doe' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	name: string;
 
 	@ApiProperty({ description: 'Celular' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(10, { message: 'El tamaño máximo de caracteres es de 10' })
 	cellphone: string = '';
 
 	@ApiProperty({ description: 'Descripción', example: 'Jon Doe, usuario de prueba' })
-	@IsString()
+	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	description: string = '';
 
