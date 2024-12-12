@@ -275,12 +275,15 @@ export class CollectionRequestService {
 
 		if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
 
-			if (zones.length === 0) {
-				throw new BusinessException('El usuario no tiene zonas configuradas', 400);
-			}
+			// if (zones.length === 0) {
+			// 	throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+			// }
 
 			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING })
-			.andWhere('zone.id IN (:...zones)', { zones });
+
+			if (zones.length > 0) {
+				queryBuilder.andWhere('zone.id IN (:...zones)', { zones });
+			}
 		}
 
 		if (roles.includes(ROL.WILLARD_LOGISTICA)) {
