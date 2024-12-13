@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ReportQueryDto } from './dto/reports_ph.dto';
+import { FindByAgencyDto, ReportQueryDto } from './dto/reports_ph.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ReportsPh } from './entities/reports_ph.entity';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
@@ -26,4 +26,12 @@ export class ReportsPhController {
 	findOne(@IdParam('id') id: string): Promise<ReportsPh> {
 		return this.reportsService.findOne(+id);
 	}
+
+	@Get('agencia')
+	@ApiOperation({ summary: 'Consultar reportes por referencia PH de agencia' })
+	@ApiResult({ type: Object })
+	async findByAgency(@Query() query: FindByAgencyDto): Promise<any> {
+		return this.reportsService.findByCollectionSite(query.referenciasPh);
+	}
+
 }

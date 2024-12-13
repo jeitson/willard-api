@@ -24,6 +24,12 @@ export class ReportCreateDto {
 	@IsNumber({}, { message: 'SedeAcopioId debe ser un número.' })
 	collectionSiteId: number;
 }
+export class FindByAgencyDto {
+    @ApiProperty({ description: 'Lista de referencias PH de la agencia.', type: [String] })
+    @IsNotEmpty({ message: 'El campo referenciasPh no puede estar vacío.' })
+    @IsString({ each: true, message: 'Cada referencia PH debe ser un texto.' })
+    referenciasPh: string[];
+}
 
 export class ReportUpdateDto extends PartialType(ReportCreateDto) { }
 

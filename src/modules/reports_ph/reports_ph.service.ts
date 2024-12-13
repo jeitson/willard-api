@@ -99,4 +99,56 @@ export class ReportsPhService {
 		const report = await this.findOne(id);
 		await this.reportsRepository.remove(report);
 	}
+
+	async findByCollectionSite(referenciasPh: string[]): Promise<any> {
+		if (!Array.isArray(referenciasPh) || referenciasPh.length === 0) {
+			throw new BusinessException('Debe proporcionar un array de referencias PH.');
+		}
+
+		const reports = await this.reportsRepository
+			.createQueryBuilder('report')
+			.innerJoinAndSelect('report.client', 'client')
+			.innerJoinAndSelect('report.product', 'product')
+			.innerJoinAndSelect('report.collectionSite', 'collectionSite')
+			.where('collectionSite.referencePH IN (:...referenciasPh)', { referenciasPh })
+			.getMany();
+
+		const ids = reports.map((report) => report.id);
+		await this.reportsRepository
+			.createQueryBuilder()
+			.update(ReportsPh)
+			.set({ consulted: true })
+			.where('id IN (:...ids)', { ids })
+			.execute();
+
+		const groupedReports = reports.reduce((acc, report) => {
+			const collectionSiteId = report.collectionSite.id;
+			if (!acc[collectionSiteId]) {
+				acc[collectionSiteId] = {
+					agenciaId: collectionSiteId,
+					agenciaReferenciaWillard: report.collectionSite.referenceWLL,
+					agenciaReferenciaPh: report.collectionSite.referencePH,
+					reportes: [],
+				};
+			}
+
+			acc[collectionSiteId].reportes.push({
+				nit: report.client.documentNumber,
+				referenciaWillard: report.client.referenceWLL,
+				referenciaPh: report.client.referencePH,
+				producto: {
+					referenciaWillard: report.product.referenceWLL,
+					referenciaPh: report.product.referencePH,
+				},
+				auditoria: {
+					fecha: report.date,
+					cantidad: report.quantityProduct,
+					guia: report.guideNumber,
+				},
+			});
+			return acc;
+		}, {});
+
+		return Object.values(groupedReports);
+	}
 }
