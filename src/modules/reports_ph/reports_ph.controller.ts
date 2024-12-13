@@ -1,34 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ReportQueryDto } from './dto/reports_ph.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ReportsPh } from './entities/reports_ph.entity';
+import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { ReportsPhService } from './reports_ph.service';
-import { CreateReportsPhDto } from './dto/create-reports_ph.dto';
-import { UpdateReportsPhDto } from './dto/update-reports_ph.dto';
 
-@Controller('reports-ph')
+@ApiTags('Negocio - Reportes')
+@Controller('reports')
 export class ReportsPhController {
-  constructor(private readonly reportsPhService: ReportsPhService) {}
+	constructor(private readonly reportsService: ReportsPhService) { }
 
-  @Post()
-  create(@Body() createReportsPhDto: CreateReportsPhDto) {
-    return this.reportsPhService.create(createReportsPhDto);
-  }
+	@Get()
+	@ApiOperation({ summary: 'Obtener todos los reportes con paginación' })
+	@ApiResult({ type: [ReportsPh], isPage: true })
+	findAll(@Query() query: ReportQueryDto) {
+		return this.reportsService.findAll(query);
+	}
 
-  @Get()
-  findAll() {
-    return this.reportsPhService.findAll();
-  }
+	@Get(':id')
+	@ApiOperation({ summary: 'Obtener un reporte por su ID' })
+	findOne(@IdParam('id') id: string): Promise<ReportsPh> {
+		return this.reportsService.findOne(+id);
+	}
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reportsPhService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReportsPhDto: UpdateReportsPhDto) {
-    return this.reportsPhService.update(+id, updateReportsPhDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reportsPhService.remove(+id);
-  }
 }

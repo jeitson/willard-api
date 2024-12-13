@@ -45,6 +45,6 @@ export class Client extends CompleteEntity {
 	@OneToMany(() => CollectionRequest, collectionsRequests => collectionsRequests.client)
     collectionsRequests: CollectionRequest[];
 
-	@OneToMany(() => ReportsPh, reportsPh => reportsPh.client)
+	// @OneToMany(() => ReportsPh, reportsPh => reportsPh.client)
     reportsPh: ReportsPh[];
 }

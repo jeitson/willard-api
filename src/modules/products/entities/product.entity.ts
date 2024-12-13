@@ -65,6 +65,6 @@ export class Product extends CompleteEntity {
 	@OneToMany(() => AuditGuiaDetail, (auditGuiaDetail) => auditGuiaDetail.product)
 	auditGuiaDetails: AuditGuiaDetail[];
 
-	@OneToMany(() => ReportsPh, (reportsPh) => reportsPh.product)
+	// @OneToMany(() => ReportsPh, (reportsPh) => reportsPh.product)
 	reportsPh: ReportsPh[];
 }

@@ -1,26 +1,102 @@
 import { Injectable } from '@nestjs/common';
-import { CreateReportsPhDto } from './dto/create-reports_ph.dto';
-import { UpdateReportsPhDto } from './dto/update-reports_ph.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ReportsPh } from './entities/reports_ph.entity';
+import { Repository, Like } from 'typeorm';
+import { ReportCreateDto, ReportQueryDto, ReportUpdateDto } from './dto/reports_ph.dto';
+import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { ClientsService } from '../clients/clients.service';
+import { ProductsService } from '../products/products.service';
+import { Pagination } from 'src/core/helper/paginate/pagination';
+import { paginate } from 'src/core/helper/paginate';
+import { UserContextService } from '../users/user-context.service';
 
 @Injectable()
 export class ReportsPhService {
-  create(createReportsPhDto: CreateReportsPhDto) {
-    return 'This action adds a new reportsPh';
-  }
+	constructor(
+		@InjectRepository(ReportsPh)
+		private readonly reportsRepository: Repository<ReportsPh>,
+		private readonly clientsService: ClientsService,
+		private readonly productsService: ProductsService,
+		private readonly userContextService: UserContextService
+	) { }
 
-  findAll() {
-    return `This action returns all reportsPh`;
-  }
+	async create(createReportDto: ReportCreateDto): Promise<ReportsPh> {
+		const client = await this.clientsService.findOne(createReportDto.clientId);
+		if (!client) {
+			throw new BusinessException('El cliente especificado no existe.');
+		}
 
-  findOne(id: number) {
-    return `This action returns a #${id} reportsPh`;
-  }
+		const product = await this.productsService.findOne(createReportDto.productId);
+		if (!product) {
+			throw new BusinessException('El producto especificado no existe.');
+		}
 
-  update(id: number, updateReportsPhDto: UpdateReportsPhDto) {
-    return `This action updates a #${id} reportsPh`;
-  }
+		const user_id = this.userContextService.getUserDetails().id;
 
-  remove(id: number) {
-    return `This action removes a #${id} reportsPh`;
-  }
+		const report = this.reportsRepository.create({ ...createReportDto, client, product, createdBy: user_id, modifiedBy: user_id });
+		return await this.reportsRepository.save(report);
+	}
+
+	async update(id: number, updateReportDto: ReportUpdateDto): Promise<ReportsPh> {
+		const report = await this.reportsRepository.findOne({ where: { id } });
+
+		if (!report) {
+			throw new BusinessException('Reporte no encontrado.');
+		}
+
+		if (updateReportDto.clientId) {
+			const client = await this.clientsService.findOne(updateReportDto.clientId);
+			if (!client) {
+				throw new BusinessException('El cliente especificado no existe.');
+			}
+		}
+
+		if (updateReportDto.productId) {
+			const product = await this.productsService.findOne(updateReportDto.productId);
+			if (!product) {
+				throw new BusinessException('El producto especificado no existe.');
+			}
+		}
+
+		const modifiedBy = this.userContextService.getUserDetails().id;
+
+		return await this.reportsRepository.save({ ...report, ...updateReportDto, modifiedBy });
+	}
+
+	async findAll(query: ReportQueryDto): Promise<Pagination<ReportsPh>> {
+		const queryBuilder = this.reportsRepository.createQueryBuilder('report');
+
+		if (query.guideNumber) {
+			queryBuilder.andWhere('report.guideNumber LIKE :guideNumber', { guideNumber: `%${query.guideNumber}%` });
+		}
+
+		if (query.clientId) {
+			queryBuilder.andWhere('report.clientId = :clientId', { clientId: query.clientId });
+		}
+
+		if (query.productId) {
+			queryBuilder.andWhere('report.productId = :productId', { productId: query.productId });
+		}
+
+		if (query.collectionSiteId) {
+			queryBuilder.andWhere('report.collectionSiteId = :collectionSiteId', { collectionSiteId: query.collectionSiteId });
+		}
+
+		return paginate<ReportsPh>(queryBuilder, { page: query.page, pageSize: query.pageSize });
+	}
+
+	async findOne(id: number): Promise<ReportsPh> {
+		const report = await this.reportsRepository.findOne({ where: { id } });
+
+		if (!report) {
+			throw new BusinessException('Reporte no encontrado.');
+		}
+
+		return report;
+	}
+
+	async remove(id: number): Promise<void> {
+		const report = await this.findOne(id);
+		await this.reportsRepository.remove(report);
+	}
 }
