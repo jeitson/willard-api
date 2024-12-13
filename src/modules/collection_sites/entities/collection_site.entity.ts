@@ -78,6 +78,6 @@ export class CollectionSite extends CompleteEntity {
 	@ManyToMany(() => User, user => user.collectionSites)
 	users: User[];
 
-	// @OneToMany(() => ReportsPh, reportsPh => reportsPh.collectionSite)
-	// reportsPh: ReportsPh[];
+	// @OneToMany(() => ReportsPh, (reportsPh) => reportsPh.collectionSite)
+	reportsPh: ReportsPh[];
 }
