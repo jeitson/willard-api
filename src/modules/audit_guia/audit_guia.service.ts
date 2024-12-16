@@ -19,6 +19,7 @@ import { Shipment } from '../shipments/entities/shipment.entity';
 import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
 import { ShipmentDetail } from '../shipments/entities/shipment_detail.entity';
 import { ShipmentPhoto } from '../shipments/entities/shipment_photo.entity';
+import { ReportsPhService } from '../reports_ph/reports_ph.service';
 
 @Injectable()
 export class AuditGuiaService {
@@ -41,6 +42,7 @@ export class AuditGuiaService {
 		private readonly transporterTravelRepository: Repository<TransporterTravel>,
 
 		private readonly catalogsService: CatalogsService,
+		private readonly reportsPhService: ReportsPhService,
 	) { }
 
 	async create(createAuditGuiaDto: AuditGuiaCreateDto): Promise<void> {
@@ -121,6 +123,16 @@ export class AuditGuiaService {
 
 		auditGuia.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
 		await this.auditGuiaRepository.save(auditGuia);
+
+		// crear reporte_ph
+		auditGuia.auditGuiaDetails.forEach(async (element) => {
+			await this.reportsPhService.create({
+				collectionSiteId: auditGuia.reception.collectionSite.id,
+				guideNumber: auditGuia.guideNumber,
+				productId: element.product.id,
+				clientId: null
+			});
+		})
 	}
 
 	async findOne(id: string): Promise<AuditGuia> {
