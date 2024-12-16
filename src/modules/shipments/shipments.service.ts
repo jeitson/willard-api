@@ -59,9 +59,9 @@ export class ShipmentsService {
 			throw new BadRequestException('La transportadora no es válida.');
 		}
 
-		if (createShipmentDto.details) {
-			await this.validateShipmentDetails(createShipmentDto.details);
-		}
+		// if (createShipmentDto.details) {
+		// 	await this.validateShipmentDetails(createShipmentDto.details);
+		// }
 
 		const shipment = this.shipmentRepository.create(createShipmentDto);
 		const savedShipment = await this.shipmentRepository.save({ ...shipment, createdBy: user_id, modifiedBy: user_id, shipmentStatusId: 67, collectionSite });
@@ -90,8 +90,10 @@ export class ShipmentsService {
 		return savedShipment;
 	}
 
-	private async validateShipmentDetails(details: ShipmentDetailDto[]): Promise<void> {
-		for (const detail of details) {
+	private async saveShipmentDetails(shipment: Shipment, details: ShipmentDetailDto[]): Promise<void> {
+		const user_id = this.userContextService.getUserDetails().id;
+
+		details.forEach(async (detail) => {
 			const product = await this.productRepository.findOneBy({ id: detail.productId });
 			if (!product) {
 				throw new BadRequestException(`El producto con ID ${detail.productId} no es válido.`);
@@ -100,22 +102,17 @@ export class ShipmentsService {
 			if (detail.quantity < 1 || detail.quantity > 10000) {
 				throw new BadRequestException(`La cantidad del producto ${detail.productId} debe estar entre 1 y 10,000.`);
 			}
-		}
-	}
 
-	private async saveShipmentDetails(shipment: Shipment, details: ShipmentDetailDto[]): Promise<void> {
-		const user_id = this.userContextService.getUserDetails().id;
-
-		const shipmentDetails = details.map(detail => {
 			const shipmentDetail = this.shipmentDetailRepository.create({
 				...detail,
 				createdBy: user_id, modifiedBy: user_id,
 				shipment,
+				product
 			});
-			return shipmentDetail;
+
+			await this.shipmentDetailRepository.save(shipmentDetail);
 		});
 
-		await this.shipmentDetailRepository.save(shipmentDetails);
 	}
 
 	private async saveShipmentPhotos(shipment: Shipment, photos: ShipmentPhotoDto[]): Promise<void> {
@@ -178,9 +175,9 @@ export class ShipmentsService {
 			throw new BadRequestException('La transportadora no es válida.');
 		}
 
-		if (updateShipmentDto.details) {
-			await this.validateShipmentDetails(updateShipmentDto.details);
-		}
+		// if (updateShipmentDto.details) {
+		// 	await this.validateShipmentDetails(updateShipmentDto.details);
+		// }
 
 		try {
 			const updatedShipment = this.shipmentRepository.create({ ...shipment, collectionSite, ...updateShipmentDto, modifiedBy: user_id });
@@ -210,17 +207,26 @@ export class ShipmentsService {
 
 		await this.shipmentDetailRepository.delete({ shipment: { id: shipmentId } });
 
-		const shipmentDetails = details.map(detail => {
+		for (const detail of details) {
+			const product = await this.productRepository.findOneBy({ id: detail.productId });
+			if (!product) {
+				throw new BadRequestException(`El producto con ID ${detail.productId} no es válido.`);
+			}
+
+			if (detail.quantity < 1 || detail.quantity > 10000) {
+				throw new BadRequestException(`La cantidad del producto ${detail.productId} debe estar entre 1 y 10,000.`);
+			}
+
 			const shipmentDetail = this.shipmentDetailRepository.create({
 				...detail,
 				createdBy: user_id,
 				modifiedBy: user_id,
 				shipment: { id: shipmentId },
+				product,
 			});
-			return shipmentDetail;
-		});
+			await this.shipmentDetailRepository.save(shipmentDetail);
 
-		await this.shipmentDetailRepository.save(shipmentDetails);
+		}
 	}
 
 	private async updateShipmentPhotos(shipmentId: number, photos: ShipmentPhotoDto[]): Promise<void> {
