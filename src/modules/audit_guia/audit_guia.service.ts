@@ -17,6 +17,8 @@ import { User } from '../users/entities/user.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
 import { Shipment } from '../shipments/entities/shipment.entity';
 import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
+import { ShipmentDetail } from '../shipments/entities/shipment_detail.entity';
+import { ShipmentPhoto } from '../shipments/entities/shipment_photo.entity';
 
 @Injectable()
 export class AuditGuiaService {
@@ -140,6 +142,8 @@ export class AuditGuiaService {
 			.leftJoinAndMapOne('auditGuia.recuperator', User, 'recuperator', 'recuperator.id = auditGuia.recuperatorId')
 			.leftJoinAndMapOne('auditGuia.transporter', Transporter, 'transporter', 'transporter.id = auditGuia.transporterId')
 			.leftJoinAndMapMany('auditGuia.shipments', Shipment, 'shipment', 'shipment.guideNumber = auditGuia.guideNumber')
+			.leftJoinAndMapMany('shipment.shipmentDetails', ShipmentDetail, 'shipmentDetails', 'shipmentDetails.shipmentId = shipment.id')
+			.leftJoinAndMapMany('shipment.shipmentPhotos', ShipmentPhoto, 'shipmentPhotos', 'shipmentPhotos.shipmentId = shipment.id')
 			.leftJoinAndSelect('shipment.collectionSite', 'collectionSite');
 
 		const rawResults = await paginate<AuditGuia>(queryBuilder, {

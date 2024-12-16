@@ -41,7 +41,7 @@ export class Shipment extends CompleteEntity {
 	referenceDoc2: string;
 
 	@ApiProperty({ description: 'Estado del envío 1' })
-	@Column({ type: 'int', name: 'EnvioEstado1' })
+	@Column({ type: 'int', name: 'EnvioEstado' })
 	shipmentStatusId: number;
 
 	@OneToMany(() => ShipmentDetail, (detail) => detail.shipment)
