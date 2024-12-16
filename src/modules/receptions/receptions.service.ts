@@ -17,6 +17,7 @@ import { AuditGuiaService } from '../audit_guia/audit_guia.service';
 import { CatalogsService } from '../catalogs/catalogs.service';
 import { formatToDate } from 'src/core/utils';
 import { RECEIPT_STATUS } from 'src/core/constants/status.constant';
+import { PICKUP_LOCATION_TYPE } from 'src/core/constants/types.constant';
 
 
 /** Estados ID
@@ -53,7 +54,7 @@ export class ReceptionsService {
 		}
 
 		// aplica si la sede de acopio es una agencia
-		if (collectionSite.siteTypeId === 52) {
+		if (collectionSite.siteTypeId === PICKUP_LOCATION_TYPE.AGENCY) {
 			if (!createReceptionDto.referenceDoc1) {
 				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
 			}
@@ -170,7 +171,7 @@ export class ReceptionsService {
 		}
 
 		// aplica si la sede de acopio es una agencia
-		if (collectionSite.siteTypeId === 52) {
+		if (collectionSite.siteTypeId === PICKUP_LOCATION_TYPE.AGENCY) {
 			if (!updateReceptionDto.referenceDoc1) {
 				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
 			}

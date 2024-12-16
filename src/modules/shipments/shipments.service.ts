@@ -14,6 +14,7 @@ import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { Child } from '../catalogs/entities/child.entity';
 import { ShipmentERC } from './entities/shipment_erc.entity';
+import { PICKUP_LOCATION_TYPE } from 'src/core/constants/types.constant';
 
 @Injectable()
 export class ShipmentsService {
@@ -45,7 +46,7 @@ export class ShipmentsService {
 		}
 
 		// aplica si la sede de acopio es una agencia
-		if (collectionSite.siteTypeId === 52) {
+		if (collectionSite.siteTypeId === PICKUP_LOCATION_TYPE.AGENCY) {
 			if (!createShipmentDto.referenceDoc1) {
 				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
 			}
@@ -161,7 +162,7 @@ export class ShipmentsService {
 		}
 
 		// aplica si la sede de acopio es una agencia
-		if (collectionSite.siteTypeId === 52) {
+		if (collectionSite.siteTypeId === PICKUP_LOCATION_TYPE.AGENCY) {
 			if (!updateShipmentDto.referenceDoc1) {
 				throw new BadRequestException('DocReferencia1 es obligatorio cuando el lugar de recogida es una sede de acopio.');
 			}
