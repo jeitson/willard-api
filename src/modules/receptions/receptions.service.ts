@@ -13,7 +13,7 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { Child } from '../catalogs/entities/child.entity';
-import { AuditGuiaService } from '../audit_guia/audit_guia.service';
+import { AuditGuideService } from '../audit_guide/audit_guide.service';
 import { CatalogsService } from '../catalogs/catalogs.service';
 import { formatToDate } from 'src/core/utils';
 import { RECEIPT_STATUS } from 'src/core/constants/status.constant';
@@ -39,7 +39,7 @@ export class ReceptionsService {
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
-		private readonly auditGuiaService: AuditGuiaService,
+		private readonly auditGuideService: AuditGuideService,
 		private readonly userContextService: UserContextService
 	) { }
 
@@ -90,14 +90,14 @@ export class ReceptionsService {
 			}
 
 			if (roles.includes(20)) {
-				await this.auditGuiaService.create({
+				await this.auditGuideService.create({
 					reception: savedReception,
 					guideNumber: reception.guideNumber,
 					recuperatorId: user_id,
 					recuperatorTotal: createReceptionDto.details.reduce((acc, item) => acc += item.quantity, 0),
 					transporterId: transporter.id,
 					transporterTotal: 0,
-					auditGuiaDetails: createReceptionDto.details.map((item) => ({
+					auditGuideDetails: createReceptionDto.details.map((item) => ({
 						productId: item.productId,
 						isRecuperator: true,
 						quantity: item.quantity,

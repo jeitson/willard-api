@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { AuditGuiaConfirmUpdateDto, AuditGuiaCreateDto, AuditGuiaDetailUpdateDto } from './dto/audit_guia.dto';
-import { AuditGuia } from './entities/audit_guia.entity';
-import { AuditGuiaDetail } from './entities/audit_guia_detail.entity';
+import { AuditGuideConfirmUpdateDto, AuditGuideCreateDto, AuditGuideDetailUpdateDto } from './dto/audit_guide.dto';
+import { AuditGuide } from './entities/audit_guide.entity';
+import { AuditGuideDetail } from './entities/audit_guide_detail.entity';
 import { Product } from 'src/modules/products/entities/product.entity';
 import { UserContextService } from '../users/user-context.service';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
-import { AuditGuiaRoute } from './entities/audit_guia-ruta.entity';
+import { AuditGuideRoute } from './entities/audit_guide-ruta.entity';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 import { CatalogsService } from '../catalogs/catalogs.service';
 import { Pagination } from 'src/core/helper/paginate/pagination';
@@ -22,21 +22,21 @@ import { ShipmentPhoto } from '../shipments/entities/shipment_photo.entity';
 import { ReportsPhService } from '../reports_ph/reports_ph.service';
 
 @Injectable()
-export class AuditGuiaService {
+export class AuditGuideService {
 	constructor(
-		@InjectRepository(AuditGuia)
-		private readonly auditGuiaRepository: Repository<AuditGuia>,
+		@InjectRepository(AuditGuide)
+		private readonly auditGuideRepository: Repository<AuditGuide>,
 
-		@InjectRepository(AuditGuiaDetail)
-		private readonly auditGuiaDetailRepository: Repository<AuditGuiaDetail>,
+		@InjectRepository(AuditGuideDetail)
+		private readonly auditGuideDetailRepository: Repository<AuditGuideDetail>,
 
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
 
 		private readonly userContextService: UserContextService,
 
-		@InjectRepository(AuditGuiaRoute)
-		private readonly auditGuiaRouteRepository: Repository<AuditGuiaRoute>,
+		@InjectRepository(AuditGuideRoute)
+		private readonly auditGuideRouteRepository: Repository<AuditGuideRoute>,
 
 		@InjectRepository(TransporterTravel)
 		private readonly transporterTravelRepository: Repository<TransporterTravel>,
@@ -45,11 +45,11 @@ export class AuditGuiaService {
 		private readonly reportsPhService: ReportsPhService,
 	) { }
 
-	async create(createAuditGuiaDto: AuditGuiaCreateDto): Promise<void> {
+	async create(createAuditGuideDto: AuditGuideCreateDto): Promise<void> {
 		const { id: userId } = this.userContextService.getUserDetails();
-		let { auditGuiaDetails, transporterTotal, ...auditGuiaData } = createAuditGuiaDto;
+		let { auditGuideDetails, transporterTotal, ...auditGuideData } = createAuditGuideDto;
 
-		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
+		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
 		await queryRunner.startTransaction();
 
 		try {
@@ -58,20 +58,20 @@ export class AuditGuiaService {
 			let date = null;
 
 			const transporterTravel = await this.transporterTravelRepository.findOne({
-				where: { guideId: createAuditGuiaDto.guideNumber.toUpperCase() },
+				where: { guideId: createAuditGuideDto.guideNumber.toUpperCase() },
 				relations: ['details'],
 			});
 
 			if (transporterTravel) {
-				({ requestStatusId, date, zoneId, auditGuiaDetails, transporterTotal } = await this.handleTransporterTravel(
+				({ requestStatusId, date, zoneId, auditGuideDetails, transporterTotal } = await this.handleTransporterTravel(
 					transporterTravel,
-					auditGuiaDetails,
+					auditGuideDetails,
 					transporterTotal,
 				));
 			}
 
-			const auditGuia = this.auditGuiaRepository.create({
-				...auditGuiaData,
+			const auditGuide = this.auditGuideRepository.create({
+				...auditGuideData,
 				zoneId,
 				date,
 				transporterTotal,
@@ -80,17 +80,17 @@ export class AuditGuiaService {
 				modifiedBy: userId,
 			});
 
-			const auditGuiaSaved = await queryRunner.manager.save(auditGuia);
-			if (!auditGuiaSaved.id) {
+			const auditGuideSaved = await queryRunner.manager.save(auditGuide);
+			if (!auditGuideSaved.id) {
 				throw new BusinessException('Error al guardar la guía de auditoría.', 500);
 			}
 
-			await this.saveAuditDetails(queryRunner, auditGuiaDetails, auditGuiaSaved);
+			await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
 
-			await this.verifyAndConfirmDetails(auditGuiaDetails, auditGuiaSaved);
+			await this.verifyAndConfirmDetails(auditGuideDetails, auditGuideSaved);
 
 			if (transporterTravel) {
-				await this.saveAuditRoute(queryRunner, auditGuiaSaved, transporterTravel, userId);
+				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
 			}
 
 			await queryRunner.commitTransaction();
@@ -102,77 +102,77 @@ export class AuditGuiaService {
 		}
 	}
 
-	async updateDetails(id: number, updateDto: AuditGuiaDetailUpdateDto): Promise<void> {
-		const auditGuia = await this.findAuditGuiaById(id);
-		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
+	async updateDetails(id: number, updateDto: AuditGuideDetailUpdateDto): Promise<void> {
+		const auditGuide = await this.findAuditGuideById(id);
+		if (auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
 		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(updateDto);
 
-		auditGuia.transporterTotal = transporterTotal;
-		auditGuia.recuperatorTotal = recuperatorTotal;
-		await this.auditGuiaRepository.save(auditGuia);
+		auditGuide.transporterTotal = transporterTotal;
+		auditGuide.recuperatorTotal = recuperatorTotal;
+		await this.auditGuideRepository.save(auditGuide);
 	}
 
-	async confirm(id: number, { comment, auditGuiaDetails, giveReason }: AuditGuiaConfirmUpdateDto): Promise<void> {
-		const auditGuia = await this.findAuditGuiaById(id);
-		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
+	async confirm(id: number, { comment, auditGuideDetails, giveReason }: AuditGuideConfirmUpdateDto): Promise<void> {
+		const auditGuide = await this.findAuditGuideById(id);
+		if (auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
-		auditGuia.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
-		auditGuia.comment = comment;
+		auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
+		auditGuide.comment = comment;
 
-		auditGuia.inFavorRecuperator = giveReason === 'R';
+		auditGuide.inFavorRecuperator = giveReason === 'R';
 
-		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails({ auditGuiaDetails });
+		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails({ auditGuideDetails });
 
-		auditGuia.transporterTotal = transporterTotal;
-		auditGuia.recuperatorTotal = recuperatorTotal;
-		await this.auditGuiaRepository.save(auditGuia);
+		auditGuide.transporterTotal = transporterTotal;
+		auditGuide.recuperatorTotal = recuperatorTotal;
+		await this.auditGuideRepository.save(auditGuide);
 
 		// crear reporte_ph
-		// auditGuia.auditGuiaDetails.forEach(async (element) => {
+		// auditGuide.auditGuideDetails.forEach(async (element) => {
 		// 	await this.reportsPhService.create({
-		// 		collectionSiteId: auditGuia.reception.collectionSite.id,
-		// 		guideNumber: auditGuia.guideNumber,
+		// 		collectionSiteId: auditGuide.reception.collectionSite.id,
+		// 		guideNumber: auditGuide.guideNumber,
 		// 		productId: element.product.id,
 		// 		clientId: null
 		// 	});
 		// })
 	}
 
-	async findOne(id: string): Promise<AuditGuia> {
-		return this.auditGuiaRepository.findOne({
+	async findOne(id: string): Promise<AuditGuide> {
+		return this.auditGuideRepository.findOne({
 			where: { id: +id },
-			relations: ['auditGuiaDetails', 'auditsGuiasRoutes', 'reception', 'transporterTravel'],
+			relations: ['auditGuideDetails', 'auditsGuidesRoutes', 'reception', 'transporterTravel'],
 		});
 	}
 
-	async findAll(query: any): Promise<Pagination<AuditGuia>> {
-		const queryBuilder = this.auditGuiaRepository.createQueryBuilder('auditGuia')
-			.leftJoinAndSelect('auditGuia.auditGuiaDetails', 'auditGuiaDetails')
-			.leftJoinAndSelect('auditGuiaDetails.product', 'product')
-			.leftJoinAndSelect('auditGuia.reception', 'reception')
-			.leftJoinAndSelect('auditGuia.auditsGuiasRoutes', 'auditsGuiasRoutes')
-			.leftJoinAndSelect('auditsGuiasRoutes.transporterTravel', 'transporterTravel')
-			.leftJoinAndMapOne('auditGuia.requestStatus', Child, 'requestStatus', 'requestStatus.id = auditGuia.requestStatusId')
-			.leftJoinAndMapOne('auditGuia.zone', Child, 'zone', 'zone.id = auditGuia.zoneId')
-			.leftJoinAndMapOne('auditGuia.recuperator', User, 'recuperator', 'recuperator.id = auditGuia.recuperatorId')
-			.leftJoinAndMapOne('auditGuia.transporter', Transporter, 'transporter', 'transporter.id = auditGuia.transporterId')
-			.leftJoinAndMapMany('auditGuia.shipments', Shipment, 'shipment', 'shipment.guideNumber = auditGuia.guideNumber')
+	async findAll(query: any): Promise<Pagination<AuditGuide>> {
+		const queryBuilder = this.auditGuideRepository.createQueryBuilder('auditGuide')
+			.leftJoinAndSelect('auditGuide.auditGuideDetails', 'auditGuideDetails')
+			.leftJoinAndSelect('auditGuideDetails.product', 'product')
+			.leftJoinAndSelect('auditGuide.reception', 'reception')
+			.leftJoinAndSelect('auditGuide.auditsGuidesRoutes', 'auditsGuidesRoutes')
+			.leftJoinAndSelect('auditsGuidesRoutes.transporterTravel', 'transporterTravel')
+			.leftJoinAndMapOne('auditGuide.requestStatus', Child, 'requestStatus', 'requestStatus.id = auditGuide.requestStatusId')
+			.leftJoinAndMapOne('auditGuide.zone', Child, 'zone', 'zone.id = auditGuide.zoneId')
+			.leftJoinAndMapOne('auditGuide.recuperator', User, 'recuperator', 'recuperator.id = auditGuide.recuperatorId')
+			.leftJoinAndMapOne('auditGuide.transporter', Transporter, 'transporter', 'transporter.id = auditGuide.transporterId')
+			.leftJoinAndMapMany('auditGuide.shipments', Shipment, 'shipment', 'shipment.guideNumber = auditGuide.guideNumber')
 			.leftJoinAndSelect('shipment.collectionSite', 'collectionSite')
 			.leftJoinAndSelect('shipment.shipmentDetails', 'ShipmentDetail')
 			.leftJoinAndSelect('shipment.shipmentPhotos', 'ShipmentPhoto');
 
-		const rawResults = await paginate<AuditGuia>(queryBuilder, {
+		const rawResults = await paginate<AuditGuide>(queryBuilder, {
 			page: query.page,
 			pageSize: query.pageSize,
 		});
 
-		const groupedResults: any = rawResults.items.map(auditGuia => {
-			const groupedDetails = auditGuia.auditGuiaDetails.reduce((acc, detail) => {
+		const groupedResults: any = rawResults.items.map(auditGuide => {
+			const groupedDetails = auditGuide.auditGuideDetails.reduce((acc, detail) => {
 				if (detail.isRecuperator) {
 					acc.recuperator.detail = [...acc.recuperator.detail, detail]
 					acc.recuperator.quantity += detail.quantity;
@@ -186,8 +186,8 @@ export class AuditGuiaService {
 				return acc;
 			}, { recuperator: { detail: [], quantity: 0, quantityCollection: 0 }, transporter: { detail: [], quantity: 0, quantityCollection: 0 } });
 			return {
-				...auditGuia,
-				auditGuiaDetails: groupedDetails || [],
+				...auditGuide,
+				auditGuideDetails: groupedDetails || [],
 			};
 		});
 
@@ -198,23 +198,23 @@ export class AuditGuiaService {
 	}
 
 	private async verifyAndConfirmDetails(
-		auditGuiaDetails: any[],
-		auditGuiaSaved: AuditGuia,
+		auditGuideDetails: any[],
+		auditGuideSaved: AuditGuide,
 	): Promise<void> {
-		const totalQuantity = auditGuiaDetails.reduce((sum, detail) => sum + detail.quantity, 0);
+		const totalQuantity = auditGuideDetails.reduce((sum, detail) => sum + detail.quantity, 0);
 		const totalProducts = await this.productRepository.count({
-			where: { id: In(auditGuiaDetails.map(detail => detail.product.id)) },
+			where: { id: In(auditGuideDetails.map(detail => detail.product.id)) },
 		});
 
-		if (auditGuiaDetails.length === totalProducts && totalQuantity === auditGuiaSaved.transporterTotal) {
-			auditGuiaSaved.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
-			await this.auditGuiaRepository.save(auditGuiaSaved);
+		if (auditGuideDetails.length === totalProducts && totalQuantity === auditGuideSaved.transporterTotal) {
+			auditGuideSaved.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
+			await this.auditGuideRepository.save(auditGuideSaved);
 		}
 	}
 
 	private async handleTransporterTravel(
 		transporterTravel: TransporterTravel,
-		auditGuiaDetails: any[],
+		auditGuideDetails: any[],
 		transporterTotal: number,
 	) {
 		const zone = await this.catalogsService.getChildrenByName(transporterTravel.zone);
@@ -240,57 +240,57 @@ export class AuditGuiaService {
 			};
 		});
 
-		auditGuiaDetails.push(...transporterDetails);
+		auditGuideDetails.push(...transporterDetails);
 
 		return {
 			requestStatusId: AUDIT_GUIDE_STATUS.PENDING,
 			date: transporterTravel.movementDate,
 			zoneId: zone[0].id,
-			auditGuiaDetails,
+			auditGuideDetails,
 			transporterTotal,
 		};
 	}
 
-	private async saveAuditDetails(queryRunner, details: any[], auditGuiaSaved: AuditGuia) {
+	private async saveAuditDetails(queryRunner, details: any[], auditGuideSaved: AuditGuide) {
 		const detailsToSave = details.map((detail) =>
-			this.auditGuiaDetailRepository.create({
+			this.auditGuideDetailRepository.create({
 				...detail,
-				auditGuia: auditGuiaSaved,
+				auditGuide: auditGuideSaved,
 			}),
 		);
-		await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
+		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
 	}
 
-	private async saveAuditRoute(queryRunner, auditGuia: AuditGuia, transporterTravel: TransporterTravel, userId: number) {
-		const auditGuiaRoute = this.auditGuiaRouteRepository.create({
-			auditGuia,
+	private async saveAuditRoute(queryRunner, auditGuide: AuditGuide, transporterTravel: TransporterTravel, userId: number) {
+		const auditGuideRoute = this.auditGuideRouteRepository.create({
+			auditGuide,
 			transporterTravel,
 			createdBy: userId.toString(),
 			updatedBy: userId.toString(),
 		});
-		await queryRunner.manager.save(auditGuiaRoute);
+		await queryRunner.manager.save(auditGuideRoute);
 	}
 
-	private async findAuditGuiaById(id: number): Promise<AuditGuia> {
-		const auditGuia = await this.auditGuiaRepository.findOne({ where: { id } });
-		if (!auditGuia) {
+	private async findAuditGuideById(id: number): Promise<AuditGuide> {
+		const auditGuide = await this.auditGuideRepository.findOne({ where: { id } });
+		if (!auditGuide) {
 			throw new BusinessException(`No se encontró la auditoría con el ID ${id}`);
 		}
-		return auditGuia;
+		return auditGuide;
 	}
 
-	private async updateAuditDetails(updateDto: AuditGuiaDetailUpdateDto) {
+	private async updateAuditDetails(updateDto: AuditGuideDetailUpdateDto) {
 		let transporterTotal = 0;
 		let recuperatorTotal = 0;
 
-		for (const detail of updateDto.auditGuiaDetails) {
-			const existingDetail = await this.auditGuiaDetailRepository.findOne({ where: { id: detail.id } });
+		for (const detail of updateDto.auditGuideDetails) {
+			const existingDetail = await this.auditGuideDetailRepository.findOne({ where: { id: detail.id } });
 			if (!existingDetail) {
 				throw new BusinessException(`No se encontró el detalle de auditoría con el ID ${detail.id}`);
 			}
 
 			existingDetail.quantityCollection = detail.quantityCollection;
-			await this.auditGuiaDetailRepository.save(existingDetail);
+			await this.auditGuideDetailRepository.save(existingDetail);
 
 			if (existingDetail.isRecuperator) {
 				recuperatorTotal += existingDetail.quantityCollection;
@@ -303,13 +303,13 @@ export class AuditGuiaService {
 	}
 
 	async synchronize(id: number): Promise<void> {
-		const auditGuia = await this.findAuditGuiaById(id);
+		const auditGuide = await this.findAuditGuideById(id);
 
-		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.WITHOUT_GUIDE) {
+		if (auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.WITHOUT_GUIDE) {
 			throw new BusinessException('Solo se pueden sincronizar auditorías en estado "sin guia".');
 		}
 
-		const queryRunner = this.auditGuiaRepository.manager.connection.createQueryRunner();
+		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
 		await queryRunner.startTransaction();
 
 		try {
@@ -318,13 +318,13 @@ export class AuditGuiaService {
 				throw new BusinessException('No se encontraron datos externos para sincronizar.', 404);
 			}
 
-			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuia, externalData);
+			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
 
-			auditGuia.transporterTotal = transporterTotal;
-			auditGuia.recuperatorTotal = recuperatorTotal;
-			auditGuia.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
+			auditGuide.transporterTotal = transporterTotal;
+			auditGuide.recuperatorTotal = recuperatorTotal;
+			auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
 
-			await queryRunner.manager.save(auditGuia);
+			await queryRunner.manager.save(auditGuide);
 
 			await queryRunner.commitTransaction();
 		} catch (error) {
@@ -344,7 +344,7 @@ export class AuditGuiaService {
 		};
 	}
 
-	private async syncAuditDetails(queryRunner, auditGuia: AuditGuia, externalData: any): Promise<any> {
+	private async syncAuditDetails(queryRunner, auditGuide: AuditGuide, externalData: any): Promise<any> {
 		let transporterTotal = 0;
 		let recuperatorTotal = 0;
 
@@ -357,8 +357,8 @@ export class AuditGuiaService {
 		const detailsToSave = foundProducts.map((product) => {
 			const { quantity } = externalData.details.find(({ productName }) => productName === product.name);
 
-			return this.auditGuiaDetailRepository.create({
-				auditGuia,
+			return this.auditGuideDetailRepository.create({
+				auditGuide,
 				product,
 				isRecuperator: false,
 				quantity,
@@ -366,7 +366,7 @@ export class AuditGuiaService {
 			});
 		});
 
-		await queryRunner.manager.save(AuditGuiaDetail, detailsToSave);
+		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
 
 		detailsToSave.forEach((detail) => {
 			if (detail.isRecuperator) {
@@ -380,19 +380,19 @@ export class AuditGuiaService {
 	}
 
 	async updateInFavorRecuperator({ id, key }: { id: number; key: string }): Promise<void> {
-		const auditGuia = await this.auditGuiaRepository.findOne({ where: { id } });
+		const auditGuide = await this.auditGuideRepository.findOne({ where: { id } });
 
-		if (!auditGuia) {
+		if (!auditGuide) {
 			throw new BusinessException('No se encontró la auditoría especificada.', 404);
 		}
 
-		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
+		if (auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
 			throw new BusinessException('La auditoría debe estar en estado pendiente para actualizar.');
 		}
 
-		auditGuia.inFavorRecuperator = key === 'R';
+		auditGuide.inFavorRecuperator = key === 'R';
 
-		await this.auditGuiaRepository.save(auditGuia);
+		await this.auditGuideRepository.save(auditGuide);
 	}
 
 

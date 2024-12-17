@@ -2,20 +2,20 @@ import { Entity, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColu
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsOptional } from 'class-validator';
-import { AuditGuia } from './audit_guia.entity';
+import { AuditGuide } from './audit_guide.entity';
 import { TransporterTravel } from 'src/modules/transporter_travel/entities/transporter_travel.entity';
 
 @Entity('auditoria_guia_ruta')
-export class AuditGuiaRoute {
+export class AuditGuideRoute {
 	@PrimaryColumn({ type: 'bigint', name: 'AuditoriaGuiaId' })
-	auditGuiaId: string;
+	auditGuideId: string;
 
 	@PrimaryColumn({ type: 'bigint', name: 'TransportadoraViajeId' })
 	transporterTravelId: string;
 
-	@ManyToOne(() => AuditGuia, auditGuia => auditGuia.auditsGuiasRoutes)
+	@ManyToOne(() => AuditGuide, auditGuide => auditGuide.auditsGuidesRoutes)
 	@JoinColumn({ name: 'AuditoriaGuiaId' })
-	auditGuia: AuditGuia;
+	auditGuide: AuditGuide;
 
 	@ManyToOne(() => TransporterTravel, transporterTravel => transporterTravel.transportersTravels)
 	@JoinColumn({ name: 'TransportadoraViajeId' })

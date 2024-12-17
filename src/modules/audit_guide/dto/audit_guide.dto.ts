@@ -6,7 +6,7 @@ import { Reception } from 'src/modules/receptions/entities/reception.entity';
 import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
 import { JoinColumn, OneToOne } from 'typeorm';
 
-export class AuditGuiaDetailCreateDto {
+export class AuditGuideDetailCreateDto {
 	@ApiProperty({ description: 'ID de producto' })
 	@IsInt({ message: 'El ID del producto debe ser un número entero' })
 	productId: number;
@@ -25,7 +25,7 @@ export class AuditGuiaDetailCreateDto {
 	quantityCollection: number;
 }
 
-export class AuditGuiaCreateDto {
+export class AuditGuideCreateDto {
 	@ApiProperty({ description: 'Número de guía' })
 	@IsString({ message: 'El número de guía debe ser una cadena de caracteres' })
 	guideNumber: string;
@@ -51,15 +51,15 @@ export class AuditGuiaCreateDto {
 	@IsInt({ message: 'El total de la transportadora debe ser un número entero' })
 	transporterTotal: number;
 
-	@ApiProperty({ type: [AuditGuiaDetailCreateDto], description: 'Detalles de la auditoría' })
-	@IsArray({ message: 'El campo "auditGuiaDetails" debe ser un arreglo de detalles' })
+	@ApiProperty({ type: [AuditGuideDetailCreateDto], description: 'Detalles de la auditoría' })
+	@IsArray({ message: 'El campo "auditGuideDetails" debe ser un arreglo de detalles' })
 	@ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
 	@ValidateNested({ each: true, message: 'Cada detalle de la auditoría debe ser válido' })
-	@Type(() => AuditGuiaDetailCreateDto)
-	auditGuiaDetails: AuditGuiaDetailCreateDto[];
+	@Type(() => AuditGuideDetailCreateDto)
+	auditGuideDetails: AuditGuideDetailCreateDto[];
 }
 
-export class AuditGuiaDetailContentUpdateDto {
+export class AuditGuideDetailContentUpdateDto {
 	@ApiProperty({ description: 'ID del detalle de la auditoría', required: true })
 	@IsInt({ message: 'El ID del detalle debe ser un número entero' })
 	id: number;
@@ -69,16 +69,16 @@ export class AuditGuiaDetailContentUpdateDto {
 	quantityCollection: number;
 }
 
-export class AuditGuiaDetailUpdateDto {
-	@ApiProperty({ type: [AuditGuiaDetailContentUpdateDto], description: 'Detalles de la auditoría' })
-	@IsArray({ message: 'El campo "auditGuiaDetails" debe ser un arreglo de detalles' })
+export class AuditGuideDetailUpdateDto {
+	@ApiProperty({ type: [AuditGuideDetailContentUpdateDto], description: 'Detalles de la auditoría' })
+	@IsArray({ message: 'El campo "auditGuideDetails" debe ser un arreglo de detalles' })
 	// @ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
 	@ValidateNested({ each: true, message: 'Cada detalle de la auditoría debe ser válido' })
-	@Type(() => AuditGuiaDetailContentUpdateDto)
-	auditGuiaDetails: AuditGuiaDetailContentUpdateDto[];
+	@Type(() => AuditGuideDetailContentUpdateDto)
+	auditGuideDetails: AuditGuideDetailContentUpdateDto[];
 }
 
-export class AuditGuiaConfirmUpdateDto extends AuditGuiaDetailUpdateDto {
+export class AuditGuideConfirmUpdateDto extends AuditGuideDetailUpdateDto {
 	@ApiProperty({ description: 'Clave que indica la razón, debe ser "R" o "T"', enum: ['R', 'T'] })
 	@IsIn(['R', 'T'], { message: 'La clave debe ser "R" o "T"' })
 	giveReason: 'R' | 'T';
@@ -94,7 +94,7 @@ export class UpdateReasonDto {
 	key: 'R' | 'T';
 }
 
-export class AuditGuiaQueryDto extends IntersectionType(
-	PagerDto<AuditGuiaCreateDto>,
-	PartialType(AuditGuiaCreateDto),
+export class AuditGuideQueryDto extends IntersectionType(
+	PagerDto<AuditGuideCreateDto>,
+	PartialType(AuditGuideCreateDto),
 ) { }

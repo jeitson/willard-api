@@ -1,45 +1,45 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
-import { AuditGuiaService } from './audit_guia.service';
+import { AuditGuideService } from './audit_guide.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/common/decorators/role.decorator';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
-import { AuditGuia } from './entities/audit_guia.entity';
+import { AuditGuide } from './entities/audit_guide.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { AuditGuiaConfirmUpdateDto, AuditGuiaDetailUpdateDto, UpdateReasonDto } from './dto/audit_guia.dto';
+import { AuditGuideConfirmUpdateDto, AuditGuideDetailUpdateDto, UpdateReasonDto } from './dto/audit_guide.dto';
 import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Auditoria de Guias')
-@Controller('audit_guia')
+@Controller('audit_guide')
 @UseGuards(RolesGuard)
-export class AuditGuiaController {
-	constructor(private readonly auditGuiaService: AuditGuiaService) { }
+export class AuditGuideController {
+	constructor(private readonly auditGuideService: AuditGuideService) { }
 
 	@Get()
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Listado de auditoria de guias' })
-	@ApiResult({ type: [AuditGuia] })
+	@ApiResult({ type: [AuditGuide] })
 	async findAll(@Query() query: any) {
-		return this.auditGuiaService.findAll(query);
+		return this.auditGuideService.findAll(query);
 	}
 
 	@Get(':id')
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Obtener auditoria por ID' })
-	@ApiResult({ type: AuditGuia })
-	async findOne(@IdParam('id') id: string): Promise<AuditGuia> {
-		return this.auditGuiaService.findOne(id);
+	@ApiResult({ type: AuditGuide })
+	async findOne(@IdParam('id') id: string): Promise<AuditGuide> {
+		return this.auditGuideService.findOne(id);
 	}
 
 	@Patch('details/:id')
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Actualizar detalle de auditoria por ID' })
-	@ApiResult({ type: AuditGuia })
-	async updateAuditGuiaDetails(
+	@ApiResult({ type: AuditGuide })
+	async updateAuditGuideDetails(
 		@IdParam('id') id: number,
-		@Body() detailsToUpdate: AuditGuiaDetailUpdateDto,
+		@Body() detailsToUpdate: AuditGuideDetailUpdateDto,
 	): Promise<void> {
-		await this.auditGuiaService.updateDetails(id, detailsToUpdate);
+		await this.auditGuideService.updateDetails(id, detailsToUpdate);
 	}
 
 	@Patch('give-reason/:id/:key')
@@ -50,7 +50,7 @@ export class AuditGuiaController {
 		@Param() params: UpdateReasonDto,
 	): Promise<void> {
 		const { key } = params;
-		await this.auditGuiaService.updateInFavorRecuperator({ id, key });
+		await this.auditGuideService.updateInFavorRecuperator({ id, key });
 	}
 
 	@Patch('confirm/:id')
@@ -58,9 +58,9 @@ export class AuditGuiaController {
 	@ApiOperation({ summary: 'Confirmar' })
 	async confirm(
 		@IdParam('id') id: number,
-		@Body() content: AuditGuiaConfirmUpdateDto
+		@Body() content: AuditGuideConfirmUpdateDto
 	): Promise<void> {
-		await this.auditGuiaService.confirm(id, content);
+		await this.auditGuideService.confirm(id, content);
 	}
 
 	@Post('synchronize/:id')
@@ -69,7 +69,7 @@ export class AuditGuiaController {
 	async synchronize(
 		@IdParam('id') id: number,
 	): Promise<void> {
-		await this.auditGuiaService.synchronize(id);
+		await this.auditGuideService.synchronize(id);
 	}
 
 }

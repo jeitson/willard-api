@@ -2,12 +2,12 @@ import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Reception } from "src/modules/receptions/entities/reception.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
-import { AuditGuiaDetail } from "./audit_guia_detail.entity";
-import { AuditGuiaRoute } from "./audit_guia-ruta.entity";
+import { AuditGuideDetail } from "./audit_guide_detail.entity";
+import { AuditGuideRoute } from "./audit_guide-ruta.entity";
 
 @Entity({ name: 'auditoria_guia' })
-export class AuditGuia extends CompleteEntity {
-	@OneToOne(() => Reception, reception => reception.auditGuia)
+export class AuditGuide extends CompleteEntity {
+	@OneToOne(() => Reception, reception => reception.auditGuide)
 	@JoinColumn({ name: 'RecepcionId' })
 	reception: Reception;
 
@@ -51,10 +51,10 @@ export class AuditGuia extends CompleteEntity {
 	@Column({ type: 'varchar', length: 100, name: 'Comentario', default: null, nullable: true })
 	comment: string;
 
-	@OneToMany(() => AuditGuiaDetail, (auditGuiaDetail) => auditGuiaDetail.auditGuia)
-	auditGuiaDetails: AuditGuiaDetail[];
+	@OneToMany(() => AuditGuideDetail, (auditGuideDetail) => auditGuideDetail.auditGuide)
+	auditGuideDetails: AuditGuideDetail[];
 
 	@ApiProperty({ description: 'Auditorias Guias' })
-	@OneToMany(() => AuditGuiaRoute, auditGuiaRoute => auditGuiaRoute.auditGuia)
-	auditsGuiasRoutes: AuditGuiaRoute[];
+	@OneToMany(() => AuditGuideRoute, auditGuideRoute => auditGuideRoute.auditGuide)
+	auditsGuidesRoutes: AuditGuideRoute[];
 }

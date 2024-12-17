@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { CompleteEntity } from 'src/core/common/entity/common.entity';
 import { TransporterTravelDetail } from './transporter_travel_detail.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditGuiaRoute } from 'src/modules/audit_guia/entities/audit_guia-ruta.entity';
+import { AuditGuideRoute } from 'src/modules/audit_guide/entities/audit_guide-ruta.entity';
 
 @Entity({ name: 'transportadora_viaje' })
 export class TransporterTravel extends CompleteEntity {
@@ -67,6 +67,6 @@ export class TransporterTravel extends CompleteEntity {
     details: TransporterTravelDetail[];
 
 	@ApiProperty({ description: 'Auditorias Guias' })
-	@OneToMany(() => AuditGuiaRoute, auditGuiaRoute => auditGuiaRoute.transporterTravel)
-	transportersTravels: AuditGuiaRoute[];
+	@OneToMany(() => AuditGuideRoute, auditGuideRoute => auditGuideRoute.transporterTravel)
+	transportersTravels: AuditGuideRoute[];
 }

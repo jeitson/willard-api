@@ -2,21 +2,21 @@ import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { Product } from "src/modules/products/entities/product.entity";
-import { AuditGuia } from "./audit_guia.entity";
+import { AuditGuide } from "./audit_guide.entity";
 
 @Entity({ name: 'auditoria_guia_detalle' })
-export class AuditGuiaDetail extends CompleteEntity {
+export class AuditGuideDetail extends CompleteEntity {
 	@ApiProperty({ description: 'ID de recepción (FK)' })
-	@ManyToOne(() => AuditGuia, (auditGuia) => auditGuia.auditGuiaDetails)
+	@ManyToOne(() => AuditGuide, (auditGuide) => auditGuide.auditGuideDetails)
 	@JoinColumn({ name: 'AuditoriaGuiaId' })
-	auditGuia: AuditGuia;
+	auditGuide: AuditGuide;
 
 	@ApiProperty({ description: 'Es Recuperadora' })
 	@Column({ type: 'boolean', name: 'EsRecuperadora', nullable: true, default: null })
 	isRecuperator: boolean;
 
 	@ApiProperty({ description: 'ID del producto' })
-	@ManyToOne(() => Product, (product) => product.auditGuiaDetails)
+	@ManyToOne(() => Product, (product) => product.auditGuideDetails)
 	@JoinColumn({ name: 'ProductoId' })
 	product: Product;
 

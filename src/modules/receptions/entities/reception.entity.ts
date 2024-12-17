@@ -5,7 +5,7 @@ import { Transporter } from "src/modules/transporters/entities/transporter.entit
 import { ReceptionDetail } from "./reception_detail.entity";
 import { ReceptionPhoto } from "./reception_photo.entity";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { AuditGuia } from "src/modules/audit_guia/entities/audit_guia.entity";
+import { AuditGuide } from "src/modules/audit_guide/entities/audit_guide.entity";
 
 @Entity({ name: 'recepcion' })
 export class Reception extends CompleteEntity {
@@ -50,6 +50,6 @@ export class Reception extends CompleteEntity {
 	@OneToMany(() => ReceptionPhoto, (photo) => photo.reception)
 	receptionPhotos: ReceptionPhoto[];
 
-	@OneToOne(() => AuditGuia, (auditGuia) => auditGuia.reception)
-	auditGuia: AuditGuia;
+	@OneToOne(() => AuditGuide, (auditGuide) => auditGuide.reception)
+	auditGuide: AuditGuide;
 }
