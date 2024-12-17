@@ -72,10 +72,20 @@ export class AuditGuiaDetailContentUpdateDto {
 export class AuditGuiaDetailUpdateDto {
 	@ApiProperty({ type: [AuditGuiaDetailContentUpdateDto], description: 'Detalles de la auditoría' })
 	@IsArray({ message: 'El campo "auditGuiaDetails" debe ser un arreglo de detalles' })
-	@ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
+	// @ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
 	@ValidateNested({ each: true, message: 'Cada detalle de la auditoría debe ser válido' })
 	@Type(() => AuditGuiaDetailContentUpdateDto)
 	auditGuiaDetails: AuditGuiaDetailContentUpdateDto[];
+}
+
+export class AuditGuiaConfirmUpdateDto extends AuditGuiaDetailUpdateDto {
+	@ApiProperty({ description: 'Clave que indica la razón, debe ser "R" o "T"', enum: ['R', 'T'] })
+	@IsIn(['R', 'T'], { message: 'La clave debe ser "R" o "T"' })
+	giveReason: 'R' | 'T';
+
+	@ApiProperty({ description: 'Comentario' })
+	@IsString({ message: 'El comentario debe ser una cadena de caracteres' })
+	comment: string;
 }
 
 export class UpdateReasonDto {

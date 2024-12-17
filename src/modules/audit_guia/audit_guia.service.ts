@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { AuditGuiaCreateDto, AuditGuiaDetailUpdateDto } from './dto/audit_guia.dto';
+import { AuditGuiaConfirmUpdateDto, AuditGuiaCreateDto, AuditGuiaDetailUpdateDto } from './dto/audit_guia.dto';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { AuditGuiaDetail } from './entities/audit_guia_detail.entity';
 import { Product } from 'src/modules/products/entities/product.entity';
@@ -115,24 +115,32 @@ export class AuditGuiaService {
 		await this.auditGuiaRepository.save(auditGuia);
 	}
 
-	async confirm(id: number): Promise<void> {
+	async confirm(id: number, { comment, auditGuiaDetails, giveReason }: AuditGuiaConfirmUpdateDto): Promise<void> {
 		const auditGuia = await this.findAuditGuiaById(id);
 		if (auditGuia.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
 		auditGuia.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
+		auditGuia.comment = comment;
+
+		auditGuia.inFavorRecuperator = giveReason === 'R';
+
+		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails({ auditGuiaDetails });
+
+		auditGuia.transporterTotal = transporterTotal;
+		auditGuia.recuperatorTotal = recuperatorTotal;
 		await this.auditGuiaRepository.save(auditGuia);
 
 		// crear reporte_ph
-		auditGuia.auditGuiaDetails.forEach(async (element) => {
-			await this.reportsPhService.create({
-				collectionSiteId: auditGuia.reception.collectionSite.id,
-				guideNumber: auditGuia.guideNumber,
-				productId: element.product.id,
-				clientId: null
-			});
-		})
+		// auditGuia.auditGuiaDetails.forEach(async (element) => {
+		// 	await this.reportsPhService.create({
+		// 		collectionSiteId: auditGuia.reception.collectionSite.id,
+		// 		guideNumber: auditGuia.guideNumber,
+		// 		productId: element.product.id,
+		// 		clientId: null
+		// 	});
+		// })
 	}
 
 	async findOne(id: string): Promise<AuditGuia> {

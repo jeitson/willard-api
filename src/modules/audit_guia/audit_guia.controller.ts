@@ -6,7 +6,7 @@ import { Roles } from 'src/core/common/decorators/role.decorator';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { AuditGuia } from './entities/audit_guia.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
-import { AuditGuiaDetailUpdateDto, UpdateReasonDto } from './dto/audit_guia.dto';
+import { AuditGuiaConfirmUpdateDto, AuditGuiaDetailUpdateDto, UpdateReasonDto } from './dto/audit_guia.dto';
 import { ROL } from 'src/core/constants/rol.constant';
 
 @ApiTags('Negocio - Auditoria de Guias')
@@ -58,8 +58,9 @@ export class AuditGuiaController {
 	@ApiOperation({ summary: 'Confirmar' })
 	async confirm(
 		@IdParam('id') id: number,
+		@Body() content: AuditGuiaConfirmUpdateDto
 	): Promise<void> {
-		await this.auditGuiaService.confirm(id);
+		await this.auditGuiaService.confirm(id, content);
 	}
 
 	@Post('synchronize/:id')
