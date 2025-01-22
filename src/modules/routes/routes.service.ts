@@ -73,36 +73,52 @@ export class RoutesService {
 				}
 			];
 
-			const mailConfig = await this.notificationsService.findOne(1);
+			if (collectionRequest.user && collectionRequest.user.email) {
+				let allEmails = [];
 
-			if (!mailConfig) {
-				throw new BusinessException('No hay configuración de correos para este proceso', 400);
+				const mailConfig = await this.notificationsService.findOne(1);
+
+				if (!mailConfig) {
+					throw new BusinessException('No hay configuración de correos para este proceso', 400); //  TODO: No debe de ser un mensaje de error, sino un log
+				}
+
+				let { emails, subject, template } = mailConfig;
+
+				const { user: { email }, ...content } = collectionRequest;
+
+				allEmails = [email];
+
+				if (content.pickUpLocation) {
+					if (content.pickUpLocation.contactEmail) {
+						allEmails.push(content.pickUpLocation.contactEmail);
+					}
+
+					if (content.pickUpLocation.user && content.pickUpLocation.user.email) {
+						allEmails.push(content.pickUpLocation.user.email);
+					}
+				}
+
+				emails = typeof emails === 'string' ? JSON.parse(emails) : emails;
+
+				allEmails = [email, ...emails].filter(validateEmail);
+
+				const mailPromises = allEmails.map(recipient =>
+					this.mailerService.send({ to: [recipient], type: 'html', content: template, subject, context: collectionRequest })
+				);
+
+				await Promise.all(mailPromises);
+
+				auditEntries.push({
+					collectionRequest,
+					name: 'MAIL_SENT',
+					description: 'NOTIFICATION BY MAIL',
+					statusId: collectionRequest.requestStatusId || REQUEST_STATUS.PENDING,
+					createdBy: userId,
+					modifiedBy: userId
+				});
+
+				await queryRunner.manager.save(CollectionRequestAudit, auditEntries);
 			}
-
-			let { emails, subject, template } = mailConfig;
-
-			const { user: { email }, pickUpLocation: { contactEmail, user: { email: pickUpLocationEmail } } } = collectionRequest;
-
-			emails = typeof emails === 'string' ? JSON.parse(emails) : emails;
-
-			const allEmails = [email, contactEmail, pickUpLocationEmail, ...emails].filter(validateEmail);
-
-			const mailPromises = allEmails.map(recipient =>
-				this.mailerService.send({ to: [recipient], type: 'html', content: template, subject, context: collectionRequest })
-			);
-
-			await Promise.all(mailPromises);
-
-			auditEntries.push({
-				collectionRequest,
-				name: 'MAIL_SENT',
-				description: 'NOTIFICATION BY MAIL',
-				statusId: collectionRequest.requestStatusId || REQUEST_STATUS.PENDING,
-				createdBy: userId,
-				modifiedBy: userId
-			});
-
-			await queryRunner.manager.save(CollectionRequestAudit, auditEntries);
 
 			await queryRunner.commitTransaction();
 			return routeSaved;
