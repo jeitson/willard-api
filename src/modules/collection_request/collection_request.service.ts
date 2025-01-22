@@ -288,7 +288,7 @@ export class CollectionRequestService {
 
 		if (roles.includes(ROL.WILLARD_LOGISTICA)) {
 			queryBuilder.where('collectionRequest.isSpecial = :status', { status: true })
-			.andWhere('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.INCOMPLETE });
+			.andWhere('collectionRequest.requestStatusId = :request_status', { request_status: REQUEST_STATUS.INCOMPLETE });
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
