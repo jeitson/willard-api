@@ -240,7 +240,7 @@ export class CollectionRequestService {
 			throw new BusinessException('No se pudó actualizar la información', 400);
 		}
 
-		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', modifiedBy: user_id });
+		const collectionRequestAudit = this.collectionRequestAuditRepository.create({ collectionRequest, name: 'UPDATED', description: 'COMPLETE INFORMATION UPDATE', modifiedBy: user_id, statusId: REQUEST_STATUS.PENDING, createdBy: user_id });
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 	}
 
@@ -288,7 +288,7 @@ export class CollectionRequestService {
 
 		if (roles.includes(ROL.WILLARD_LOGISTICA)) {
 			queryBuilder.where('collectionRequest.isSpecial = :status', { status: true })
-			.andWhere('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.INCOMPLETE });
+			.andWhere('collectionRequest.requestStatusId = :request_status', { request_status: REQUEST_STATUS.INCOMPLETE });
 		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
