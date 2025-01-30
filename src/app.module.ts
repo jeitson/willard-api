@@ -32,6 +32,7 @@ import { AuditGuideModule } from './modules/audit_guide/audit_guide.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 import { ApiModule } from './modules/integrations/ph_central/api.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
 
 @Module({
 	imports: [
@@ -66,6 +67,7 @@ import { ApiModule } from './modules/integrations/ph_central/api.module';
 		AuditGuideModule,
 		ReportsPhModule,
 		ApiModule,
+		IntegrationsModule,
 		// SeedModule
 	],
 	controllers: [],

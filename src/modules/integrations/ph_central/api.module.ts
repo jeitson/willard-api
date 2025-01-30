@@ -5,6 +5,7 @@ import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   providers: [ApiService, TasksService],
-  imports: [TasksModule]
+  imports: [TasksModule],
+  exports: [ApiService]
 })
 export class ApiModule {}
