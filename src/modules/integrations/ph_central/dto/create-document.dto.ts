@@ -1,10 +1,10 @@
-export class CreateDocuments {
+export interface CreateDocuments {
 	irc: IRC[];
 	erc: Erc[];
 	remisiones: Remisione[];
 }
 
-export class Erc {
+export interface Erc {
 	agencia: string;
 	facturadeventa: string;
 	entregadopor: string;
@@ -13,12 +13,12 @@ export class Erc {
 	items: ErcItem[];
 }
 
-export class ErcItem {
+export interface ErcItem {
 	referencia: string;
 	cantidad: string;
 }
 
-export class IRC {
+export interface IRC {
 	agencia: string;
 	cliente: string;
 	fecha: string;
@@ -27,14 +27,14 @@ export class IRC {
 	items: IRCItem[];
 }
 
-export class IRCItem {
+export interface IRCItem {
 	referencia: string;
 	cantidad: string;
 	paraotro_tipodedocumentodeidentificacion?: string;
 	paraotro_numerodedocumentodeidentificacion?: string;
 }
 
-export class Remisione {
+export interface Remisione {
 	agencia: string;
 	fecha: string;
 	recibido_por: string;
@@ -46,7 +46,7 @@ export class Remisione {
 	items: RemisioneItem[];
 }
 
-export class RemisioneItem {
+export interface RemisioneItem {
 	erc: string;
 	factura: string;
 	referencia: string;
@@ -54,7 +54,7 @@ export class RemisioneItem {
 }
 
 
-export class GetDocumentsByDate {
+export interface GetDocumentsByDate {
 	FechaHoraInicial: Date;
 	FechaHoraFinal: Date
 }

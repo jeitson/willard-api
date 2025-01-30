@@ -1,4 +1,4 @@
-export class GetClients {
+export interface GetClientsByDate {
 	fechaInicio: Date;
 	fechaFin: Date
 }
