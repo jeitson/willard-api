@@ -1,53 +1,7 @@
-runtime: nodejs20
+runtime: nodejs18
 env: standard
+
 instance_class: F1
-
-env_variables:
-  NODE_ENV: "production"
-  PORT: 8080
-  APP_NAME: "Willard Backend"
-  APP_BASE_URL: "http://localhost:3000"
-  APP_LOCALE: "sp-CO"
-
-  TZ: "Latam/Bogota"
-  # security
-  JWT_SECRET: "admin!@#123"
-  JWT_EXPIRE: 86400 # unidad de tiempo
-  REFRESH_TOKEN_SECRET: "admin!@#123"
-  REFRESH_TOKEN_EXPIRE: 2592000
-
-  # swagger
-  SWAGGER_ENABLE: true
-  SWAGGER_PATH: "api-docs"
-  SWAGGER_VERSION: 1.0
-
-  # db
-  DB_HOST: "willardsql.postgres.database.azure.com"
-  DB_PORT: 5432
-  DB_DATABASE: "postgres"
-  DB_USERNAME: "administrador"
-  DB_PASSWORD: "WiLlaRd2024*"
-  DB_SYNCHRONIZE: true
-  DB_LOGGING: ["error"]
-
-  # Si está en modo demo (en modo demo, se interceptan todas las peticiones excepto los métodos GET)
-  IS_DEMO: true
-
-  AUTH0_DOMAIN: "dev-tf6rjjtc.auth0.com"
-  AUTH0_CLIENT_ID: "WZNm59oARsrlUlcSjdDrxqRfM6DtmqSz"
-  AUTH0_CONNECTION: "Username-Password-Authentication"
-
-  SMTP_HOST: "smtp.gmail.com"
-  SMTP_PORT: 587
-  SMTP_USER: "proyectowillardbupas@gmail.com"
-  SMTP_PASS: "zmbn fpzq iuov sjev"
-
-  FIREBASE_PROJECT_ID: "willard-backend"
-  FIREBASE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDGRU30dhoAhSAv\nQNFGEMBcfDXDcRSEfn0tcSrBqy8sVu5bZcksZAboFC/Hc5eD47NEpj5oIiajsVXG\nKcp7okzIZyA6n85JGiQbot3W2es7SfTVqX4sJfiI2v5GPDnddQgyfl2sbYvnLYAh\ngTNB91np38NLllb/6MCOKAK9xX38ppRFF8abAM3runwt9aOdESjFojxS2TR8lwPZ\n1HPHOo6o+MWNcI6enEZT1Z7NTweQ5bkH2M5iDQ7GmWS8LxqK13N3HWT2vJ1JKCcD\nQ6sCfb2LEMF72BF0mWQSmutF/aQaNuUdJLMJsAJXCRTIyWstgr2QqauxUngSWT2Y\nmDf4ynV3AgMBAAECggEACrt6pkZ0Tt3l6ZjlGxlSCE+S63LmDOv546lSCqy0/33v\nJhRi6Nu7QfnBwlaf93wuWoNzMljS5Z52SaU+eCXHaTun03SOCof3N2XAA17FbG6q\n6ZvkoAgoJWRRSkT9Tt8EZBNSB8DgR1G/s1CWkTYN8Gpz3FYVfIHBVpCU4Wfc032q\neagNC+8gAkRzFmxVIpqWnNt8JORzgcj/U86Tc1544Uvd7cU3l/5PE9MXL4/AZ7iJ\nMo3yILbnnK6AxxY3PDKSCQQ3heASoYTzwjN3kg1y0U/vKVelA8o8ETwyYvnk9KbQ\nItssb7yaoRTG5ukVZNjO56PFQE5ol5AQfTczmrf6OQKBgQDe+oI7tDxoUGsFstNN\neEscq7sTIJiZpTQ+GYKp6uO5JjR7vPAaHx/syqo0iiEkBySdnNNCtXzMKia2zQ3K\nfwex4ra88kFgaDui8E345fTBPGTwFqTo3A/X+mjdyGA0ltnVDn2edTTbN3u1Hg2o\noWmsQHJ+ugmUoVERClexM50nuQKBgQDjohSbm72nWvrKF3IuYtqrn1zAUMVI4fUc\npnSycpbTN+EZ9cy934Gc0ZLTGuFl3guoa0OOlcsoe1EN3nX5KuRXkLPVE7Nz5YlO\noD1Voe2OBc3PEO1HTl8NoVK75boEa1BOGwrcg/PkW9DGjvzUVy//WS/uW8wEUGcZ\n9A+c0mm+rwKBgQCPwHrzmMgVDDtjCh3V5QavrjtGIo6fB3W9z16AwzEa7XmKiI1W\nmdhQJXxDsQWan4xInJFKgYy6ZzZcRahtcyX31cyv1ZK2X5yK+FecbkwzxAbjDgY1\nJaKFQCgZS5RScypuhBASd0ejSIrVglGV9LIW3dmyv6drjfCghsVwNXFM6QKBgCOl\noyKHLhkCJ1n0d/4JnwLXTvgS7gIu2GqnKokzZqknDAo7stddI/gB3cNPZ1LDhgHW\n4lp23Ly3KwdH+iON8vo/f9nzXtvcazcz4scBN6lRAVzW4sGS5VHGHKWuIQZGI+pH\nU9kalNwDANvHUpKSIMMVHWtvVrCqQqsOzE8bqFGjAoGBAIR7mvv/3Fm4KRrBg0Ny\nO/n52eawywEVAN/mxi9jQ3HS/FraXSd4L81JGTNjZfnWH5c8NxJxMBVlHMVB2/EH\n+UBQdjCQzi+8yg04Gkxt/LXyBGTNRmCiHp6MewgBvDEOFuWdBbNfoj7hNdWlb/yl\nzQCY9L3rcfUX2XasGgh+7doL\n-----END PRIVATE KEY-----\n"
-  FIREBASE_CLIENT_EMAIL: "firebase-adminsdk-xgigq@willard-backend.iam.gserviceaccount.com"
-  FIREBASE_STORAGE_BUCKET: "willard-backend.appspot.com"
-
-  MAX_FILE_SIZE : 800000
 
 handlers:
 - url: /.*
