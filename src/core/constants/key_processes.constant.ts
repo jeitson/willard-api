@@ -1,0 +1,3 @@
+export enum KEY_PROCESSES {
+	'SYNC:CLIENT' = 'SYNC:CLIENT',
+}
