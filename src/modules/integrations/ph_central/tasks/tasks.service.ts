@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ApiService } from '../api.service';
+import { ClientsService } from 'src/modules/clients/clients.service';
 
 @Injectable()
 export class TasksService {
-	constructor(private readonly apiService: ApiService) { }
+	constructor(private readonly apiService: ApiService, private clientsService: ClientsService) { }
 
 	@Cron(CronExpression.EVERY_HOUR)
 	async syncDocuments() {

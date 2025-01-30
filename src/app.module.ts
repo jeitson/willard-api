@@ -33,6 +33,7 @@ import { SeedModule } from './modules/seed/seed.module';
 import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 import { ApiModule } from './modules/integrations/ph_central/api.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { HistoryJobsModule } from './modules/history_jobs/history_jobs.module';
 
 @Module({
 	imports: [
@@ -68,6 +69,7 @@ import { IntegrationsModule } from './modules/integrations/integrations.module';
 		ReportsPhModule,
 		ApiModule,
 		IntegrationsModule,
+		HistoryJobsModule,
 		// SeedModule
 	],
 	controllers: [],
