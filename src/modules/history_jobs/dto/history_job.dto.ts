@@ -37,8 +37,8 @@ export class HistoryJobDto {
 	outputContent: any = [];
 
 	@ApiProperty({ description: 'Estado del Proceso' })
-	@IsEnum(['SUCCESS', 'ERROR'], { message: 'Debe de ser un SUCCESS o ERROR' })
-	statusProcess: 'SUCCESS' | 'ERROR' = 'SUCCESS';
+	@IsEnum(['SUCCESS', 'FAILED'], { message: 'Debe de ser un SUCCESS o FAILED' })
+	statusProcess: 'SUCCESS' | 'FAILED' = 'SUCCESS';
 }
 
 export class HistoryJobQueryDto extends IntersectionType(

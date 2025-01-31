@@ -8,28 +8,69 @@ import { ClientsCronService } from 'src/modules/clients/clients.cron.service';
 @Injectable()
 export class TasksService {
 	private readonly logger = new Logger(TasksService.name);
+	private readonly key_client = KEY_PROCESSES['SYNC:CLIENT'];
+
 	constructor(
 		private readonly apiService: ApiService,
-		private readonly clientsService: ClientsCronService,
-		private readonly historyJobsService: HistoryJobsService
+		private readonly historyJobsService: HistoryJobsService,
+		private readonly clientsCronService: ClientsCronService,
 	) { }
 
-	@Cron(CronExpression.EVERY_HOUR)
-	async syncDocuments() {
-		// const documents = await this.apiService.getDocuments();
-		console.log('Synced documents:', []);
-	}
-
-	@Cron(CronExpression.EVERY_HOUR)
+	// @Cron(CronExpression.EVERY_30_SECONDS)
 	async syncClients() {
-		this.logger.debug('Called when the current second is 45');
-		// this.historyJobsService.create({
-		// 	description: 'DESCRIPCIÓN DE EJEMPLO',
-		// 	inputContent: [],
-		// 	key: KEY_PROCESSES['SYNC:CLIENT'],
-		// 	name: 'SINCRONIZACIÓN DE CLIENTES',
-		// 	outputContent: [],
-		// });
-		console.log('Synced clients:', []);
+		const now = new Date();
+		const lastSuccessfulSync = await this.historyJobsService.getLastSuccessfulSync(this.key_client);
+		const startTime = lastSuccessfulSync || new Date(now.getTime() - 60 * 60 * 1000);
+		const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+
+		const adjustedEndTime = endTime > now ? now : endTime;
+
+		this.logger.debug(`Sincronizando clientes desde ${startTime} hasta ${adjustedEndTime}...`);
+
+		const content = {
+			fechaInicio: startTime,
+			fechaFin: adjustedEndTime,
+		};
+
+		try {
+			const clients = await this.apiService.getClients(content);
+
+			if (clients.length > 0) {
+				this.logger.debug(`Clientes obtenidos: ${clients.length}`);
+
+				await this.clientsCronService.saveClients(clients);
+
+				this.historyJobsService.create({
+					description: `Sincronización exitosa de clientes desde ${startTime} hasta ${adjustedEndTime}`,
+					inputContent: content,
+					key: this.key_client,
+					name: 'SINCRONIZACIÓN DE CLIENTES',
+					outputContent: clients,
+					statusProcess: 'SUCCESS',
+				});
+			} else {
+				this.logger.debug('No hay clientes para sincronizar en este intervalo.');
+
+				this.historyJobsService.create({
+					description: `No hubo clientes para sincronizar desde ${startTime} hasta ${adjustedEndTime}`,
+					inputContent: content,
+					key: this.key_client,
+					name: 'SINCRONIZACIÓN DE CLIENTES',
+					outputContent: [],
+					statusProcess: 'SUCCESS',
+				});
+			}
+		} catch (error) {
+			this.logger.error(`Error durante la sincronización de clientes: ${error.message}`);
+
+			this.historyJobsService.create({
+				description: `Error al sincronizar clientes desde ${startTime} hasta ${adjustedEndTime}: ${error.message}`,
+				inputContent: content,
+				key: this.key_client,
+				name: 'SINCRONIZACIÓN DE CLIENTES',
+				outputContent: error,
+				statusProcess: 'FAILED',
+			});
+		}
 	}
 }

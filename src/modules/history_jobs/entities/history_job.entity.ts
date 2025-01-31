@@ -25,6 +25,6 @@ export class HistoryJob extends CompleteEntity {
 	outputContent: string = '[]';
 
 	@ApiProperty({ description: 'Estado del Proceso' })
-	@Column({ type: 'enum', enum: ['SUCCESS', 'ERROR'] })
-	statusProcess: 'SUCCESS' | 'ERROR' = 'SUCCESS';
+	@Column({ type: 'enum', enum: ['SUCCESS', 'FAILED'] })
+	statusProcess: 'SUCCESS' | 'FAILED' = 'SUCCESS';
 }

@@ -5,7 +5,6 @@ import { HistoryJob } from './entities/history_job.entity';
 import { EntityManager, Like, Repository } from 'typeorm';
 import { paginate } from 'src/core/helper/paginate';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { UserContextService } from '../users/user-context.service';
 
 @Injectable()
 export class HistoryJobsService {
@@ -15,6 +14,12 @@ export class HistoryJobsService {
 		@InjectEntityManager() private entityManager: EntityManager,
 	) { }
 
+	/**
+	 * Crea un nuevo registro en el historial de trabajos.
+	 *
+	 * @param {HistoryJobDto} content - Datos del trabajo a registrar.
+	 * @returns {Promise<void>}
+	 */
 	async create({
 		inputContent,
 		outputContent,
@@ -31,6 +36,52 @@ export class HistoryJobsService {
 		});
 	}
 
+	/**
+	 * Obtiene la fecha de la última sincronización exitosa para una clave específica.
+	 *
+	 * @param {string} key - Clave del proceso (por ejemplo, 'SYNC:CLIENT').
+	 * @returns {Promise<Date | null>} - Fecha de la última sincronización exitosa, o null si no hay registros.
+	 */
+	async getLastSuccessfulSync(key: string): Promise<Date | null> {
+		const lastSync = await this.historyJobRepository.findOne({
+			where: {
+				key,
+				statusProcess: 'SUCCESS',
+			},
+			order: {
+				createdAt: 'DESC',
+			},
+		});
+
+		return lastSync ? lastSync.createdAt : null;
+	}
+
+	/**
+	 * Obtiene la fecha de la última sincronización fallida para una clave específica.
+	 *
+	 * @param {string} key - Clave del proceso (por ejemplo, 'SYNC:CLIENT').
+	 * @returns {Promise<Date | null>} - Fecha de la última sincronización fallida, o null si no hay registros.
+	 */
+	async getLastFailedfulSync(key: string): Promise<Date | null> {
+		const lastSync = await this.historyJobRepository.findOne({
+			where: {
+				key,
+				statusProcess: 'FAILED',
+			},
+			order: {
+				createdAt: 'DESC',
+			},
+		});
+
+		return lastSync ? lastSync.createdAt : null;
+	}
+
+	/**
+	 * Obtiene todos los registros del historial de trabajos.
+	 *
+	 * @param {HistoryJobQueryDto} query - Parámetros de consulta.
+	 * @returns {Promise<Pagination<HistoryJob>>} - Resultados paginados.
+	 */
 	async findAll({
 		page,
 		pageSize,
@@ -60,9 +111,15 @@ export class HistoryJobsService {
 		return paginatedResult;
 	}
 
+	/**
+	 * Obtiene un registro del historial de trabajos por su ID.
+	 *
+	 * @param {number} id - ID del registro.
+	 * @returns {Promise<HistoryJob | undefined>} - Registro del historial.
+	 */
 	async findOneById(id: number): Promise<HistoryJob | undefined> {
 		const item = await this.historyJobRepository.findOneBy({
-			id
+			id,
 		});
 
 		item.inputContent = item.inputContent ? JSON.parse(item.inputContent) : [];
