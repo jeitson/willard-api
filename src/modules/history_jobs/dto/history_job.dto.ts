@@ -1,6 +1,7 @@
 import { ApiProperty, IntersectionType, OmitType, PartialType } from '@nestjs/swagger';
 import {
 	IsArray,
+	IsEnum,
 	IsNotEmpty,
 	IsString,
 	MaxLength,
@@ -16,13 +17,13 @@ export class HistoryJobDto {
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	key: string;
 
-	@ApiProperty({ description: 'Nombre', example: 'Administrador' })
+	@ApiProperty({ description: 'Nombre'})
 	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	name: string;
 
-	@ApiProperty({ description: 'Descripción', example: 'Rol aplicado a los usuarios administrativos' })
+	@ApiProperty({ description: 'Descripción' })
 	@IsString({ message: 'Debe de ser un texto' })
 	@MaxLength(255, { message: 'El tamaño máximo de caracteres es de 255' })
 	description: string = '';
@@ -34,9 +35,13 @@ export class HistoryJobDto {
 	@ApiProperty({ description: 'Contenido de Salida', example: [] })
 	@IsArray()
 	outputContent: any = [];
+
+	@ApiProperty({ description: 'Estado del Proceso' })
+	@IsEnum(['SUCCESS', 'ERROR'], { message: 'Debe de ser un SUCCESS o ERROR' })
+	statusProcess: 'SUCCESS' | 'ERROR' = 'SUCCESS';
 }
 
 export class HistoryJobQueryDto extends IntersectionType(
 	PagerDto<HistoryJobDto>,
-	PartialType(OmitType(HistoryJob, ['inputContent', 'outputContent', 'description'])),
+	PartialType(OmitType(HistoryJob, ['inputContent', 'outputContent', 'description', 'statusProcess'])),
 ) { }
