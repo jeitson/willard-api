@@ -5,11 +5,11 @@ import { Column, Entity } from "typeorm";
 @Entity({ name: 'proceso_historial' })
 export class HistoryJob extends CompleteEntity {
 	@ApiProperty({ description: 'Llave' })
-	@Column({ type: 'varchar', length: 10, name: 'Llave' })
+	@Column({ type: 'varchar', length: 25, name: 'Llave' })
 	key: string;
 
 	@ApiProperty({ description: 'Nombre' })
-	@Column({ type: 'varchar', length: 25, name: 'Nombre' })
+	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
 	name: string;
 
 	@ApiProperty({ description: 'Description' })

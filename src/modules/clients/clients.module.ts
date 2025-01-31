@@ -4,8 +4,9 @@ import { ClientsController } from './clients.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Client } from './entities/client.entity';
 import { UsersModule } from '../users/users.module';
+import { ClientsCronService } from './clients.cron.service';
 
-const providers = [ClientsService]
+const providers = [ClientsService, ClientsCronService]
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Client]), UsersModule],

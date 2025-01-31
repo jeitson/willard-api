@@ -12,7 +12,7 @@ import { HistoryJob } from '../entities/history_job.entity';
 export class HistoryJobDto {
 	@ApiProperty({ description: 'Llave', example: 'CRON::SYNC_CLIENT' })
 	@IsString({ message: 'Debe de ser un texto' })
-	@MaxLength(50, { message: 'El tamaño máximo de caracteres es de 50' })
+	@MaxLength(25, { message: 'El tamaño máximo de caracteres es de 50' })
 	@IsNotEmpty({ message: 'El campo no debe de estar vacío' })
 	key: string;
 

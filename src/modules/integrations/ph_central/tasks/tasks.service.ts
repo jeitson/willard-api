@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ApiService } from '../api.service';
-import { ClientsService } from 'src/modules/clients/clients.service';
 import { HistoryJobsService } from 'src/modules/history_jobs/history_jobs.service';
 import { KEY_PROCESSES } from 'src/core/constants/key_processes.constant';
+import { ClientsCronService } from 'src/modules/clients/clients.cron.service';
 
 @Injectable()
 export class TasksService {
 	private readonly logger = new Logger(TasksService.name);
 	constructor(
 		private readonly apiService: ApiService,
-		private readonly clientsService: ClientsService,
+		private readonly clientsService: ClientsCronService,
 		private readonly historyJobsService: HistoryJobsService
 	) { }
 
@@ -20,7 +20,7 @@ export class TasksService {
 		console.log('Synced documents:', []);
 	}
 
-	@Cron(CronExpression.EVERY_30_SECONDS)
+	@Cron(CronExpression.EVERY_HOUR)
 	async syncClients() {
 		this.logger.debug('Called when the current second is 45');
 		// this.historyJobsService.create({
@@ -30,7 +30,6 @@ export class TasksService {
 		// 	name: 'SINCRONIZACIÓN DE CLIENTES',
 		// 	outputContent: [],
 		// });
-		// const clients = await this.apiService.getClients();
 		console.log('Synced clients:', []);
 	}
 }
