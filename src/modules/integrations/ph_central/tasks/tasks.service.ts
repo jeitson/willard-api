@@ -10,8 +10,8 @@ export class TasksService {
 	private readonly logger = new Logger(TasksService.name);
 	constructor(
 		private readonly apiService: ApiService,
-		private clientsService: ClientsService,
-		private historyJobsService: HistoryJobsService
+		private readonly clientsService: ClientsService,
+		private readonly historyJobsService: HistoryJobsService
 	) { }
 
 	@Cron(CronExpression.EVERY_HOUR)
@@ -23,13 +23,13 @@ export class TasksService {
 	@Cron(CronExpression.EVERY_30_SECONDS)
 	async syncClients() {
 		this.logger.debug('Called when the current second is 45');
-		this.historyJobsService.create({
-			description: 'DESCRIPCIÓN DE EJEMPLO',
-			inputContent: [],
-			key: KEY_PROCESSES['SYNC:CLIENT'],
-			name: 'SINCRONIZACIÓN DE CLIENTES',
-			outputContent: [],
-		});
+		// this.historyJobsService.create({
+		// 	description: 'DESCRIPCIÓN DE EJEMPLO',
+		// 	inputContent: [],
+		// 	key: KEY_PROCESSES['SYNC:CLIENT'],
+		// 	name: 'SINCRONIZACIÓN DE CLIENTES',
+		// 	outputContent: [],
+		// });
 		// const clients = await this.apiService.getClients();
 		console.log('Synced clients:', []);
 	}
