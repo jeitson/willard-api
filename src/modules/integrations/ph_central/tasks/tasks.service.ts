@@ -19,8 +19,8 @@ export class TasksService {
 	// @Cron(CronExpression.EVERY_30_SECONDS)
 	async syncClients() {
 		const now = new Date();
-		const lastSuccessfulSync = await this.historyJobsService.getLastSuccessfulSync(this.key_client);
-		const startTime = lastSuccessfulSync || new Date(now.getTime() - 60 * 60 * 1000);
+		const lastSuccessSync = await this.historyJobsService.getLastSuccessSync(this.key_client);
+		const startTime = lastSuccessSync || new Date(now.getTime() - 60 * 60 * 1000);
 		const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
 
 		const adjustedEndTime = endTime > now ? now : endTime;

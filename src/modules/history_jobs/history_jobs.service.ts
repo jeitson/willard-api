@@ -42,7 +42,7 @@ export class HistoryJobsService {
 	 * @param {string} key - Clave del proceso (por ejemplo, 'SYNC:CLIENT').
 	 * @returns {Promise<Date | null>} - Fecha de la última sincronización exitosa, o null si no hay registros.
 	 */
-	async getLastSuccessfulSync(key: string): Promise<Date | null> {
+	async getLastSuccessSync(key: string): Promise<Date | null> {
 		const lastSync = await this.historyJobRepository.findOne({
 			where: {
 				key,
@@ -62,7 +62,7 @@ export class HistoryJobsService {
 	 * @param {string} key - Clave del proceso (por ejemplo, 'SYNC:CLIENT').
 	 * @returns {Promise<Date | null>} - Fecha de la última sincronización fallida, o null si no hay registros.
 	 */
-	async getLastFailedfulSync(key: string): Promise<Date | null> {
+	async getLastFailedSync(key: string): Promise<Date | null> {
 		const lastSync = await this.historyJobRepository.findOne({
 			where: {
 				key,
