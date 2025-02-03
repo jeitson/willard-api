@@ -1,6 +1,6 @@
 import { ApiProperty, IntersectionType, PartialType } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsOptional, IsString, IsInt, MaxLength, Matches, Min, Max, ValidateNested, maxLength } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsInt, MaxLength, Matches, Min, Max, ValidateNested, maxLength, IsArray, ArrayNotEmpty } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
 import { Product } from "src/modules/products/entities/product.entity";
 
@@ -64,13 +64,16 @@ export class ReceptionDto {
 	@Matches(/^[A-Z0-9]{0,10}$/, { message: 'DocReferencia2 debe ser alfanumérico y tener hasta 10 caracteres.' })
 	referenceDoc2?: string;
 
-	@ApiProperty({ description: 'Detalles de la recepción', isArray: true, type: ReceptionDetailDto })
-	@IsOptional()
-	details?: ReceptionDetailDto[];
-
 	@ApiProperty({ description: 'Fotos de la recepción', isArray: true, type: ReceptionPhotoDto })
 	@IsOptional()
 	photos?: ReceptionPhotoDto[];
+
+	@ApiProperty({ type: [ReceptionDetailDto], description: 'Detalles de la recepción' })
+	@IsArray({ message: 'El campo "details" debe ser un arreglo de detalles' })
+	@ArrayNotEmpty({ message: 'El arreglo de detalles no puede estar vacío' })
+	@ValidateNested({ each: true, message: 'Cada detalle de la recepción debe ser válido' })
+	@Type(() => ReceptionDetailDto)
+	details?: ReceptionDetailDto[];
 }
 
 export class ReceptionUpdateDto extends PartialType(ReceptionDto) { }
