@@ -16,7 +16,7 @@ export class AuditGuideController {
 	constructor(private readonly auditGuideService: AuditGuideService) { }
 
 	@Get()
-	@Roles(ROL.AUDITORIA_PH)
+	// @Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Listado de auditoria de guias' })
 	@ApiResult({ type: [AuditGuide] })
 	async findAll(@Query() query: any) {

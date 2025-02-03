@@ -335,6 +335,12 @@ export class AuditGuideService {
 
 			await queryRunner.manager.save(auditGuide);
 
+			const auditGuideRoute = this.auditGuideRouteRepository.create({
+				auditGuide,
+				transporterTravel: externalData,
+			});
+			await queryRunner.manager.save(auditGuideRoute);
+
 			await queryRunner.commitTransaction();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
