@@ -165,6 +165,7 @@ export class AuditGuideService {
 			.leftJoinAndSelect('auditGuide.reception', 'reception')
 			.leftJoinAndSelect('auditGuide.auditsGuidesRoutes', 'auditsGuidesRoutes')
 			.leftJoinAndSelect('auditsGuidesRoutes.transporterTravel', 'transporterTravel')
+			.leftJoinAndSelect('transporterTravel.details', 'details')
 			.leftJoinAndMapOne('auditGuide.requestStatus', Child, 'requestStatus', 'requestStatus.id = auditGuide.requestStatusId')
 			.leftJoinAndMapOne('auditGuide.zone', Child, 'zone', 'zone.id = auditGuide.zoneId')
 			.leftJoinAndMapOne('auditGuide.recuperator', User, 'recuperator', 'recuperator.id = auditGuide.recuperatorId')
@@ -181,6 +182,9 @@ export class AuditGuideService {
 		});
 
 		const groupedResults: any = rawResults.items.map(auditGuide => {
+			if ((auditGuide.id.toString()) === '58') {
+				console.log(auditGuide.auditsGuidesRoutes)
+			}
 			const groupedDetails = auditGuide.auditGuideDetails.reduce((acc, detail) => {
 				if (detail.isRecuperator) {
 					acc.recuperator.detail = [...acc.recuperator.detail, detail]
