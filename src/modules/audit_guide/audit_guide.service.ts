@@ -176,7 +176,8 @@ export class AuditGuideService {
 
 		const rawResults = await paginate<AuditGuide>(queryBuilder, {
 			page: query.page,
-			pageSize: query.pageSize,
+			pageSize: 30,
+			// pageSize: query.pageSize,
 		});
 
 		const groupedResults: any = rawResults.items.map(auditGuide => {
