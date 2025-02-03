@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsOptional, IsString, IsDateString, IsBoolean, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsDateString, IsBoolean, ValidateNested, MaxLength } from "class-validator";
 import { DriverDto } from "src/modules/drivers/dto/driver.dto";
 
 export class CreateRouteDto {
@@ -61,6 +61,12 @@ export class CreateRouteDto {
 	@ValidateNested()
 	@Type(() => DriverDto)
 	transporter: DriverDto;
+
+	@ApiProperty({ description: 'Número de guía' })
+	@IsNotEmpty({ message: 'NumeroGuia es obligatorio.' })
+	@IsString({ message: 'NumeroGuia debe ser un texto.' })
+	@MaxLength(10, { message: 'Debe de tener máximo 10 caracteres.' })
+	guideNumber: string;
 }
 
 export class UpdateRouteDto {
@@ -112,4 +118,10 @@ export class UpdateRouteDto {
 	@IsOptional()
 	@IsDateString()
 	deliveryDateToCollectionSite?: string;
+
+	@ApiProperty({ description: 'Número de guía' })
+	@IsOptional()
+	@IsString({ message: 'NumeroGuia debe ser un texto.' })
+	@MaxLength(10, { message: 'Debe de tener máximo 10 caracteres.' })
+	guideNumber?: string;
 }

@@ -63,6 +63,10 @@ export class CollectionRequest extends CompleteEntity {
 	})
 	requestTime: string;
 
+	@ApiProperty({ description: 'Número de guía' })
+	@Column({ type: 'varchar', length: 20, name: 'NumeroGuia', nullable: true, default: null })
+	guideNumber: string;
+
 	@Column({ type: 'int', name: 'CantidadEstimada' })
 	estimatedQuantity: number;
 
