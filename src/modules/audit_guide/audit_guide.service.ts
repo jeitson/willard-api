@@ -280,7 +280,7 @@ export class AuditGuideService {
 	}
 
 	private async findAuditGuideById(id: number): Promise<AuditGuide> {
-		const auditGuide = await this.auditGuideRepository.findOne({ where: { id } });
+		const auditGuide = await this.auditGuideRepository.findOne({ where: { id }, relations: ['auditGuideDetails', 'auditsGuidesRoutes'] });
 		if (!auditGuide) {
 			throw new BusinessException(`No se encontró la auditoría con el ID ${id}`);
 		}
@@ -321,7 +321,7 @@ export class AuditGuideService {
 		await queryRunner.startTransaction();
 
 		try {
-			const externalData = await this.fetchExternalData();
+			const externalData = await this.fetchExternalData(auditGuide.guideNumber);
 			if (!externalData) {
 				throw new BusinessException('No se encontraron datos externos para sincronizar.', 404);
 			}
@@ -343,13 +343,8 @@ export class AuditGuideService {
 		}
 	}
 
-	private async fetchExternalData(): Promise<any> {
-		return {
-			details: [
-				{ productName: 'Battery A', quantity: 10 },
-				{ productName: 'Battery B', quantity: 5 },
-			],
-		};
+	private async fetchExternalData(guideId: string): Promise<any> {
+		return this.transporterTravelRepository.findOne({ where: { guideId }, relations: ['details'] });
 	}
 
 	private async syncAuditDetails(queryRunner, auditGuide: AuditGuide, externalData: any): Promise<any> {
