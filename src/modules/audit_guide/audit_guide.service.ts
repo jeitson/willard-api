@@ -203,7 +203,7 @@ export class AuditGuideService {
 	): Promise<void> {
 		const totalQuantity = auditGuideDetails.reduce((sum, detail) => sum + detail.quantity, 0);
 		const totalProducts = await this.productRepository.count({
-			where: { id: In(auditGuideDetails.map(detail => detail.product.id)) },
+			where: { id: In(auditGuideDetails.map(detail => detail.productId)) },
 		});
 
 		if (auditGuideDetails.length === totalProducts && totalQuantity === auditGuideSaved.transporterTotal) {
