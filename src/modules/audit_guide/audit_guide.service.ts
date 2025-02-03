@@ -53,9 +53,11 @@ export class AuditGuideService {
 		await queryRunner.startTransaction();
 
 		try {
-			let requestStatusId = AUDIT_GUIDE_STATUS.WITHOUT_GUIDE;
-			let zoneId = null;
-			let date = null;
+			let { requestStatusId, zoneId, date } = {
+				requestStatusId: AUDIT_GUIDE_STATUS.WITHOUT_GUIDE,
+				zoneId: null,
+				date: null,
+			};
 
 			const transporterTravel = await this.transporterTravelRepository.findOne({
 				where: { guideId: createAuditGuideDto.guideNumber.toUpperCase() },
@@ -63,11 +65,8 @@ export class AuditGuideService {
 			});
 
 			if (transporterTravel) {
-				({ requestStatusId, date, zoneId, auditGuideDetails, transporterTotal } = await this.handleTransporterTravel(
-					transporterTravel,
-					auditGuideDetails,
-					transporterTotal,
-				));
+				({ requestStatusId, date, zoneId, auditGuideDetails, transporterTotal } =
+					await this.handleTransporterTravel(transporterTravel, auditGuideDetails, transporterTotal));
 			}
 
 			const auditGuide = this.auditGuideRepository.create({
@@ -85,10 +84,14 @@ export class AuditGuideService {
 				throw new BusinessException('Error al guardar la guía de auditoría.', 500);
 			}
 
+			const productIds = auditGuideDetails.map((item) => item.productId);
+			const products = await this.productRepository.findBy({ id: In(productIds) });
+			const productMap = new Map(products.map((product) => [product.id, product]));
+
 			auditGuideDetails = auditGuideDetails.map((item) => ({
 				...item,
-				product: this.productRepository.findOneBy({ id: item.productId })
-			}))
+				product: productMap.get((item.productId).toString() as any),
+			}));
 
 			await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
 
@@ -101,7 +104,7 @@ export class AuditGuideService {
 			await queryRunner.commitTransaction();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
-			throw error;
+			throw new BusinessException(error.message || 'Error inesperado en la creación de la auditoría.', 500);
 		} finally {
 			await queryRunner.release();
 		}
