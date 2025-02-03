@@ -85,6 +85,11 @@ export class AuditGuideService {
 				throw new BusinessException('Error al guardar la guía de auditoría.', 500);
 			}
 
+			auditGuideDetails = auditGuideDetails.map((item) => ({
+				...item,
+				product: this.productRepository.findOneBy({ id: item.productId })
+			}))
+
 			await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
 
 			await this.verifyAndConfirmDetails(auditGuideDetails, auditGuideSaved);
@@ -305,7 +310,7 @@ export class AuditGuideService {
 	async synchronize(id: number): Promise<void> {
 		const auditGuide = await this.findAuditGuideById(id);
 
-		if (auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.WITHOUT_GUIDE) {
+		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.WITHOUT_GUIDE) {
 			throw new BusinessException('Solo se pueden sincronizar auditorías en estado "sin guia".');
 		}
 
