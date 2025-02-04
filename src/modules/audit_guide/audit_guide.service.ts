@@ -17,8 +17,6 @@ import { User } from '../users/entities/user.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
 import { Shipment } from '../shipments/entities/shipment.entity';
 import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
-import { ShipmentDetail } from '../shipments/entities/shipment_detail.entity';
-import { ShipmentPhoto } from '../shipments/entities/shipment_photo.entity';
 import { ReportsPhService } from '../reports_ph/reports_ph.service';
 
 @Injectable()
