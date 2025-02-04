@@ -184,9 +184,6 @@ export class AuditGuideService {
 		});
 
 		const groupedResults: any = rawResults.items.map(auditGuide => {
-			if ((auditGuide.id.toString()) === '58') {
-				console.log(auditGuide.auditsGuidesRoutes)
-			}
 			const groupedDetails = auditGuide.auditGuideDetails.reduce((acc, detail) => {
 				if (detail.isRecuperator) {
 					acc.recuperator.detail = [...acc.recuperator.detail, detail]
