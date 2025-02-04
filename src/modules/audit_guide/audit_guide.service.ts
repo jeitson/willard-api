@@ -43,6 +43,8 @@ export class AuditGuideService {
 
 		private readonly catalogsService: CatalogsService,
 		private readonly reportsPhService: ReportsPhService,
+		@InjectRepository(Child)
+		private readonly childrensRepository: Repository<Child>,
 	) { }
 
 	async create(createAuditGuideDto: AuditGuideCreateDto): Promise<void> {
@@ -333,8 +335,16 @@ export class AuditGuideService {
 
 			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
 
+			const zone = await this.childrensRepository.findOne({ where: { name: externalData.zone } });
+
+			if (!zone) {
+				throw new BusinessException('La zona configurada del viaje, no existe en el sistema');
+			}
+
 			auditGuide.transporterTotal = transporterTotal;
 			auditGuide.recuperatorTotal = recuperatorTotal;
+			auditGuide.date = externalData.movementDate,
+			auditGuide.zoneId = zone.id;
 			auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
 
 			await queryRunner.manager.save(auditGuide);
@@ -354,7 +364,7 @@ export class AuditGuideService {
 		}
 	}
 
-	private async fetchExternalData(guideId: string): Promise<any> {
+	private async fetchExternalData(guideId: string): Promise<TransporterTravel> {
 		return this.transporterTravelRepository.findOne({ where: { guideId }, relations: ['details'] });
 	}
 
