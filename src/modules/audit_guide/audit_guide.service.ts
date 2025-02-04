@@ -362,14 +362,14 @@ export class AuditGuideService {
 		let transporterTotal = 0;
 		let recuperatorTotal = 0;
 
-		const productNames = externalData.details.map((item) => item.productName);
+		const productNames = externalData.details.map((item) => item.batteryType);
 		const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
 		if (foundProducts.length !== productNames.length) {
 			throw new BusinessException('No se pudieron validar todos los productos de los datos externos.');
 		}
 
 		const detailsToSave = foundProducts.map((product) => {
-			const { quantity } = externalData.details.find(({ productName }) => productName === product.name);
+			const { quantity } = externalData.details.find(({ batteryType }) => batteryType === product.name);
 
 			return this.auditGuideDetailRepository.create({
 				auditGuide,
