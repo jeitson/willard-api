@@ -26,19 +26,19 @@ export class Route extends CompleteEntity {
     confirmedPickUpDate: string;
 
     @ApiProperty({ description: 'Trip Opening Date' })
-    @Column({ type: 'date', name: 'FechaAperturaViaje', nullable: true, default: true })
+    @Column({ type: 'date', name: 'FechaAperturaViaje', nullable: true, default: null })
     tripStartDate: string;
 
     @ApiProperty({ description: 'Trip Opening Time' })
-    @Column({ type: 'time', name: 'HoraAperturaViaje', nullable: true, default: true })
+    @Column({ type: 'time', name: 'HoraAperturaViaje', nullable: true, default: null })
     tripStartTime: string;
 
     @ApiProperty({ description: 'Trip Closing Date' })
-    @Column({ type: 'date', name: 'FechaCierreViaje', nullable: true, default: true })
+    @Column({ type: 'date', name: 'FechaCierreViaje', nullable: true, default: null })
     tripEndDate: string;
 
     @ApiProperty({ description: 'Trip Closing Time' })
-    @Column({ type: 'time', name: 'HoraCierreViaje', nullable: true, default: true })
+    @Column({ type: 'time', name: 'HoraCierreViaje', nullable: true, default: null })
     tripEndTime: string;
 
     @ApiProperty({ description: 'Truck Plate' })
