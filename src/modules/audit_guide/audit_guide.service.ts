@@ -330,7 +330,7 @@ export class AuditGuideService {
 
 			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
 
-			const zone = await this.childrensRepository.findOne({ where: { name: externalData.zone } });
+			const zone = await this.childrensRepository.findOne({ where: { name: externalData.zone.toUpperCase() } });
 
 			if (!zone) {
 				throw new BusinessException('La zona configurada del viaje, no existe en el sistema');
