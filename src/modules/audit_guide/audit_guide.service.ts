@@ -376,13 +376,13 @@ export class AuditGuideService {
 		const detailsToSave = foundProducts.map((product) => {
 			const { quantity } = externalData.details.find(({ batteryType }) => batteryType === product.name);
 
-			return this.auditGuideDetailRepository.create({
+			return {
 				auditGuide,
 				product,
 				isRecuperator: false,
 				quantity,
 				quantityCollection: quantity,
-			});
+			};
 		});
 
 		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
