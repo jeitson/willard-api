@@ -42,7 +42,7 @@ export class AuditGuideController {
 		await this.auditGuideService.updateDetails(id, detailsToUpdate);
 	}
 
-	@Patch('give-reason/:id/:key')
+	@Post('give-reason/:id/:key')
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Dar la razón a una auditoria' })
 	async updateInFavorRecuperator(
@@ -53,7 +53,7 @@ export class AuditGuideController {
 		await this.auditGuideService.updateInFavorRecuperator({ id, key });
 	}
 
-	@Patch('confirm/:id')
+	@Post('confirm/:id')
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Confirmar' })
 	async confirm(
