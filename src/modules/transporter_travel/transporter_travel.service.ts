@@ -41,16 +41,11 @@ export class TransporterTravelService {
 			const item = this.mapRowToTransporterTravelDto(data);
 			item.details = this.convertDetail(data.detalles);
 
-			// Validar que el registro tenga al menos un detalle
-			if (!item.details || item.details.length === 0) {
-				throw new BusinessException('Todos los registros deben tener al menos un detalle.');
-			}
+			await this.validateAllRecords([item]);
 
-			// Verificar si es una actualización
 			if (item.guidePreviousId) {
 				await this.updateTransporterTravel(item);
 			} else {
-				await this.validateRelations([item]);
 				const travelRecord = this.transporterTravelRepository.create(item);
 				const savedRecord = await this.transporterTravelRepository.save(travelRecord);
 				return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
@@ -70,8 +65,11 @@ export class TransporterTravelService {
 			const detailSheet = workbook.Sheets[detailSheetName];
 			const detailData = XLSX.utils.sheet_to_json(detailSheet);
 
-			const records = [];
+			const recordsToCreate = [];
+			const recordsToUpdate = [];
 			const validationErrors = [];
+
+			// Agrupar detalles por guía
 			const detailsByGuide = detailData.reduce((acc, detail) => {
 				const idGuia = detail['idGuia'];
 				if (!acc[idGuia]) {
@@ -84,6 +82,7 @@ export class TransporterTravelService {
 				return acc;
 			}, {});
 
+			// Procesar cada fila del archivo principal
 			for (const [index, row] of mainData.entries()) {
 				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
 				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
@@ -91,6 +90,7 @@ export class TransporterTravelService {
 				const details = detailsByGuide[record.guideId] || [];
 				record.details = this.convertDetail(details);
 
+				// Validar que el registro tenga al menos un detalle
 				if (!record.details || record.details.length === 0) {
 					validationErrors.push({
 						row: index + 1,
@@ -99,56 +99,34 @@ export class TransporterTravelService {
 					continue;
 				}
 
-				const errors = await validate(record);
-				if (errors.length > 0) {
-					const errorMessages = errors.map((error) => ({
-						property: error.property,
-						errors: Object.values(error.constraints || {}),
-					}));
-					validationErrors.push({
-						row: index + 1,
-						errors: errorMessages,
-					});
+				// Separar registros para creación y actualización
+				if (record.guidePreviousId) {
+					recordsToUpdate.push(record);
 				} else {
-					if (record.guidePreviousId) {
-						await this.updateTransporterTravel(record);
-					} else {
-						records.push(this.transporterTravelRepository.create(record));
-					}
+					recordsToCreate.push(record);
 				}
 			}
 
-			if (validationErrors.length > 0) {
-				throw new UnprocessableEntityException({
-					message: 'Error de validación en una o más filas',
-					errors: validationErrors,
-				});
+			// Validar todos los registros antes de proceder
+			await this.validateAllRecords([...recordsToCreate, ...recordsToUpdate]);
+
+			// Procesar actualizaciones
+			for (const record of recordsToUpdate) {
+				await this.updateTransporterTravel(record);
 			}
 
-			await this.validateRelations(records);
-			const savedRecord = await this.transporterTravelRepository.save(records);
-			return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
+			// Procesar creaciones
+			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate);
+
+			// Combinar resultados de creación y actualización
+			const allSavedRecords = [
+				...savedRecords,
+				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
+			];
+
+			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {
 			throw new BadRequestException('Error al procesar el archivo Excel: ' + error.message);
-		}
-	}
-
-	async validateRelations(records: TransporterTravel[]) {
-		// Validar zonas
-		const zones = records.flatMap((item) => item.zone.toUpperCase());
-		const _zones = await this.childrensRepository.find({ where: { name: In(zones) } });
-		if (!_zones || _zones.length !== zones.length) {
-			throw new BusinessException('Verifique las zonas ingresadas - ' + zones.join(', '));
-		}
-
-		// Validar productos
-		const products = records.reduce((acc, item) => {
-			acc = [...acc, ...item.details.map((r) => r.batteryType.toUpperCase())];
-			return acc;
-		}, []);
-		const _products = await this.productRepository.find({ where: { name: In(products) } });
-		if (!_products || _products.length !== products.length) {
-			throw new BusinessException('Verifique los productos ingresados - ' + products.join(', '));
 		}
 	}
 
@@ -178,7 +156,7 @@ export class TransporterTravelService {
 		};
 	}
 
-	convertDetail(details: any): any[] {
+	private convertDetail(details: any): any[] {
 		return details.map((d) => ({
 			batteryType: d.tipoBat.toUpperCase(),
 			quantity: d.cantidad,
@@ -194,10 +172,10 @@ export class TransporterTravelService {
 			throw new BusinessException(`No se encontró ningún registro con idGuiaAntes: ${item.guidePreviousId}`);
 		}
 
-		if (!item.details || item.details.length === 0) {
-			throw new BusinessException('Todos los registros deben tener al menos un detalle.');
-		}
+		// Validar el registro antes de proceder
+		await this.validateAllRecords([item]);
 
+		// Actualizar campos
 		existingRecord.routeId = item.routeId;
 		existingRecord.guideId = item.guideId;
 		existingRecord.type = item.type;
@@ -222,5 +200,49 @@ export class TransporterTravelService {
 		existingRecord.details = this.convertDetail(item.details);
 
 		await this.transporterTravelRepository.save(existingRecord);
+	}
+
+	private async validateAllRecords(records: any[]): Promise<void> {
+		const validationErrors = [];
+
+		// Validar que todos los registros tengan al menos un detalle
+		for (const [index, record] of records.entries()) {
+			if (!record.details || record.details.length === 0) {
+				validationErrors.push({
+					row: index + 1,
+					errors: ['El registro debe tener al menos un detalle.'],
+				});
+			}
+		}
+
+		// Validar productos
+		const productNames = records.flatMap((record) =>
+			record.details.map((detail) => detail.batteryType.toUpperCase())
+		);
+		const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
+		if (foundProducts.length !== productNames.length) {
+			validationErrors.push({
+				row: 'Global',
+				errors: [`Algunos productos no existen: ${productNames.join(', ')}`],
+			});
+		}
+
+		// Validar zonas
+		const zones = records.map((record) => record.zone.toUpperCase());
+		const foundZones = await this.childrensRepository.find({ where: { name: In(zones) } });
+		if (foundZones.length !== zones.length) {
+			validationErrors.push({
+				row: 'Global',
+				errors: [`Algunas zonas no existen: ${zones.join(', ')}`],
+			});
+		}
+
+		// Lanzar errores si hay problemas
+		if (validationErrors.length > 0) {
+			throw new UnprocessableEntityException({
+				message: 'Error de validación en una o más filas',
+				errors: validationErrors,
+			});
+		}
 	}
 }
