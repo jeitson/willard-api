@@ -108,6 +108,8 @@ export class AuditGuideService {
 
 			if (transporterTravel) {
 				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
+
+				this.checkAndSyncAuditGuides([transporterTravel]);
 			}
 
 			await queryRunner.commitTransaction();
