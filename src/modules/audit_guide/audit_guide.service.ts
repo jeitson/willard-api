@@ -112,7 +112,7 @@ export class AuditGuideService {
 
 	async updateDetails(id: number, updateDto: AuditGuideDetailUpdateDto): Promise<void> {
 		const auditGuide = await this.findAuditGuideById(id);
-		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
+		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.BY_CONCILLIATE) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
@@ -125,7 +125,7 @@ export class AuditGuideService {
 
 	async confirm(id: number, { comment, auditGuideDetails, giveReason }: AuditGuideConfirmUpdateDto): Promise<void> {
 		const auditGuide = await this.findAuditGuideById(id);
-		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
+		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.BY_CONCILLIATE) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
@@ -253,7 +253,7 @@ export class AuditGuideService {
 		auditGuideDetails.push(...transporterDetails);
 
 		return {
-			requestStatusId: AUDIT_GUIDE_STATUS.PENDING,
+			requestStatusId: AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
 			date: transporterTravel.movementDate,
 			zoneId: zone[0].id,
 			auditGuideDetails,
@@ -341,7 +341,7 @@ export class AuditGuideService {
 				recuperatorTotal,
 				date: externalData.movementDate,
 				zoneId: zone.id,
-				requestStatusId: AUDIT_GUIDE_STATUS.PENDING,
+				requestStatusId: AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
 				modifiedBy: user_id,
 			});
 
@@ -417,7 +417,7 @@ export class AuditGuideService {
 			throw new BusinessException('No se encontró la auditoría especificada.', 404);
 		}
 
-		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.PENDING) {
+		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.BY_CONCILLIATE) {
 			throw new BusinessException('La auditoría debe estar en estado pendiente para actualizar.');
 		}
 
@@ -425,6 +425,5 @@ export class AuditGuideService {
 
 		await this.auditGuideRepository.save(auditGuide);
 	}
-
 
 }
