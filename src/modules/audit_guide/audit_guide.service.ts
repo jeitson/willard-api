@@ -397,14 +397,14 @@ export class AuditGuideService {
 				throw new BusinessException('La zona configurada del viaje, no existe en el sistema');
 			}
 
-			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
+			const { transporterTotal, recuperatorTotal, isConfirmed } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
 
 			await queryRunner.manager.update(AuditGuide, auditGuide.id, {
 				transporterTotal,
 				recuperatorTotal,
 				date: externalData.movementDate,
 				zoneId: zone.id,
-				requestStatusId: AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
+				requestStatusId: isConfirmed ? AUDIT_GUIDE_STATUS.CONFIRMED : AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
 				modifiedBy: user_id,
 			});
 
@@ -429,11 +429,12 @@ export class AuditGuideService {
 		return this.transporterTravelRepository.findOne({ where: { guideId }, relations: ['details'] });
 	}
 
-	private async syncAuditDetails(queryRunner, auditGuide: AuditGuide, externalData: any): Promise<any> {
+	private async syncAuditDetails(
+		queryRunner,
+		auditGuide: AuditGuide,
+		externalData: any
+	): Promise<{ transporterTotal: number; recuperatorTotal: number; isConfirmed: boolean }> {
 		const user_id = this.userContextService.getUserDetails()?.id;
-
-		let transporterTotal = 0;
-		let recuperatorTotal = 0;
 
 		const productNames = externalData.details.map((item) => item.batteryType);
 		const foundProducts = await this.productRepository.find({ where: { name: In(productNames) } });
@@ -441,7 +442,7 @@ export class AuditGuideService {
 			throw new BusinessException('No se pudieron validar todos los productos de los datos externos.');
 		}
 
-		const detailsToSave = foundProducts.map((product) => {
+		const newDetailsToSave = foundProducts.map((product) => {
 			const { quantity } = externalData.details.find(({ batteryType }) => batteryType === product.name);
 			return this.auditGuideDetailRepository.create({
 				auditGuide: auditGuide,
@@ -454,23 +455,33 @@ export class AuditGuideService {
 			});
 		});
 
-		detailsToSave.forEach((detail) => {
-			if (!detail.auditGuideId || !detail.product) {
-				throw new BusinessException('Error al configurar los detalles de la auditoría.');
-			}
-		});
+		await queryRunner.manager.save(AuditGuideDetail, newDetailsToSave);
 
-		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
+		const allDetails = [
+			...auditGuide.auditGuideDetails.map(({ isRecuperator, quantityCollection: quantity }) => ({
+				isRecuperator,
+				quantity,
+			})),
+			...newDetailsToSave.map(({ isRecuperator, quantity }) => ({ isRecuperator, quantity })),
+		];
 
-		detailsToSave.forEach((detail) => {
-			if (detail.isRecuperator) {
-				recuperatorTotal += detail.quantity;
-			} else {
-				transporterTotal += detail.quantity;
-			}
-		});
+		const { transporterTotal, recuperatorTotal, transporterQty, recuperatorQty } = allDetails.reduce(
+			(acc, detail) => {
+				if (detail.isRecuperator) {
+					acc.recuperatorTotal += detail.quantity;
+					acc.recuperatorQty++;
+				} else {
+					acc.transporterTotal += detail.quantity;
+					acc.transporterQty++;
+				}
+				return acc;
+			},
+			{ transporterTotal: 0, recuperatorTotal: 0, transporterQty: 0, recuperatorQty: 0 }
+		);
 
-		return { transporterTotal, recuperatorTotal };
+		const isConfirmed = transporterTotal === recuperatorTotal && transporterQty === recuperatorQty;
+
+		return { transporterTotal, recuperatorTotal, isConfirmed };
 	}
 
 	async updateInFavorRecuperator({ id, key }: { id: number; key: string }): Promise<void> {
@@ -511,7 +522,7 @@ export class AuditGuideService {
 
 				if (!transporterTravel) { continue; }
 
-				const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(
+				const { transporterTotal, recuperatorTotal, isConfirmed } = await this.syncAuditDetails(
 					queryRunner,
 					auditGuide,
 					transporterTravel
@@ -528,7 +539,7 @@ export class AuditGuideService {
 						recuperatorTotal,
 						date: transporterTravel.movementDate,
 						zoneId: zone.id,
-						requestStatusId: AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
+						requestStatusId: isConfirmed ? AUDIT_GUIDE_STATUS.CONFIRMED : AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
 						modifiedBy: this.userContextService.getUserDetails()?.id,
 					}
 				);
