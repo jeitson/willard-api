@@ -8,10 +8,11 @@ import { AuditGuide } from './entities/audit_guide.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { AuditGuideConfirmUpdateDto, AuditGuideDetailUpdateDto, UpdateReasonDto } from './dto/audit_guide.dto';
 import { ROL } from 'src/core/constants/rol.constant';
+import { Public } from 'src/core/common/decorators/public.decorator';
 
 @ApiTags('Negocio - Auditoria de Guias')
 @Controller('audit_guide')
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 export class AuditGuideController {
 	constructor(private readonly auditGuideService: AuditGuideService) { }
 
@@ -64,7 +65,8 @@ export class AuditGuideController {
 	}
 
 	@Post('synchronize/:id')
-	@Roles(ROL.AUDITORIA_PH)
+	// @Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Sincronizar' })
 	async synchronize(
 		@IdParam('id') id: number,
