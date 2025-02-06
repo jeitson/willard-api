@@ -25,20 +25,12 @@ export class TransporterTravelService {
 
 	async createFromJson(data: TransporterTravelDto): Promise<ResponseCodeTransporterTravel[]> {
 		const travelRecordDto = plainToClass(TransporterTravelDto, data);
-
 		const errors = await validate(travelRecordDto);
-
 		if (errors.length > 0) {
-			const errorMessages = errors.map(error => {
-				const constraints = error.constraints
-					? Object.values(error.constraints)
-					: [];
-				return {
-					property: error.property,
-					errors: constraints,
-				};
-			});
-
+			const errorMessages = errors.map((error) => ({
+				property: error.property,
+				errors: Object.values(error.constraints || {}),
+			}));
 			throw new UnprocessableEntityException({
 				message: 'Validation failed',
 				errors: errorMessages,
@@ -49,12 +41,20 @@ export class TransporterTravelService {
 			const item = this.mapRowToTransporterTravelDto(data);
 			item.details = this.convertDetail(data.detalles);
 
-			await this.validateRelations([item]);
+			// Validar que el registro tenga al menos un detalle
+			if (!item.details || item.details.length === 0) {
+				throw new BusinessException('Todos los registros deben tener al menos un detalle.');
+			}
 
-			const travelRecord = this.transporterTravelRepository.create(item);
-			const savedRecord = await this.transporterTravelRepository.save(travelRecord);
-
-			return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
+			// Verificar si es una actualización
+			if (item.guidePreviousId) {
+				await this.updateTransporterTravel(item);
+			} else {
+				await this.validateRelations([item]);
+				const travelRecord = this.transporterTravelRepository.create(item);
+				const savedRecord = await this.transporterTravelRepository.save(travelRecord);
+				return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
+			}
 		} catch (error) {
 			throw new BusinessException('Error al procesar el objeto JSON: ' + error.message);
 		}
@@ -63,18 +63,15 @@ export class TransporterTravelService {
 	async createFromExcel(file: any): Promise<ResponseCodeTransporterTravel[]> {
 		try {
 			const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-
 			const mainSheetName = workbook.SheetNames[0];
 			const mainSheet = workbook.Sheets[mainSheetName];
 			const mainData = XLSX.utils.sheet_to_json(mainSheet);
-
 			const detailSheetName = workbook.SheetNames[1];
 			const detailSheet = workbook.Sheets[detailSheetName];
 			const detailData = XLSX.utils.sheet_to_json(detailSheet);
 
 			const records = [];
 			const validationErrors = [];
-
 			const detailsByGuide = detailData.reduce((acc, detail) => {
 				const idGuia = detail['idGuia'];
 				if (!acc[idGuia]) {
@@ -90,26 +87,34 @@ export class TransporterTravelService {
 			for (const [index, row] of mainData.entries()) {
 				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
 				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
-
 				const record = this.mapRowToTransporterTravelDto(row);
-
 				const details = detailsByGuide[record.guideId] || [];
-
 				record.details = this.convertDetail(details);
+
+				if (!record.details || record.details.length === 0) {
+					validationErrors.push({
+						row: index + 1,
+						errors: ['El registro debe tener al menos un detalle.'],
+					});
+					continue;
+				}
 
 				const errors = await validate(record);
 				if (errors.length > 0) {
-					const errorMessages = errors.map(error => ({
+					const errorMessages = errors.map((error) => ({
 						property: error.property,
 						errors: Object.values(error.constraints || {}),
 					}));
-
 					validationErrors.push({
 						row: index + 1,
 						errors: errorMessages,
 					});
 				} else {
-					records.push(this.transporterTravelRepository.create(record));
+					if (record.guidePreviousId) {
+						await this.updateTransporterTravel(record);
+					} else {
+						records.push(this.transporterTravelRepository.create(record));
+					}
 				}
 			}
 
@@ -121,61 +126,28 @@ export class TransporterTravelService {
 			}
 
 			await this.validateRelations(records);
-
 			const savedRecord = await this.transporterTravelRepository.save(records);
-
 			return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
-
 		} catch (error) {
 			throw new BadRequestException('Error al procesar el archivo Excel: ' + error.message);
 		}
 	}
 
-	async validate(item: any): Promise<any[]> {
-		const errors = await validate(item);
-
-		if (errors.length > 0) {
-			return errors.map(error => {
-				const constraints = error.constraints
-					? Object.values(error.constraints)
-					: [];
-				return {
-					property: error.property,
-					errors: constraints,
-				};
-			});
-		}
-
-		return [];
-	}
-
 	async validateRelations(records: TransporterTravel[]) {
-		// Zonas
-		const zones = records.flatMap(item => item.zone.toUpperCase());
-
+		// Validar zonas
+		const zones = records.flatMap((item) => item.zone.toUpperCase());
 		const _zones = await this.childrensRepository.find({ where: { name: In(zones) } });
-
-		if (!_zones) {
-			throw new BusinessException('No existen las zonas ingresadas');
-		}
-
-		if (_zones.length !== zones.length) {
+		if (!_zones || _zones.length !== zones.length) {
 			throw new BusinessException('Verifique las zonas ingresadas - ' + zones.join(', '));
 		}
 
-		// Productos
+		// Validar productos
 		const products = records.reduce((acc, item) => {
-			acc = [...acc, ...item.details.map((r: { batteryType: string; }) => r.batteryType.toUpperCase())]
+			acc = [...acc, ...item.details.map((r) => r.batteryType.toUpperCase())];
 			return acc;
 		}, []);
-
 		const _products = await this.productRepository.find({ where: { name: In(products) } });
-
-		if (!_products) {
-			throw new BusinessException('No existen los productos ingresados');
-		}
-
-		if (_products.length !== products.length) {
+		if (!_products || _products.length !== products.length) {
 			throw new BusinessException('Verifique los productos ingresados - ' + products.join(', '));
 		}
 	}
@@ -184,6 +156,7 @@ export class TransporterTravelService {
 		return {
 			routeId: row['idRuta'],
 			guideId: row['idGuia'],
+			guidePreviousId: row['idGuiaAntes'],
 			type: row['tipo'],
 			sequence: row['secuencia'],
 			movementDate: row['fechaMov'],
@@ -201,14 +174,53 @@ export class TransporterTravelService {
 			referenceDocument: row['docReferencia'],
 			referenceDocument2: row['docReferencia2'],
 			supportUrls: row['urlSoportes'] || [],
-			details: []
+			details: [],
 		};
 	}
 
 	convertDetail(details: any): any[] {
-		return details.map((d: any) => ({
+		return details.map((d) => ({
 			batteryType: d.tipoBat.toUpperCase(),
 			quantity: d.cantidad,
 		})) || [];
+	}
+
+	private async updateTransporterTravel(item: any): Promise<void> {
+		const existingRecord = await this.transporterTravelRepository.findOne({
+			where: { guideId: item.guidePreviousId },
+		});
+
+		if (!existingRecord) {
+			throw new BusinessException(`No se encontró ningún registro con idGuiaAntes: ${item.guidePreviousId}`);
+		}
+
+		if (!item.details || item.details.length === 0) {
+			throw new BusinessException('Todos los registros deben tener al menos un detalle.');
+		}
+
+		existingRecord.routeId = item.routeId;
+		existingRecord.guideId = item.guideId;
+		existingRecord.type = item.type;
+		existingRecord.sequence = item.sequence;
+		existingRecord.movementDate = item.movementDate;
+		existingRecord.movementTime = item.movementTime;
+		existingRecord.planner = item.planner;
+		existingRecord.zone = item.zone;
+		existingRecord.city = item.city;
+		existingRecord.department = item.department;
+		existingRecord.licensePlate = item.licensePlate;
+		existingRecord.driver = item.driver;
+		existingRecord.siteName = item.siteName;
+		existingRecord.address = item.address;
+		existingRecord.gpsPosition = item.gpsPosition;
+		existingRecord.totalQuantity = item.totalQuantity;
+		existingRecord.referenceDocument = item.referenceDocument;
+		existingRecord.referenceDocument2 = item.referenceDocument2;
+		existingRecord.supportUrls = item.supportUrls;
+
+		// Actualizar detalles
+		existingRecord.details = this.convertDetail(item.details);
+
+		await this.transporterTravelRepository.save(existingRecord);
 	}
 }
