@@ -547,4 +547,57 @@ export class AuditGuideService {
 			await queryRunner.release();
 		}
 	}
+
+	// async createTT(transporterTravel: TransporterTravel): Promise<void> {
+	// 	const { id: userId } = this.userContextService.getUserDetails();
+	// 	let { auditGuideDetails, transporterTotal, ...auditGuideData } = transporterTravel;
+
+	// 	const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
+	// 	await queryRunner.startTransaction();
+
+	// 	try {
+	// 		const { requestStatusId, date, zoneId, auditGuideDetails, transporterTotal } =
+	// 		await this.handleTransporterTravel(transporterTravel, auditGuideDetails, transporterTotal);
+
+	// 	  // Crear la auditoría
+	// 	  const auditGuide = this.auditGuideRepository.create({
+	// 		...auditGuideData,
+	// 		zoneId,
+	// 		date,
+	// 		transporterTotal,
+	// 		requestStatusId,
+	// 		createdBy: userId,
+	// 		modifiedBy: userId,
+	// 	  });
+
+	// 	  const auditGuideSaved = await queryRunner.manager.save(auditGuide);
+	// 	  if (!auditGuideSaved.id) {
+	// 		throw new BusinessException('Error al guardar la guía de auditoría.', 500);
+	// 	  }
+
+	// 	  // Validar y asignar productos
+	// 	  const productIds = auditGuideDetails.map((item) => item.productId);
+	// 	  const products = await this.productRepository.findBy({ id: In(productIds) });
+	// 	  const productMap = new Map(products.map((product) => [product.id, product]));
+	// 	  auditGuideDetails = auditGuideDetails.map((item) => ({
+	// 		...item,
+	// 		product: productMap.get((item.productId).toString() as any),
+	// 	  }));
+
+	// 	  // Guardar detalles de la auditoría
+	// 	  await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
+
+	// 	  // Guardar ruta de auditoría si aplica
+	// 	  if (transporterTravel) {
+	// 		await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
+	// 	  }
+
+	// 	  await queryRunner.commitTransaction();
+	// 	} catch (error) {
+	// 	  await queryRunner.rollbackTransaction();
+	// 	  throw new BusinessException(error.message || 'Error inesperado en la creación de la auditoría.', 500);
+	// 	} finally {
+	// 	  await queryRunner.release();
+	// 	}
+	//   }
 }
