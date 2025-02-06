@@ -329,29 +329,27 @@ export class AuditGuideService {
 				throw new BusinessException('No se encontraron datos externos para sincronizar.', 404);
 			}
 
-			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
-
 			const zone = await this.childrensRepository.findOne({ where: { name: externalData.zone.toUpperCase() } });
 
 			if (!zone) {
 				throw new BusinessException('La zona configurada del viaje, no existe en el sistema');
 			}
 
-			console.log({ transporterTotal, recuperatorTotal })
+			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
 
-			// auditGuide.transporterTotal = transporterTotal;
-			// auditGuide.recuperatorTotal = recuperatorTotal;
-			// auditGuide.date = externalData.movementDate,
-			// 	auditGuide.zoneId = zone.id;
-			// auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
+			auditGuide.transporterTotal = transporterTotal;
+			auditGuide.recuperatorTotal = recuperatorTotal;
+			auditGuide.date = externalData.movementDate,
+			auditGuide.zoneId = zone.id;
+			auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
 
-			// await queryRunner.manager.save(auditGuide);
+			await queryRunner.manager.save(auditGuide);
 
-			// const auditGuideRoute = this.auditGuideRouteRepository.create({
-			// 	auditGuide,
-			// 	transporterTravel: externalData,
-			// });
-			// await queryRunner.manager.save(auditGuideRoute);
+			const auditGuideRoute = this.auditGuideRouteRepository.create({
+				auditGuide,
+				transporterTravel: externalData,
+			});
+			await queryRunner.manager.save(auditGuideRoute);
 
 			await queryRunner.commitTransaction();
 		} catch (error) {
@@ -387,23 +385,21 @@ export class AuditGuideService {
 			});
 		});
 
-		console.log(detailsToSave);
+		detailsToSave.forEach((detail) => {
+			if (!detail.auditGuideId || !detail.product) {
+				throw new BusinessException('Error al configurar los detalles de la auditoría.');
+			}
+		});
 
-		// detailsToSave.forEach((detail) => {
-		// 	if (!detail.auditGuideId || !detail.product) {
-		// 		throw new BusinessException('Error al configurar los detalles de la auditoría.');
-		// 	}
-		// });
+		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
 
-		// await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
-
-		// detailsToSave.forEach((detail) => {
-		// 	if (detail.isRecuperator) {
-		// 		recuperatorTotal += detail.quantity;
-		// 	} else {
-		// 		transporterTotal += detail.quantity;
-		// 	}
-		// });
+		detailsToSave.forEach((detail) => {
+			if (detail.isRecuperator) {
+				recuperatorTotal += detail.quantity;
+			} else {
+				transporterTotal += detail.quantity;
+			}
+		});
 
 		return { transporterTotal, recuperatorTotal };
 	}
