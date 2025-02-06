@@ -313,9 +313,9 @@ export class AuditGuideService {
 	}
 
 	async synchronize(id: number): Promise<void> {
-		// const user_id = this.userContextService.getUserDetails()?.id; Usar el usuario creador/actulizador
-		const auditGuide = await this.findAuditGuideById(id);
+		const user_id = this.userContextService.getUserDetails()?.id;
 
+		const auditGuide = await this.findAuditGuideById(id);
 		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.WITHOUT_GUIDE) {
 			throw new BusinessException('Solo se pueden sincronizar auditorías en estado "sin guia".');
 		}
@@ -330,24 +330,26 @@ export class AuditGuideService {
 			}
 
 			const zone = await this.childrensRepository.findOne({ where: { name: externalData.zone.toUpperCase() } });
-
 			if (!zone) {
 				throw new BusinessException('La zona configurada del viaje, no existe en el sistema');
 			}
 
 			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
 
-			auditGuide.transporterTotal = transporterTotal;
-			auditGuide.recuperatorTotal = recuperatorTotal;
-			auditGuide.date = externalData.movementDate,
-			auditGuide.zoneId = zone.id;
-			auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
-
-			await queryRunner.manager.save(auditGuide);
+			await queryRunner.manager.update(AuditGuide, auditGuide.id, {
+				transporterTotal,
+				recuperatorTotal,
+				date: externalData.movementDate,
+				zoneId: zone.id,
+				requestStatusId: AUDIT_GUIDE_STATUS.PENDING,
+				modifiedBy: user_id,
+			});
 
 			const auditGuideRoute = this.auditGuideRouteRepository.create({
 				auditGuide,
 				transporterTravel: externalData,
+				createdBy: user_id,
+				updatedBy: user_id,
 			});
 			await queryRunner.manager.save(auditGuideRoute);
 
@@ -365,6 +367,8 @@ export class AuditGuideService {
 	}
 
 	private async syncAuditDetails(queryRunner, auditGuide: AuditGuide, externalData: any): Promise<any> {
+		const user_id = this.userContextService.getUserDetails()?.id;
+
 		let transporterTotal = 0;
 		let recuperatorTotal = 0;
 
@@ -382,6 +386,8 @@ export class AuditGuideService {
 				isRecuperator: false,
 				quantity,
 				quantityCollection: quantity,
+				createdBy: user_id,
+				modifiedBy: user_id,
 			});
 		});
 
