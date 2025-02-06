@@ -104,8 +104,6 @@ export class AuditGuideService {
 
 			await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
 
-			await this.verifyAndConfirmDetails(auditGuideDetails, auditGuideSaved);
-
 			if (transporterTravel) {
 				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
 
@@ -222,21 +220,6 @@ export class AuditGuideService {
 			...rawResults,
 			items: groupedResults,
 		};
-	}
-
-	private async verifyAndConfirmDetails(
-		auditGuideDetails: any[],
-		auditGuideSaved: AuditGuide,
-	): Promise<void> {
-		const totalQuantity = auditGuideDetails.reduce((sum, detail) => sum + detail.quantity, 0);
-		const totalProducts = await this.productRepository.count({
-			where: { id: In(auditGuideDetails.map(detail => detail.productId)) },
-		});
-
-		if (auditGuideDetails.length === totalProducts && totalQuantity === auditGuideSaved.transporterTotal) {
-			auditGuideSaved.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
-			await this.auditGuideRepository.save(auditGuideSaved);
-		}
 	}
 
 	private async handleTransporterTravel(
