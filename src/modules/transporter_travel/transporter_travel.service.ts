@@ -11,6 +11,7 @@ import { TransporterTravelDto } from './dto/transporter_travel.dto';
 import { Product } from '../products/entities/product.entity';
 import { Child } from '../catalogs/entities/child.entity';
 import { ResponseCodeTransporterTravel } from './entities/response';
+import { AuditGuideService } from '../audit_guide/audit_guide.service';
 
 @Injectable()
 export class TransporterTravelService {
@@ -21,6 +22,7 @@ export class TransporterTravelService {
 		private readonly productRepository: Repository<Product>,
 		@InjectRepository(Child)
 		private readonly childrensRepository: Repository<Child>,
+		private readonly auditGuideService: AuditGuideService,
 	) { }
 
 	async createFromJson(data: TransporterTravelDto): Promise<ResponseCodeTransporterTravel[]> {
@@ -48,6 +50,9 @@ export class TransporterTravelService {
 			} else {
 				const travelRecord = this.transporterTravelRepository.create(item);
 				const savedRecord = await this.transporterTravelRepository.save(travelRecord);
+
+				this.auditGuideService.checkAndSyncAuditGuides(savedRecord);
+
 				return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 			}
 		} catch (error) {
@@ -124,6 +129,8 @@ export class TransporterTravelService {
 				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
 			];
 
+			this.auditGuideService.checkAndSyncAuditGuides(allSavedRecords);
+
 			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {
 			throw new BadRequestException('Error al procesar el archivo Excel: ' + error.message);
@@ -199,7 +206,9 @@ export class TransporterTravelService {
 		// Actualizar detalles
 		existingRecord.details = this.convertDetail(item.details);
 
-		await this.transporterTravelRepository.save(existingRecord);
+		const updatedRecord = await this.transporterTravelRepository.save(existingRecord);
+
+		this.auditGuideService.checkAndSyncAuditGuides([updatedRecord]);
 	}
 
 	private async validateAllRecords(records: any[]): Promise<void> {

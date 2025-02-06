@@ -334,7 +334,7 @@ export class AuditGuideService {
 				const product = await this.productRepository.findOneBy({ id: detail.productId })
 
 				if (!product) {
-					throw new BusinessException(`El producto ${ detail.productId } no existe`);
+					throw new BusinessException(`El producto ${detail.productId} no existe`);
 				}
 
 				const newDetail = this.auditGuideDetailRepository.create({
@@ -489,4 +489,66 @@ export class AuditGuideService {
 		await this.auditGuideRepository.save(auditGuide);
 	}
 
+	async checkAndSyncAuditGuides(transporterTravels: TransporterTravel[]): Promise<void> {
+		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
+		await queryRunner.startTransaction();
+
+		try {
+			const guidesNumber = transporterTravels.map(({ guideId }) => guideId.toString().toUpperCase());
+
+			const auditsGuides = await this.auditGuideRepository.find({
+				where: { guideNumber: In(guidesNumber), requestStatusId: AUDIT_GUIDE_STATUS.WITHOUT_GUIDE },
+			});
+
+			if (auditsGuides.length === 0) {
+				return;
+			}
+
+			for (const auditGuide of auditsGuides) {
+				const transporterTravel = transporterTravels.find(
+					(element) => element.guideId === auditGuide.guideNumber
+				);
+
+				if (!transporterTravel) { continue; }
+
+				const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(
+					queryRunner,
+					auditGuide,
+					transporterTravel
+				);
+
+				const zone = await this.childrensRepository.findOne({ where: { name: transporterTravel.zone.toUpperCase() } });
+				if (!zone) { continue; }
+
+				await queryRunner.manager.update(
+					AuditGuide,
+					auditGuide.id,
+					{
+						transporterTotal,
+						recuperatorTotal,
+						date: transporterTravel.movementDate,
+						zoneId: zone.id,
+						requestStatusId: AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
+						modifiedBy: this.userContextService.getUserDetails()?.id,
+					}
+				);
+
+				const auditGuideRoute = this.auditGuideRouteRepository.create({
+					auditGuide,
+					transporterTravel,
+					createdBy: this.userContextService.getUserDetails()?.id,
+					updatedBy: this.userContextService.getUserDetails()?.id,
+				});
+
+				await queryRunner.manager.save(auditGuideRoute);
+			}
+
+			await queryRunner.commitTransaction();
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			throw new BusinessException(`Error al sincronizar guías de auditoría: ${error.message}`);
+		} finally {
+			await queryRunner.release();
+		}
+	}
 }
