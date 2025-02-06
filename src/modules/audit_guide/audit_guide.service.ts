@@ -330,7 +330,6 @@ export class AuditGuideService {
 			}
 
 			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
-			console.log({ transporterTotal, recuperatorTotal })
 
 			const zone = await this.childrensRepository.findOne({ where: { name: externalData.zone.toUpperCase() } });
 
@@ -341,7 +340,7 @@ export class AuditGuideService {
 			auditGuide.transporterTotal = transporterTotal;
 			auditGuide.recuperatorTotal = recuperatorTotal;
 			auditGuide.date = externalData.movementDate,
-			auditGuide.zoneId = zone.id;
+				auditGuide.zoneId = zone.id;
 			auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
 
 			await queryRunner.manager.save(auditGuide);
@@ -377,9 +376,8 @@ export class AuditGuideService {
 
 		const detailsToSave = foundProducts.map((product) => {
 			const { quantity } = externalData.details.find(({ batteryType }) => batteryType === product.name);
-
 			return this.auditGuideDetailRepository.create({
-				auditGuide,
+				auditGuideId: auditGuide.id,
 				product,
 				isRecuperator: false,
 				quantity,
@@ -387,7 +385,11 @@ export class AuditGuideService {
 			});
 		});
 
-		console.log(detailsToSave);
+		detailsToSave.forEach((detail) => {
+			if (!detail.auditGuideId || !detail.product) {
+				throw new BusinessException('Error al configurar los detalles de la auditoría.');
+			}
+		});
 
 		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
 

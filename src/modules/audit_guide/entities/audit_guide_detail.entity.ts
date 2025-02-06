@@ -11,6 +11,9 @@ export class AuditGuideDetail extends CompleteEntity {
 	@JoinColumn({ name: 'AuditoriaGuiaId' })
 	auditGuide: AuditGuide;
 
+	@Column({ type: 'bigint', name: 'AuditoriaGuiaId', nullable: false })
+	auditGuideId: number;
+
 	@ApiProperty({ description: 'Es Recuperadora' })
 	@Column({ type: 'boolean', name: 'EsRecuperadora', nullable: true, default: null })
 	isRecuperator: boolean;
