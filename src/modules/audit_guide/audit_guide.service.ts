@@ -337,19 +337,21 @@ export class AuditGuideService {
 				throw new BusinessException('La zona configurada del viaje, no existe en el sistema');
 			}
 
-			auditGuide.transporterTotal = transporterTotal;
-			auditGuide.recuperatorTotal = recuperatorTotal;
-			auditGuide.date = externalData.movementDate,
-				auditGuide.zoneId = zone.id;
-			auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
+			console.log({ transporterTotal, recuperatorTotal })
 
-			await queryRunner.manager.save(auditGuide);
+			// auditGuide.transporterTotal = transporterTotal;
+			// auditGuide.recuperatorTotal = recuperatorTotal;
+			// auditGuide.date = externalData.movementDate,
+			// 	auditGuide.zoneId = zone.id;
+			// auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.PENDING;
 
-			const auditGuideRoute = this.auditGuideRouteRepository.create({
-				auditGuide,
-				transporterTravel: externalData,
-			});
-			await queryRunner.manager.save(auditGuideRoute);
+			// await queryRunner.manager.save(auditGuide);
+
+			// const auditGuideRoute = this.auditGuideRouteRepository.create({
+			// 	auditGuide,
+			// 	transporterTravel: externalData,
+			// });
+			// await queryRunner.manager.save(auditGuideRoute);
 
 			await queryRunner.commitTransaction();
 		} catch (error) {
@@ -385,21 +387,23 @@ export class AuditGuideService {
 			});
 		});
 
-		detailsToSave.forEach((detail) => {
-			if (!detail.auditGuideId || !detail.product) {
-				throw new BusinessException('Error al configurar los detalles de la auditoría.');
-			}
-		});
+		console.log(detailsToSave);
 
-		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
+		// detailsToSave.forEach((detail) => {
+		// 	if (!detail.auditGuideId || !detail.product) {
+		// 		throw new BusinessException('Error al configurar los detalles de la auditoría.');
+		// 	}
+		// });
 
-		detailsToSave.forEach((detail) => {
-			if (detail.isRecuperator) {
-				recuperatorTotal += detail.quantity;
-			} else {
-				transporterTotal += detail.quantity;
-			}
-		});
+		// await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
+
+		// detailsToSave.forEach((detail) => {
+		// 	if (detail.isRecuperator) {
+		// 		recuperatorTotal += detail.quantity;
+		// 	} else {
+		// 		transporterTotal += detail.quantity;
+		// 	}
+		// });
 
 		return { transporterTotal, recuperatorTotal };
 	}
