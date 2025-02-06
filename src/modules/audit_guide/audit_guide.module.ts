@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuditGuideService } from './audit_guide.service';
 import { AuditGuideController } from './audit_guide.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,11 +10,12 @@ import { UsersModule } from '../users/users.module';
 import { TransporterTravelModule } from '../transporter_travel/transporter_travel.module';
 import { CatalogsModule } from '../catalogs/catalogs.module';
 import { ReportsPhModule } from '../reports_ph/reports_ph.module';
+import { ReceptionsModule } from '../receptions/receptions.module';
 
 const providers = [AuditGuideService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([AuditGuide, AuditGuideDetail, AuditGuideRoute]), ProductsModule, UsersModule, TransporterTravelModule, CatalogsModule, ReportsPhModule],
+	imports: [TypeOrmModule.forFeature([AuditGuide, AuditGuideDetail, AuditGuideRoute]), ProductsModule, UsersModule, TransporterTravelModule, CatalogsModule, ReportsPhModule, forwardRef(() => ReceptionsModule)],
 	controllers: [AuditGuideController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

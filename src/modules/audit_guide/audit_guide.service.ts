@@ -18,6 +18,9 @@ import { Transporter } from '../transporters/entities/transporter.entity';
 import { Shipment } from '../shipments/entities/shipment.entity';
 import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
 import { ReportsPhService } from '../reports_ph/reports_ph.service';
+import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
+import { Reception } from '../receptions/entities/reception.entity';
+import { ReceptionDetail } from '../receptions/entities/reception_detail.entity';
 
 @Injectable()
 export class AuditGuideService {
@@ -38,6 +41,12 @@ export class AuditGuideService {
 
 		@InjectRepository(TransporterTravel)
 		private readonly transporterTravelRepository: Repository<TransporterTravel>,
+
+		@InjectRepository(TransporterTravelDetail)
+		private readonly transporterTravelDetailRepository: Repository<TransporterTravelDetail>,
+
+		@InjectRepository(ReceptionDetail)
+		private readonly receptionDetailRepository: Repository<ReceptionDetail>,
 
 		private readonly catalogsService: CatalogsService,
 		private readonly reportsPhService: ReportsPhService,
@@ -111,19 +120,24 @@ export class AuditGuideService {
 	}
 
 	async updateDetails(id: number, updateDto: AuditGuideDetailUpdateDto): Promise<void> {
+		const { id: userId } = this.userContextService.getUserDetails();
+
 		const auditGuide = await this.findAuditGuideById(id);
 		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.BY_CONCILLIATE) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
-		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(updateDto);
+		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(updateDto, id);
 
 		auditGuide.transporterTotal = transporterTotal;
 		auditGuide.recuperatorTotal = recuperatorTotal;
+		auditGuide.modifiedBy = userId;
 		await this.auditGuideRepository.save(auditGuide);
 	}
 
 	async confirm(id: number, { comment, auditGuideDetails, giveReason }: AuditGuideConfirmUpdateDto): Promise<void> {
+		const { id: userId } = this.userContextService.getUserDetails();
+
 		const auditGuide = await this.findAuditGuideById(id);
 		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.BY_CONCILLIATE) {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
@@ -134,10 +148,11 @@ export class AuditGuideService {
 
 		auditGuide.inFavorRecuperator = giveReason === 'R';
 
-		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails({ auditGuideDetails });
+		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails({ auditGuideDetails }, id);
 
 		auditGuide.transporterTotal = transporterTotal;
 		auditGuide.recuperatorTotal = recuperatorTotal;
+		auditGuide.modifiedBy = userId;
 		await this.auditGuideRepository.save(auditGuide);
 
 		// crear reporte_ph
@@ -289,23 +304,71 @@ export class AuditGuideService {
 		return auditGuide;
 	}
 
-	private async updateAuditDetails(updateDto: AuditGuideDetailUpdateDto) {
+	private async updateAuditDetails(updateDto: AuditGuideDetailUpdateDto, id: number): Promise<{ transporterTotal: number; recuperatorTotal: number }> {
+		const { id: userId } = this.userContextService.getUserDetails();
+
 		let transporterTotal = 0;
 		let recuperatorTotal = 0;
 
 		for (const detail of updateDto.auditGuideDetails) {
-			const existingDetail = await this.auditGuideDetailRepository.findOne({ where: { id: detail.id } });
-			if (!existingDetail) {
-				throw new BusinessException(`No se encontró el detalle de auditoría con el ID ${detail.id}`);
-			}
+			if (!detail.id) {
+				const existingDetail = await this.auditGuideDetailRepository.findOne({ where: { id: detail.id } });
 
-			existingDetail.quantityCollection = detail.quantityCollection;
-			await this.auditGuideDetailRepository.save(existingDetail);
+				if (!existingDetail) {
+					throw new BusinessException(`No se encontró el detalle de auditoría con el ID ${detail.id}`);
+				}
 
-			if (existingDetail.isRecuperator) {
-				recuperatorTotal += existingDetail.quantityCollection;
+				existingDetail.quantityCollection = detail.quantityCollection;
+				await this.auditGuideDetailRepository.save(existingDetail);
+
+				if (existingDetail.isRecuperator) {
+					recuperatorTotal += existingDetail.quantityCollection;
+				} else {
+					transporterTotal += existingDetail.quantityCollection;
+				}
 			} else {
-				transporterTotal += existingDetail.quantityCollection;
+				if (!detail.productId || !detail.type) {
+					throw new BusinessException('El producto y el tipo son obligatorios para crear un nuevo detalle.');
+				}
+
+				const product = await this.productRepository.findOneBy({ id: detail.productId })
+
+				if (!product) {
+					throw new BusinessException(`El producto ${ detail.productId } no existe`);
+				}
+
+				const newDetail = this.auditGuideDetailRepository.create({
+					product,
+					isRecuperator: detail.type === 'R',
+					quantity: detail.quantityCollection,
+					quantityCollection: detail.quantityCollection,
+					modifiedBy: userId,
+				});
+
+				const savedDetail = await this.auditGuideDetailRepository.save(newDetail);
+
+				const createdBy = userId, modifiedBy = userId;
+
+				if (detail.type === 'T') {
+					this.transporterTravelDetailRepository.save({
+						batteryType: product.name,
+						quantity: detail.quantityCollection,
+						createdBy, modifiedBy,
+					});
+				} else if (detail.type === 'R') {
+					this.receptionDetailRepository.save({
+						product,
+						quantity: detail.quantityCollection,
+						createdBy, modifiedBy,
+						reception: { id }
+					})
+				}
+
+				if (savedDetail.isRecuperator) {
+					recuperatorTotal += savedDetail.quantityCollection;
+				} else {
+					transporterTotal += savedDetail.quantityCollection;
+				}
 			}
 		}
 

@@ -1,6 +1,6 @@
 import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested, IsIn } from 'class-validator';
+import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested, IsIn, ValidateIf } from 'class-validator';
 import { PagerDto } from 'src/core/common/dto/pager.dto';
 import { Reception } from 'src/modules/receptions/entities/reception.entity';
 import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
@@ -67,6 +67,25 @@ export class AuditGuideDetailContentUpdateDto {
 	@ApiProperty({ description: 'Cantidad Corregida', required: true })
 	@IsInt({ message: 'La cantidad corregida debe ser un número entero' })
 	quantityCollection: number;
+
+	@ApiProperty({
+		description: 'Producto relacionado con el detalle',
+		required: false,
+		nullable: true,
+	})
+	@ValidateIf((dto) => !dto?.id)
+	@IsString({ message: 'El producto debe ser válido' })
+	productId?: number | null;
+
+	@ApiProperty({
+		description: 'Tipo de detalle (R o T)',
+		required: false,
+		nullable: true,
+		enum: ['R', 'T'],
+	})
+	@ValidateIf((dto) => !dto?.id)
+	@IsIn(['R', 'T'], { message: 'El tipo debe ser "R" o "T"' })
+	type?: 'R' | 'T' | null;
 }
 
 export class AuditGuideDetailUpdateDto {
