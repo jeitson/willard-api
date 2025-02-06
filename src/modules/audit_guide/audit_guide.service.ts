@@ -385,6 +385,8 @@ export class AuditGuideService {
 			});
 		});
 
+		console.log(detailsToSave);
+
 		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
 
 		detailsToSave.forEach((detail) => {
