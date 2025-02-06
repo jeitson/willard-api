@@ -13,7 +13,7 @@ export abstract class CommonEntity extends BaseEntity {
 	@ApiProperty()
 	@Expose()
 	@PrimaryGeneratedColumn({ type: 'bigint', name: 'Id' })
-	id: number;
+	id: any;
 
 	@ApiProperty()
 	@Expose()

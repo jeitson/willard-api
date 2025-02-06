@@ -377,7 +377,7 @@ export class AuditGuideService {
 		const detailsToSave = foundProducts.map((product) => {
 			const { quantity } = externalData.details.find(({ batteryType }) => batteryType === product.name);
 			return this.auditGuideDetailRepository.create({
-				auditGuideId: auditGuide.id,
+				auditGuide: auditGuide,
 				product,
 				isRecuperator: false,
 				quantity,
