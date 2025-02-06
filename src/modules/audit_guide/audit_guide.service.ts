@@ -313,6 +313,7 @@ export class AuditGuideService {
 	}
 
 	async synchronize(id: number): Promise<void> {
+		// const user_id = this.userContextService.getUserDetails()?.id; Usar el usuario creador/actulizador
 		const auditGuide = await this.findAuditGuideById(id);
 
 		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.WITHOUT_GUIDE) {
@@ -329,6 +330,7 @@ export class AuditGuideService {
 			}
 
 			const { transporterTotal, recuperatorTotal } = await this.syncAuditDetails(queryRunner, auditGuide, externalData);
+			console.log({ transporterTotal, recuperatorTotal })
 
 			const zone = await this.childrensRepository.findOne({ where: { name: externalData.zone.toUpperCase() } });
 
