@@ -272,24 +272,33 @@ export class TransporterTravelService {
 	async updateGuideNumber(id: number, { idGuia: guideId }: TransporterTravelGuideNumberDto): Promise<void> {
 		const existingRecord = await this.transporterTravelRepository.findOne({
 			where: { id },
-			relations: ['transportersTravels']
+			relations: ['transportersTravels', 'transportersTravels.auditGuide'],
 		});
-
 		if (!existingRecord) {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		if (existingRecord.transportersTravels.length > 0 && !existingRecord.transportersTravels.every(({ auditGuide }) => [
-			AUDIT_GUIDE_STATUS.WITHOUT_GUIDE,
-			AUDIT_GUIDE_STATUS.TRANSIT
-		].includes(auditGuide.requestStatusId))) {
-			throw new BusinessException(`No se puede actualizar el registro, ya que tiene una vinculación activa y se encuentran en un estado "SIN GUÍA" o "EN TRANSITO"`);
+		if (
+			existingRecord.transportersTravels.some(
+				({ auditGuide }) =>
+					![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+auditGuide.requestStatusId)
+			)
+		) {
+			throw new BusinessException(
+				`No se puede actualizar el registro, ya que tiene una vinculación activa en un estado diferente a "SIN GUÍA" o "EN TRANSITO".`
+			);
 		}
 
 		existingRecord.guideId = guideId;
 
+		existingRecord.transportersTravels.forEach((element) => {
+			if (element.auditGuide) {
+				element.auditGuide.guideNumber = guideId;
+			}
+		});
+
 		const updatedRecord = await this.transporterTravelRepository.save(existingRecord);
 
-		this.auditGuideService.checkAndSyncAuditGuides([updatedRecord]);
+		await this.auditGuideService.checkAndSyncAuditGuides([updatedRecord]);
 	}
 }

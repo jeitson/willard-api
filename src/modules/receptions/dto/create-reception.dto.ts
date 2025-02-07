@@ -28,7 +28,16 @@ export class ReceptionPhotoDto {
 	url: string;
 }
 
-export class ReceptionDto {
+export class ReceptionGuideNumberDto {
+	@ApiProperty({ description: 'Número de guía' })
+	@IsNotEmpty({ message: 'NumeroGuia es obligatorio.' })
+	@IsString({ message: 'NumeroGuia debe ser un texto.' })
+	@MaxLength(10, { message: 'Debe de tener máximo 10 caracteres.' })
+	// @Matches(/^[A-Z0-9]{10}$/, { message: 'NumeroGuia debe ser alfanumérico, de 10 dígitos y en mayúsculas.' })
+	guideNumber: string;
+}
+
+export class ReceptionDto extends ReceptionGuideNumberDto {
 	@ApiProperty({ description: 'ID de la transportadora' })
 	@IsNotEmpty({ message: 'TransportadoraId es obligatorio.' })
 	@IsInt({ message: 'TransportadoraId debe ser un número entero.' })
@@ -45,13 +54,6 @@ export class ReceptionDto {
 	@IsString({ message: 'Conductor debe ser un texto.' })
 	@MaxLength(50, { message: 'Conductor no puede tener más de 50 caracteres.' })
 	driver: string;
-
-	@ApiProperty({ description: 'Número de guía' })
-	@IsNotEmpty({ message: 'NumeroGuia es obligatorio.' })
-	@IsString({ message: 'NumeroGuia debe ser un texto.' })
-	@MaxLength(10, { message: 'Debe de tener máximo 10 caracteres.' })
-	// @Matches(/^[A-Z0-9]{10}$/, { message: 'NumeroGuia debe ser alfanumérico, de 10 dígitos y en mayúsculas.' })
-	guideNumber: string;
 
 	// Referencias opcionales - aplica si la sede de acopio es una agencia
 	@ApiProperty({ description: 'Documento de referencia 1' })
