@@ -40,7 +40,8 @@ export class TransporterTravelController {
 	}
 
 	@Get()
-	@Roles(ROL.AUDITORIA_PH)
+	// @Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Listado de registros de transportadora' })
 	@ApiResult({ type: [TransporterTravel] })
 	async findAll(@Query() query: any) {

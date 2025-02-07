@@ -259,13 +259,16 @@ export class TransporterTravelService {
 	}
 
 	async findAll(query: any): Promise<Pagination<TransporterTravel>> {
-		const queryBuilder = this.transporterTravelRepository.createQueryBuilder('transporter_travel')
-			.leftJoinAndSelect('transporter_travel.details', 'details');
+		const queryBuilder = this.transporterTravelRepository
+			.createQueryBuilder('transporter_travel')
+			.leftJoinAndSelect('transporter_travel.details', 'details')
+			.leftJoinAndSelect('transporter_travel.transportersTravels', 'transportersTravels')
+			.leftJoinAndSelect('transportersTravels.auditGuide', 'auditGuide')
+			.leftJoinAndMapOne('auditGuide.requestStatus', Child, 'requestStatus', 'requestStatus.id = auditGuide.requestStatusId');
 
 		return await paginate<TransporterTravel>(queryBuilder, {
 			page: query.page,
-			pageSize: 30,
-			// pageSize: query.pageSize,
+			pageSize: query.pageSize,
 		});
 	}
 
