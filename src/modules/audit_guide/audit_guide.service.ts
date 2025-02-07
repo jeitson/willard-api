@@ -173,6 +173,13 @@ export class AuditGuideService {
 		});
 	}
 
+	async findOneByGuideNumber(guideNumber: string): Promise<AuditGuide> {
+		return this.auditGuideRepository.findOne({
+			where: { guideNumber },
+			relations: ['auditGuideDetails', 'auditsGuidesRoutes', 'reception', 'transporterTravel'],
+		});
+	}
+
 	async findAll(query: any): Promise<Pagination<AuditGuide>> {
 		const queryBuilder = this.auditGuideRepository.createQueryBuilder('auditGuide')
 			.leftJoinAndSelect('auditGuide.auditGuideDetails', 'auditGuideDetails')

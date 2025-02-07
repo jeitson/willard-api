@@ -7,11 +7,14 @@ import { plainToClass } from 'class-transformer';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { excelDateToJSDate, excelTimeToJSDate } from 'src/core/utils';
 import { TransporterTravel } from './entities/transporter_travel.entity';
-import { TransporterTravelDto } from './dto/transporter_travel.dto';
+import { TransporterTravelDto, TransporterTravelGuideNumberDto } from './dto/transporter_travel.dto';
 import { Product } from '../products/entities/product.entity';
 import { Child } from '../catalogs/entities/child.entity';
 import { ResponseCodeTransporterTravel } from './entities/response';
 import { AuditGuideService } from '../audit_guide/audit_guide.service';
+import { Pagination } from 'src/core/helper/paginate/pagination';
+import { paginate } from 'src/core/helper/paginate';
+import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
 
 @Injectable()
 export class TransporterTravelService {
@@ -253,5 +256,40 @@ export class TransporterTravelService {
 				errors: validationErrors,
 			});
 		}
+	}
+
+	async findAll(query: any): Promise<Pagination<TransporterTravel>> {
+		const queryBuilder = this.transporterTravelRepository.createQueryBuilder('transporter_travel')
+			.leftJoinAndSelect('transporter_travel.details', 'details');
+
+		return await paginate<TransporterTravel>(queryBuilder, {
+			page: query.page,
+			pageSize: 30,
+			// pageSize: query.pageSize,
+		});
+	}
+
+	async updateGuideNumber(id: number, { idGuia: guideId }: TransporterTravelGuideNumberDto): Promise<void> {
+		const existingRecord = await this.transporterTravelRepository.findOne({
+			where: { id },
+			relations: ['transportersTravels']
+		});
+
+		if (!existingRecord) {
+			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
+		}
+
+		if (existingRecord.transportersTravels.length > 0 && !existingRecord.transportersTravels.every(({ auditGuide }) => [
+			AUDIT_GUIDE_STATUS.WITHOUT_GUIDE,
+			AUDIT_GUIDE_STATUS.TRANSIT
+		].includes(auditGuide.requestStatusId))) {
+			throw new BusinessException(`No se puede actualizar el registro, ya que tiene una vinculación activa y se encuentran en un estado "SIN GUÍA" o "EN TRANSITO"`);
+		}
+
+		existingRecord.guideId = guideId;
+
+		const updatedRecord = await this.transporterTravelRepository.save(existingRecord);
+
+		this.auditGuideService.checkAndSyncAuditGuides([updatedRecord]);
 	}
 }

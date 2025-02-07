@@ -12,16 +12,18 @@ export class TransporterTravelDetailDto {
 	cantidad: number;
 }
 
-export class TransporterTravelDto {
-	@IsString({ message: 'El ID de la ruta debe ser un texto.' })
-	@IsNotEmpty({ message: 'El campo idRuta no puede estar vacío.' })
-	@MaxLength(10, { message: 'El campo idRuta no debe exceder los 10 caracteres.' })
-	idRuta: string;
-
+export class TransporterTravelGuideNumberDto {
 	@IsString({ message: 'El ID de la guía debe ser un texto.' })
 	@IsNotEmpty({ message: 'El campo idGuia no puede estar vacío.' })
 	@MaxLength(10, { message: 'El campo idGuia no debe exceder los 10 caracteres.' })
 	idGuia: string;
+}
+
+export class TransporterTravelDto extends TransporterTravelGuideNumberDto {
+	@IsString({ message: 'El ID de la ruta debe ser un texto.' })
+	@IsNotEmpty({ message: 'El campo idRuta no puede estar vacío.' })
+	@MaxLength(10, { message: 'El campo idRuta no debe exceder los 10 caracteres.' })
+	idRuta: string;
 
 	@IsString({ message: 'El tipo de movimiento debe ser un texto.' })
 	@IsNotEmpty({ message: 'El campo tipo no puede estar vacío.' })

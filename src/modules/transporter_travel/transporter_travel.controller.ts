@@ -1,13 +1,17 @@
-import { Controller, Post, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, UploadedFile, Get, Query, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Public } from 'src/core/common/decorators/public.decorator';
 import { TransporterTravelService } from './transporter_travel.service';
-import { TransporterTravelDto } from './dto/transporter_travel.dto';
+import { TransporterTravelDto, TransporterTravelGuideNumberDto } from './dto/transporter_travel.dto';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { ResponseCodeTransporterTravel } from './entities/response';
+import { Roles } from 'src/core/common/decorators/role.decorator';
+import { TransporterTravel } from './entities/transporter_travel.entity';
+import { ROL } from 'src/core/constants/rol.constant';
+import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Transportadora Viaje')
 // @UseGuards(RolesGuard)
@@ -33,5 +37,23 @@ export class TransporterTravelController {
 		}
 
 		throw new BusinessException('Debe proporcionar un archivo Excel o un objeto JSON válido');
+	}
+
+	@Get()
+	@Roles(ROL.AUDITORIA_PH)
+	@ApiOperation({ summary: 'Listado de registros de transportadora' })
+	@ApiResult({ type: [TransporterTravel] })
+	async findAll(@Query() query: any) {
+		return this.transporterTravelService.findAll(query);
+	}
+
+	@Patch('guia/:id')
+	@Roles(ROL.AUDITORIA_PH)
+	@ApiOperation({ summary: 'Actualizar número de guía por su por ID' })
+	async updateAuditGuideDetails(
+		@IdParam('id') id: number,
+		@Body() detailsToUpdate: TransporterTravelGuideNumberDto,
+	): Promise<void> {
+		await this.transporterTravelService.updateGuideNumber(id, detailsToUpdate);
 	}
 }
