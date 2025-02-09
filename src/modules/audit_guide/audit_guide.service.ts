@@ -556,7 +556,7 @@ export class AuditGuideService {
 	}
 
 	async updateGuideNumber(guideNumber: string): Promise<void> {
-		const auditGuide = await this.auditGuideRepository.findOne({ where: { guideNumber }});
+		const auditGuide = await this.auditGuideRepository.findOne({ where: { guideNumber } });
 
 		if (!auditGuide) {
 			throw new BusinessException('No se encontró la auditoría especificada.', 404);
@@ -571,56 +571,66 @@ export class AuditGuideService {
 		await this.auditGuideRepository.save(auditGuide);
 	}
 
-	// async createTT(transporterTravel: TransporterTravel): Promise<void> {
-	// 	const { id: userId } = this.userContextService.getUserDetails();
-	// 	let { auditGuideDetails, transporterTotal, ...auditGuideData } = transporterTravel;
+	async createByTransporter(transporterTravels: TransporterTravel[]): Promise<void> {
+		const { id: userId } = this.userContextService.getUserDetails();
+		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
+		await queryRunner.startTransaction();
 
-	// 	const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
-	// 	await queryRunner.startTransaction();
+		try {
+			for (const transporterTravel of transporterTravels) {
+				const _auditGuide = await this.auditGuideRepository.findOne({
+					where: { guideNumber: transporterTravel.guideId },
+				});
 
-	// 	try {
-	// 		const { requestStatusId, date, zoneId, auditGuideDetails, transporterTotal } =
-	// 		await this.handleTransporterTravel(transporterTravel, auditGuideDetails, transporterTotal);
+				if (_auditGuide) {
+					await this.checkAndSyncAuditGuides([transporterTravel]);
+					continue;
+				}
 
-	// 	  // Crear la auditoría
-	// 	  const auditGuide = this.auditGuideRepository.create({
-	// 		...auditGuideData,
-	// 		zoneId,
-	// 		date,
-	// 		transporterTotal,
-	// 		requestStatusId,
-	// 		createdBy: userId,
-	// 		modifiedBy: userId,
-	// 	  });
+				let { date, zoneId, auditGuideDetails, transporterTotal } = await this.handleTransporterTravel(
+					transporterTravel,
+					[],
+					0
+				);
 
-	// 	  const auditGuideSaved = await queryRunner.manager.save(auditGuide);
-	// 	  if (!auditGuideSaved.id) {
-	// 		throw new BusinessException('Error al guardar la guía de auditoría.', 500);
-	// 	  }
+				const auditGuide = this.auditGuideRepository.create({
+					reception: null,
+					guideNumber: transporterTravel.guideId,
+					date,
+					zoneId,
+					recuperatorId: null,
+					transporterId: null,
+					recuperatorTotal: 0,
+					transporterTotal,
+					requestStatusId: AUDIT_GUIDE_STATUS.TRANSIT,
+					createdBy: userId,
+					modifiedBy: userId,
+				});
 
-	// 	  // Validar y asignar productos
-	// 	  const productIds = auditGuideDetails.map((item) => item.productId);
-	// 	  const products = await this.productRepository.findBy({ id: In(productIds) });
-	// 	  const productMap = new Map(products.map((product) => [product.id, product]));
-	// 	  auditGuideDetails = auditGuideDetails.map((item) => ({
-	// 		...item,
-	// 		product: productMap.get((item.productId).toString() as any),
-	// 	  }));
+				const auditGuideSaved = await queryRunner.manager.save(auditGuide);
+				if (!auditGuideSaved.id) {
+					throw new BusinessException('Error al guardar la guía de auditoría.', 500);
+				}
 
-	// 	  // Guardar detalles de la auditoría
-	// 	  await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
+				const productIds = auditGuideDetails.map((item) => item.productId);
+				const products = await this.productRepository.findBy({ id: In(productIds) });
+				const productMap = new Map(products.map((product) => [product.id, product]));
+				auditGuideDetails = auditGuideDetails.map((item) => ({
+					...item,
+					product: productMap.get((item.productId).toString() as any),
+				}));
 
-	// 	  // Guardar ruta de auditoría si aplica
-	// 	  if (transporterTravel) {
-	// 		await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
-	// 	  }
+				await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
 
-	// 	  await queryRunner.commitTransaction();
-	// 	} catch (error) {
-	// 	  await queryRunner.rollbackTransaction();
-	// 	  throw new BusinessException(error.message || 'Error inesperado en la creación de la auditoría.', 500);
-	// 	} finally {
-	// 	  await queryRunner.release();
-	// 	}
-	//   }
+				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
+			}
+
+			await queryRunner.commitTransaction();
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			throw new BusinessException(error.message || 'Error inesperado en la creación de la auditoría.', 500);
+		} finally {
+			await queryRunner.release();
+		}
+	}
 }

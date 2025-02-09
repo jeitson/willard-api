@@ -54,7 +54,7 @@ export class TransporterTravelService {
 				const travelRecord = this.transporterTravelRepository.create(item);
 				const savedRecord = await this.transporterTravelRepository.save(travelRecord);
 
-				this.auditGuideService.checkAndSyncAuditGuides(savedRecord);
+				this.auditGuideService.createByTransporter(savedRecord);
 
 				return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 			}
@@ -132,7 +132,7 @@ export class TransporterTravelService {
 				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
 			];
 
-			this.auditGuideService.checkAndSyncAuditGuides(allSavedRecords);
+			this.auditGuideService.createByTransporter(allSavedRecords);
 
 			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {
