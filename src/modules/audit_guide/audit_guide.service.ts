@@ -555,6 +555,22 @@ export class AuditGuideService {
 		}
 	}
 
+	async updateGuideNumber(guideNumber: string): Promise<void> {
+		const auditGuide = await this.auditGuideRepository.findOne({ where: { guideNumber }});
+
+		if (!auditGuide) {
+			throw new BusinessException('No se encontró la auditoría especificada.', 404);
+		}
+
+		if (![AUDIT_GUIDE_STATUS.TRANSIT, AUDIT_GUIDE_STATUS.WITHOUT_GUIDE].includes(+auditGuide.requestStatusId)) {
+			throw new BusinessException('La auditoría no se puede actualizar.');
+		}
+
+		auditGuide.guideNumber = guideNumber;
+
+		await this.auditGuideRepository.save(auditGuide);
+	}
+
 	// async createTT(transporterTravel: TransporterTravel): Promise<void> {
 	// 	const { id: userId } = this.userContextService.getUserDetails();
 	// 	let { auditGuideDetails, transporterTotal, ...auditGuideData } = transporterTravel;
