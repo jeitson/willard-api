@@ -294,11 +294,13 @@ export class TransporterTravelService {
 			);
 		}
 
+		const guideNumberOld = JSON.parse(JSON.stringify(existingRecord.guideId));
+
 		existingRecord.guideId = guideId;
 
 		for (const transporterTravel of existingRecord.transportersTravels) {
 			if (transporterTravel.auditGuide) {
-				await this.auditGuideService.updateGuideNumber(transporterTravel.auditGuide.guideNumber, guideId);
+				await this.auditGuideService.updateGuideNumber(guideNumberOld, guideId);
 			}
 		}
 
