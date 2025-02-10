@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Or, Repository } from 'typeorm';
 import { AuditGuideConfirmUpdateDto, AuditGuideCreateDto, AuditGuideDetailUpdateDto } from './dto/audit_guide.dto';
 import { AuditGuide } from './entities/audit_guide.entity';
 import { AuditGuideDetail } from './entities/audit_guide_detail.entity';
@@ -499,7 +499,7 @@ export class AuditGuideService {
 			const guidesNumber = transporterTravels.map(({ guideId }) => guideId.toString().toUpperCase());
 
 			const auditsGuides = await this.auditGuideRepository.find({
-				where: { guideNumber: In(guidesNumber), requestStatusId: AUDIT_GUIDE_STATUS.WITHOUT_GUIDE },
+				where: { guideNumber: In(guidesNumber), requestStatusId: In([AUDIT_GUIDE_STATUS.WITHOUT_GUIDE.toString(), AUDIT_GUIDE_STATUS.TRANSIT.toString()]) },
 				relations: ['auditGuideDetails']
 			});
 

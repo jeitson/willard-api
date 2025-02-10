@@ -314,13 +314,13 @@ export class ReceptionsService {
 
 		existingRecord.guideNumber = guideNumber;
 
-		const updatedRecord = await this.receptionRepository.save(existingRecord);
+		await this.receptionRepository.update(id, { guideNumber });
 
 		if (existingRecord.auditGuide) {
 			await this.auditGuideService.updateGuideNumber(guideNumberOld, guideNumber);
 		}
 
-		const transporterTravels = updatedRecord.auditGuide.auditsGuidesRoutes.map(route => route.transporterTravel);
+		const transporterTravels = existingRecord.auditGuide.auditsGuidesRoutes.map(route => route.transporterTravel);
 
 		await this.auditGuideService.checkAndSyncAuditGuides(transporterTravels);
 	}
