@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseInterceptors, UploadedFile, Get, Query, Patch } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, UploadedFile, Get, Query, Patch, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -40,7 +40,7 @@ export class TransporterTravelController {
 	}
 
 	@Get()
-	// @Roles(ROL.AUDITORIA_PH)
+	@Roles(ROL.AUDITORIA_PH)
 	@Public()
 	@ApiOperation({ summary: 'Listado de registros de transportadora' })
 	@ApiResult({ type: [TransporterTravel] })
@@ -49,8 +49,7 @@ export class TransporterTravelController {
 	}
 
 	@Patch('guia/:id')
-	// @Roles(ROL.AUDITORIA_PH)
-	@Public()
+	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Actualizar número de guía por su por ID' })
 	async updateAuditGuideDetails(
 		@IdParam('id') id: number,

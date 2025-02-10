@@ -500,6 +500,7 @@ export class AuditGuideService {
 
 			const auditsGuides = await this.auditGuideRepository.find({
 				where: { guideNumber: In(guidesNumber), requestStatusId: AUDIT_GUIDE_STATUS.WITHOUT_GUIDE },
+				relations: ['auditGuideDetails']
 			});
 
 			if (auditsGuides.length === 0) {
