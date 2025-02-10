@@ -494,51 +494,27 @@ export class AuditGuideService {
 	async checkAndSyncAuditGuides(_guidesNumber: string[]): Promise<void> {
 		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
 		await queryRunner.startTransaction();
+
 		try {
 			_guidesNumber = _guidesNumber.map((guideId) => guideId.toString().toUpperCase());
 
-			const transporterTravels = await this.transporterTravelRepository.find({
-				where: { guideId: In(_guidesNumber) },
-				relations: ['details'],
-			});
+			const transporterTravels = await this.transporterTravelRepository.find({ where: { guideId: In(_guidesNumber) }, relations: ['details']})
 
-			let auditsGuides = await this.auditGuideRepository.find({
-				where: {
-					guideNumber: In(_guidesNumber),
-					requestStatusId: In([AUDIT_GUIDE_STATUS.WITHOUT_GUIDE.toString(), AUDIT_GUIDE_STATUS.TRANSIT.toString()]),
-				},
-				relations: ['auditGuideDetails', 'auditsGuidesRoutes'],
+			const auditsGuides = await this.auditGuideRepository.find({
+				where: { guideNumber: In(_guidesNumber), requestStatusId: In([AUDIT_GUIDE_STATUS.WITHOUT_GUIDE.toString(), AUDIT_GUIDE_STATUS.TRANSIT.toString()]) },
+				relations: ['auditGuideDetails', 'auditsGuidesRoutes']
 			});
 
 			if (auditsGuides.length === 0) {
 				return;
 			}
 
-			const uniqueGuideNumbers = new Set(auditsGuides.map((auditGuide) => auditGuide.guideNumber));
-			for (const guideNumber of uniqueGuideNumbers) {
-				const auditsForGuide = auditsGuides.filter((auditGuide) => auditGuide.guideNumber === guideNumber);
-
-				if (auditsForGuide.length > 1) {
-					auditsForGuide.sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1));
-
-					const latestAudit = auditsForGuide[0];
-					const auditsToDelete = auditsForGuide.slice(1);
-
-					for (const auditToDelete of auditsToDelete) {
-						await queryRunner.manager.delete(AuditGuide, auditToDelete.id);
-					}
-
-					auditsGuides = auditsGuides.filter((auditGuide) => !auditsToDelete.map((a) => a.id).includes(auditGuide.id));
-				}
-			}
-
 			for (const auditGuide of auditsGuides) {
 				const transporterTravel = transporterTravels.find(
 					(element) => element.guideId === auditGuide.guideNumber
 				);
-				if (!transporterTravel) {
-					continue;
-				}
+
+				if (!transporterTravel) { continue; }
 
 				if (auditGuide.auditsGuidesRoutes.length === 0) {
 					await this.saveAuditRoute(queryRunner, auditGuide, transporterTravel, this.userContextService.getUserDetails()?.id);
@@ -551,9 +527,7 @@ export class AuditGuideService {
 				);
 
 				const zone = await this.childrensRepository.findOne({ where: { name: transporterTravel.zone.toUpperCase() } });
-				if (!zone) {
-					continue;
-				}
+				if (!zone) { continue; }
 
 				await queryRunner.manager.update(
 					AuditGuide,
@@ -574,6 +548,7 @@ export class AuditGuideService {
 					createdBy: this.userContextService.getUserDetails()?.id,
 					updatedBy: this.userContextService.getUserDetails()?.id,
 				});
+
 				await queryRunner.manager.save(auditGuideRoute);
 			}
 
