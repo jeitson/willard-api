@@ -310,12 +310,14 @@ export class ReceptionsService {
 			);
 		}
 
+		const guideNumberOld = JSON.stringify(JSON.parse(existingRecord.guideNumber));
+
 		existingRecord.guideNumber = guideNumber;
 
 		const updatedRecord = await this.receptionRepository.save(existingRecord);
 
 		if (existingRecord.auditGuide) {
-			this.auditGuideService.updateGuideNumber(guideNumber);
+			await this.auditGuideService.updateGuideNumber(guideNumberOld, guideNumber);
 		}
 
 		const transporterTravels = updatedRecord.auditGuide.auditsGuidesRoutes.map(route => route.transporterTravel);

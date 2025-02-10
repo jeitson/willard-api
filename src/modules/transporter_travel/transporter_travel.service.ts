@@ -296,7 +296,7 @@ export class TransporterTravelService {
 
 		existingRecord.transportersTravels.forEach((element) => {
 			if (element.auditGuide) {
-				this.auditGuideService.updateGuideNumber(guideId);
+				this.auditGuideService.updateGuideNumber(element.auditGuide.guideNumber, guideId);
 			}
 		});
 

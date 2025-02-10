@@ -555,7 +555,7 @@ export class AuditGuideService {
 		}
 	}
 
-	async updateGuideNumber(guideNumber: string): Promise<void> {
+	async updateGuideNumber(guideNumber: string, newGuideNumber: string): Promise<void> {
 		const auditGuide = await this.auditGuideRepository.findOne({ where: { guideNumber } });
 
 		if (!auditGuide) {
@@ -566,7 +566,7 @@ export class AuditGuideService {
 			throw new BusinessException('La auditoría no se puede actualizar.');
 		}
 
-		auditGuide.guideNumber = guideNumber;
+		auditGuide.guideNumber = newGuideNumber;
 
 		await this.auditGuideRepository.save(auditGuide);
 	}
