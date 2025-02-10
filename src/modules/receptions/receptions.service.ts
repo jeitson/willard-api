@@ -310,7 +310,7 @@ export class ReceptionsService {
 			);
 		}
 
-		const guideNumberOld = JSON.stringify(JSON.parse(existingRecord.guideNumber));
+		const guideNumberOld =  JSON.parse(JSON.stringify(existingRecord.guideNumber));
 
 		existingRecord.guideNumber = guideNumber;
 
