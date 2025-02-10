@@ -161,7 +161,7 @@ export class CatalogsService {
 	}
 
 	async getChildrenByName(name: string): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { name: name } });
+		return await this.childrensRepository.find({ where: { name: name.toUpperCase() } });
 	}
 
 	async getChildrenByKeyAndParent(key: string, parentId: number): Promise<Child[]> {

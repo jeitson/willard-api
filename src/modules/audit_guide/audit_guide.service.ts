@@ -278,12 +278,12 @@ export class AuditGuideService {
 		await queryRunner.manager.save(AuditGuideDetail, detailsToSave);
 	}
 
-	private async saveAuditRoute(queryRunner, auditGuide: AuditGuide, transporterTravel: TransporterTravel, userId: number) {
+	private async saveAuditRoute(queryRunner, auditGuide: AuditGuide, transporterTravel: TransporterTravel, userId: number | null) {
 		const auditGuideRoute = this.auditGuideRouteRepository.create({
 			auditGuide,
 			transporterTravel,
-			createdBy: userId.toString(),
-			updatedBy: userId.toString(),
+			createdBy: userId?.toString(),
+			updatedBy: userId?.toString(),
 		});
 		await queryRunner.manager.save(auditGuideRoute);
 	}
@@ -572,7 +572,6 @@ export class AuditGuideService {
 	}
 
 	async createByTransporter(transporterTravels: TransporterTravel[]): Promise<void> {
-		const { id: userId } = this.userContextService.getUserDetails();
 		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
 		await queryRunner.startTransaction();
 
@@ -603,8 +602,6 @@ export class AuditGuideService {
 					recuperatorTotal: 0,
 					transporterTotal,
 					requestStatusId: AUDIT_GUIDE_STATUS.TRANSIT,
-					createdBy: userId,
-					modifiedBy: userId,
 				});
 
 				const auditGuideSaved = await queryRunner.manager.save(auditGuide);
@@ -622,7 +619,7 @@ export class AuditGuideService {
 
 				await this.saveAuditDetails(queryRunner, auditGuideDetails, auditGuideSaved);
 
-				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
+				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, null);
 			}
 
 			await queryRunner.commitTransaction();

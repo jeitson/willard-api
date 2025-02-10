@@ -132,7 +132,7 @@ export class TransporterTravelService {
 				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
 			];
 
-			this.auditGuideService.createByTransporter(allSavedRecords);
+			await this.auditGuideService.createByTransporter(allSavedRecords);
 
 			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {

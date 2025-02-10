@@ -24,11 +24,11 @@ export class AuditGuide extends CompleteEntity {
 	zoneId: number;
 
 	@ApiProperty({ description: 'Recuperadora ID' })
-	@Column({ type: 'bigint', name: 'RecuperadoraId' })
+	@Column({ type: 'bigint', name: 'RecuperadoraId', nullable: true, default: null })
 	recuperatorId: number;
 
 	@ApiProperty({ description: 'Transportadora ID' })
-	@Column({ type: 'bigint', name: 'TransportadoraId' })
+	@Column({ type: 'bigint', name: 'TransportadoraId', nullable: true, default: null })
 	transporterId: number;
 
 	@ApiProperty({ description: 'Recuperadora Total' })
