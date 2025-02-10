@@ -275,7 +275,7 @@ export class TransporterTravelService {
 	async updateGuideNumber(id: number, { idGuia: guideId }: TransporterTravelGuideNumberDto): Promise<void> {
 		const existingRecord = await this.transporterTravelRepository.findOne({
 			where: { id },
-			relations: ['transportersTravels', 'transportersTravels.auditGuide'],
+			relations: ['transportersTravels', 'transportersTravels.auditGuide', 'transportersTravels.transporterTravel'],
 		});
 		if (!existingRecord) {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
