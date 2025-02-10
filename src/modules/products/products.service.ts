@@ -116,7 +116,7 @@ export class ProductsService {
 		const categoriesWithProducts = categories.map((category) => ({
 			...category,
 			products: productsByCategoryId[category.id] || [],
-		}));
+		})).filter(({ products }) => products.length > 0);
 
 		return categoriesWithProducts;
 	}
