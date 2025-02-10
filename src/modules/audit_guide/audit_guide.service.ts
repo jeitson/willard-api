@@ -107,7 +107,7 @@ export class AuditGuideService {
 			if (transporterTravel) {
 				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
 
-				this.checkAndSyncAuditGuides([transporterTravel]);
+				this.checkAndSyncAuditGuides([transporterTravel.guideId]);
 			}
 
 			await queryRunner.commitTransaction();
@@ -491,16 +491,18 @@ export class AuditGuideService {
 		await this.auditGuideRepository.save(auditGuide);
 	}
 
-	async checkAndSyncAuditGuides(transporterTravels: TransporterTravel[]): Promise<void> {
+	async checkAndSyncAuditGuides(_guidesNumber: string[]): Promise<void> {
 		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
 		await queryRunner.startTransaction();
 
 		try {
-			const guidesNumber = transporterTravels.map(({ guideId }) => guideId.toString().toUpperCase());
+			_guidesNumber = _guidesNumber.map((guideId) => guideId.toString().toUpperCase());
+
+			const transporterTravels = await this.transporterTravelRepository.find({ where: { guideId: In(_guidesNumber) }, relations: ['details']})
 
 			const auditsGuides = await this.auditGuideRepository.find({
-				where: { guideNumber: In(guidesNumber), requestStatusId: In([AUDIT_GUIDE_STATUS.WITHOUT_GUIDE.toString(), AUDIT_GUIDE_STATUS.TRANSIT.toString()]) },
-				relations: ['auditGuideDetails']
+				where: { guideNumber: In(_guidesNumber), requestStatusId: In([AUDIT_GUIDE_STATUS.WITHOUT_GUIDE.toString(), AUDIT_GUIDE_STATUS.TRANSIT.toString()]) },
+				relations: ['auditGuideDetails', 'auditsGuidesRoutes']
 			});
 
 			if (auditsGuides.length === 0) {
@@ -513,6 +515,10 @@ export class AuditGuideService {
 				);
 
 				if (!transporterTravel) { continue; }
+
+				if (auditGuide.auditsGuidesRoutes.length === 0) {
+					await this.saveAuditRoute(queryRunner, auditGuide, transporterTravel, this.userContextService.getUserDetails()?.id);
+				}
 
 				const { transporterTotal, recuperatorTotal, isConfirmed } = await this.syncAuditDetails(
 					queryRunner,
@@ -582,7 +588,7 @@ export class AuditGuideService {
 				});
 
 				if (_auditGuide) {
-					await this.checkAndSyncAuditGuides([transporterTravel]);
+					await this.checkAndSyncAuditGuides([transporterTravel.guideId]);
 					continue;
 				}
 

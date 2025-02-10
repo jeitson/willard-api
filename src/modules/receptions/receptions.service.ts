@@ -298,7 +298,7 @@ export class ReceptionsService {
 	async updateGuideNumber(id: number, { guideNumber }: ReceptionGuideNumberDto): Promise<void> {
 		const existingRecord = await this.receptionRepository.findOne({
 			where: { id },
-			relations: ['auditGuide', 'auditGuide.auditsGuidesRoutes', 'auditGuide.auditsGuidesRoutes.transporterTravel'],
+			relations: ['auditGuide'],
 		});
 		if (!existingRecord) {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
@@ -320,8 +320,6 @@ export class ReceptionsService {
 			await this.auditGuideService.updateGuideNumber(guideNumberOld, guideNumber);
 		}
 
-		const transporterTravels = existingRecord.auditGuide.auditsGuidesRoutes.map(route => route.transporterTravel);
-
-		await this.auditGuideService.checkAndSyncAuditGuides(transporterTravels);
+		await this.auditGuideService.checkAndSyncAuditGuides([guideNumber]);
 	}
 }

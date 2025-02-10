@@ -209,9 +209,7 @@ export class TransporterTravelService {
 		// Actualizar detalles
 		existingRecord.details = this.convertDetail(item.details);
 
-		const updatedRecord = await this.transporterTravelRepository.save(existingRecord);
-
-		this.auditGuideService.checkAndSyncAuditGuides([updatedRecord]);
+		this.auditGuideService.checkAndSyncAuditGuides([existingRecord.guideId]);
 	}
 
 	private async validateAllRecords(records: any[]): Promise<void> {
@@ -306,6 +304,6 @@ export class TransporterTravelService {
 
 		await this.transporterTravelRepository.update(existingRecord.id, { guideId });
 
-		await this.auditGuideService.checkAndSyncAuditGuides([{ ...existingRecord, guideId } as TransporterTravel]);
+		await this.auditGuideService.checkAndSyncAuditGuides([guideId]);
 	}
 }
