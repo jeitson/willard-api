@@ -29,6 +29,12 @@ export class ProductsController {
 		return this.productsService.findAll(dto);
 	}
 
+	@Get('categories')
+	@ApiOperation({ summary: 'Obtener listado de tipos de productos con productos' })
+	async findAllByCategory() {
+		return this.productsService.findAllByCategory();
+	}
+
 	@Get(':id')
 	@ApiOperation({ summary: 'Obtener producto por su ID' })
 	findOne(@IdParam('id') id: string): Promise<Product> {
