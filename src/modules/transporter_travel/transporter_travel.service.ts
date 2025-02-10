@@ -275,33 +275,35 @@ export class TransporterTravelService {
 	async updateGuideNumber(id: number, { idGuia: guideId }: TransporterTravelGuideNumberDto): Promise<void> {
 		const existingRecord = await this.transporterTravelRepository.findOne({
 			where: { id },
-			relations: ['transportersTravels', 'transportersTravels.auditGuide', 'transportersTravels.transporterTravel'],
+			relations: ['transportersTravels', 'transportersTravels.auditGuide'],
 		});
+
 		if (!existingRecord) {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		if (
-			existingRecord.transportersTravels.some(
-				({ auditGuide }) =>
-					![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+auditGuide.requestStatusId)
-			)
-		) {
+		const hasInvalidStatus = existingRecord.transportersTravels.some(
+			({ auditGuide }) =>
+				auditGuide &&
+				![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+auditGuide.requestStatusId),
+		);
+
+		if (hasInvalidStatus) {
 			throw new BusinessException(
-				`No se puede actualizar el registro, ya que tiene una vinculación activa en un estado diferente a "SIN GUÍA" o "EN TRANSITO".`
+				`No se puede actualizar el registro, ya que tiene una vinculación activa en un estado diferente a "SIN GUÍA" o "EN TRANSITO".`,
 			);
 		}
 
 		existingRecord.guideId = guideId;
 
-		existingRecord.transportersTravels.forEach((element) => {
-			if (element.auditGuide) {
-				this.auditGuideService.updateGuideNumber(element.auditGuide.guideNumber, guideId);
+		for (const transporterTravel of existingRecord.transportersTravels) {
+			if (transporterTravel.auditGuide) {
+				await this.auditGuideService.updateGuideNumber(transporterTravel.auditGuide.guideNumber, guideId);
 			}
-		});
+		}
 
-		const updatedRecord = await this.transporterTravelRepository.save(existingRecord);
+		await this.transporterTravelRepository.update(existingRecord.id, { guideId });
 
-		await this.auditGuideService.checkAndSyncAuditGuides([updatedRecord]);
+		await this.auditGuideService.checkAndSyncAuditGuides([{ ...existingRecord, guideId } as TransporterTravel]);
 	}
 }

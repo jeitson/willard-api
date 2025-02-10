@@ -49,7 +49,8 @@ export class TransporterTravelController {
 	}
 
 	@Patch('guia/:id')
-	@Roles(ROL.AUDITORIA_PH)
+	// @Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Actualizar número de guía por su por ID' })
 	async updateAuditGuideDetails(
 		@IdParam('id') id: number,
