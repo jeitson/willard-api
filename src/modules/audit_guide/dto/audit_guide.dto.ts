@@ -115,13 +115,13 @@ export class UpdateReasonDto {
 export class AuditGuideQueryDto extends IntersectionType(PagerDto) {
 	@ApiProperty({ description: 'Número de guía' })
 	@IsString({ message: 'El número de guía debe ser una cadena de caracteres' })
-	guideNumber: string;
+	guideNumber?: string;
 
 	@ApiProperty({ description: 'Fecha (formato YYYY-MM-DD)', example: '2024-02-20' })
 	@Matches(/^\d{4}-\d{2}-\d{2}$/, {
 		message: 'La fecha debe estar en formato YYYY-MM-DD (por ejemplo, 2024-02-20)',
 	})
-	date: string;
+	date?: string;
 
 	@ApiProperty({
 		description: 'Estado de la guía',
@@ -132,5 +132,5 @@ export class AuditGuideQueryDto extends IntersectionType(PagerDto) {
 	@IsEnum(AUDIT_GUIDE_STATUS, {
 		message: `El estado debe ser uno de los siguientes: ${Object.values(AUDIT_GUIDE_STATUS).join(', ')}`,
 	})
-	requestStatus: AUDIT_GUIDE_STATUS; // Usa el tipo de la enumeración
+	requestStatus?: AUDIT_GUIDE_STATUS; // Usa el tipo de la enumeración
 }

@@ -20,7 +20,7 @@ export class AuditGuideController {
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Listado de auditoria de guias' })
 	@ApiResult({ type: [AuditGuide] })
-	async findAll(@Query() query: AuditGuideQueryDto) {
+	async findAll(@Query() query?: AuditGuideQueryDto) {
 		return this.auditGuideService.findAll(query);
 	}
 
