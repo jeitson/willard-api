@@ -231,7 +231,9 @@ export class AuditGuideService {
 		const allProducts = await this.productRepository.find({ where: { status: true } });
 
 		const groupedResults = rawResults.items.map(auditGuide => {
-			const groupedDetails: any = auditGuide.auditGuideDetails.reduce((acc, detail) => {
+			const groupedDetails: any = auditGuide.auditGuideDetails.reduce((acc, detail: any) => {
+				detail.type = detail.isRecuperator ? 'R' : 'T' ;
+				detail.productId = detail.product.id;
 				if (detail.isRecuperator) {
 					acc.recuperator.detail.push(detail);
 					acc.recuperator.quantity += detail.quantity;
