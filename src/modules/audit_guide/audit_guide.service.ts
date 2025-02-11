@@ -380,7 +380,7 @@ export class AuditGuideService {
 		let recuperatorTotal = 0;
 
 		for (const detail of updateDto.auditGuideDetails) {
-			if (!detail.id) {
+			if (detail.id) {
 				const existingDetail = await this.auditGuideDetailRepository.findOne({ where: { id: detail.id } });
 
 				if (!existingDetail) {
