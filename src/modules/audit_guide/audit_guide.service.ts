@@ -276,6 +276,7 @@ export class AuditGuideService {
 					quantity: 0,
 					quantityCollection: 0,
 					isRecuperator: true,
+					productId: product.id,
 					type: 'R',
 				});
 			});
@@ -289,6 +290,7 @@ export class AuditGuideService {
 					quantity: 0,
 					quantityCollection: 0,
 					isRecuperator: false,
+					productId: product.id,
 					type: 'T',
 				});
 			});
