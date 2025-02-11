@@ -59,7 +59,8 @@ export class AuditGuideController {
 	@ApiOperation({ summary: 'Confirmar' })
 	async confirm(
 		@IdParam('id') id: number,
-		@Body() content: AuditGuideConfirmUpdateDto
+		// @Body() content: AuditGuideConfirmUpdateDto
+		@Body() content: any
 	): Promise<void> {
 		await this.auditGuideService.confirm(id, content);
 	}

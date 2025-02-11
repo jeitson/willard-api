@@ -72,8 +72,8 @@ export class AuditGuideDetailContentUpdateDto {
 		required: false,
 		nullable: true,
 	})
-	@ValidateIf((dto) => !dto?.id)
-	@IsString({ message: 'El producto debe ser válido' })
+	@ValidateIf((dto) => dto.productId !== undefined) // Solo valida si productId está presente
+	@IsInt({ message: 'El producto debe ser un número entero válido' })
 	productId?: number | null;
 
 	@ApiProperty({
@@ -82,7 +82,7 @@ export class AuditGuideDetailContentUpdateDto {
 		nullable: true,
 		enum: ['R', 'T'],
 	})
-	@ValidateIf((dto) => !dto?.id)
+	@ValidateIf((dto) => dto.type !== undefined) // Solo valida si type está presente
 	@IsIn(['R', 'T'], { message: 'El tipo debe ser "R" o "T"' })
 	type?: 'R' | 'T' | null;
 }
