@@ -145,16 +145,14 @@ export class AuditGuideService {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
-		auditGuide.requestStatusId = AUDIT_GUIDE_STATUS.CONFIRMED;
-		auditGuide.comment = comment;
-
-		auditGuide.inFavorRecuperator = giveReason === 'R';
-
 		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(auditGuide, { auditGuideDetails }, id);
 
 		await this.auditGuideRepository.update(auditGuide.id, {
 			transporterTotal,
 			recuperatorTotal,
+			requestStatusId: AUDIT_GUIDE_STATUS.CONFIRMED,
+			comment,
+			inFavorRecuperator: giveReason === 'R',
 			modifiedBy,
 		});
 
