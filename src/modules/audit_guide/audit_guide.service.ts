@@ -295,6 +295,19 @@ export class AuditGuideService {
 				});
 			});
 
+			for (const key in groupedDetails) {
+				groupedDetails[key].detail.sort((a, b) => {
+					if (a.product.name < b.product.name) {
+						return -1;
+					}
+					if (a.product.name > b.product.name) {
+						return 1;
+					}
+
+					return a.quantityCollection - b.quantityCollection;
+				});
+			}
+
 			auditGuide.auditGuideDetails = groupedDetails;
 
 			return auditGuide;
