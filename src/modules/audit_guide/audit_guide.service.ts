@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Or, Repository } from 'typeorm';
-import { AuditGuideConfirmUpdateDto, AuditGuideCreateDto, AuditGuideDetailUpdateDto } from './dto/audit_guide.dto';
+import { AuditGuideConfirmUpdateDto, AuditGuideCreateDto, AuditGuideDetailUpdateDto, AuditGuideQueryDto } from './dto/audit_guide.dto';
 import { AuditGuide } from './entities/audit_guide.entity';
 import { AuditGuideDetail } from './entities/audit_guide_detail.entity';
 import { Product } from 'src/modules/products/entities/product.entity';
@@ -181,7 +181,13 @@ export class AuditGuideService {
 		});
 	}
 
-	async findAll(query: any): Promise<Pagination<AuditGuide>> {
+	async findAll({
+		page,
+		pageSize,
+		date,
+		guideNumber,
+		requestStatus
+	}: AuditGuideQueryDto): Promise<Pagination<AuditGuide>> {
 		const queryBuilder = this.auditGuideRepository.createQueryBuilder('auditGuide')
 			.leftJoinAndSelect('auditGuide.auditGuideDetails', 'auditGuideDetails')
 			.leftJoinAndSelect('auditGuideDetails.product', 'product')
@@ -198,26 +204,45 @@ export class AuditGuideService {
 			.leftJoinAndSelect('shipment.shipmentDetails', 'ShipmentDetail')
 			.leftJoinAndSelect('shipment.shipmentPhotos', 'ShipmentPhoto');
 
+		if (date) {
+			const startOfDay = new Date(date);
+			const endOfDay = new Date(startOfDay);
+			endOfDay.setDate(endOfDay.getDate() + 1);
+
+			queryBuilder.andWhere('auditGuide.updatedAt >= :startOfDay AND auditGuide.updatedAt < :endOfDay', {
+				startOfDay,
+				endOfDay,
+			});
+		}
+
+		if (guideNumber) {
+			queryBuilder.andWhere('auditGuide.guideNumber = :guideNumber', { guideNumber });
+		}
+
+		if (requestStatus) {
+			queryBuilder.andWhere('auditGuide.requestStatusId = :requestStatus', { requestStatus });
+		}
+
 		const rawResults = await paginate<AuditGuide>(queryBuilder, {
-			page: query.page,
-			pageSize: query.pageSize,
+			page,
+			pageSize,
 		});
 
 		const allProducts = await this.productRepository.find({ where: { status: true } });
 
-		const groupedResults: any = rawResults.items.map(auditGuide => {
-			const groupedDetails = auditGuide.auditGuideDetails.reduce((acc, detail) => {
+		const groupedResults = rawResults.items.map(auditGuide => {
+			const groupedDetails: any = auditGuide.auditGuideDetails.reduce((acc, detail) => {
 				if (detail.isRecuperator) {
-					acc.recuperator.detail = [...acc.recuperator.detail, detail];
+					acc.recuperator.detail.push(detail);
 					acc.recuperator.quantity += detail.quantity;
 					acc.recuperator.quantityCollection += detail.quantityCollection;
 				} else {
-					acc.transporter.detail = [...acc.transporter.detail, detail];
+					acc.transporter.detail.push(detail);
 					acc.transporter.quantity += detail.quantity;
 					acc.transporter.quantityCollection += detail.quantityCollection;
 				}
 				if (+auditGuide.requestStatusId === AUDIT_GUIDE_STATUS.CONFIRMED) {
-					acc.conciliation.detail = [...acc.conciliation.detail, detail];
+					acc.conciliation.detail.push(detail);
 					acc.conciliation.quantity += detail.quantity;
 					acc.conciliation.quantityCollection += detail.quantityCollection;
 				}
@@ -228,15 +253,20 @@ export class AuditGuideService {
 				conciliation: { detail: [], quantity: 0, quantityCollection: 0 },
 			});
 
-			const existingRecuperatorProductIds = auditGuide.auditGuideDetails
-				.filter(detail => detail.isRecuperator)
-				.map(detail => detail.product.id);
-			const existingTransporterProductIds = auditGuide.auditGuideDetails
-				.filter(detail => !detail.isRecuperator)
-				.map(detail => detail.product.id);
+			const existingProductIdsByType = auditGuide.auditGuideDetails.reduce(
+				(acc, detail) => {
+					if (detail.isRecuperator) {
+						acc.recuperator.push(detail.product.id);
+					} else {
+						acc.transporter.push(detail.product.id);
+					}
+					return acc;
+				},
+				{ recuperator: [], transporter: [] }
+			);
 
-			const missingRecuperatorProducts = allProducts.filter(product =>
-				!existingRecuperatorProductIds.includes(product.id)
+			const missingRecuperatorProducts = allProducts.filter(
+				product => !existingProductIdsByType.recuperator.includes(product.id)
 			);
 			missingRecuperatorProducts.forEach(product => {
 				groupedDetails.recuperator.detail.push({
@@ -244,13 +274,12 @@ export class AuditGuideService {
 					quantity: 0,
 					quantityCollection: 0,
 					isRecuperator: true,
-					auditGuideId: auditGuide.id,
-					type: 'R'
+					type: 'R',
 				});
 			});
 
-			const missingTransporterProducts = allProducts.filter(product =>
-				!existingTransporterProductIds.includes(product.id)
+			const missingTransporterProducts = allProducts.filter(
+				product => !existingProductIdsByType.transporter.includes(product.id)
 			);
 			missingTransporterProducts.forEach(product => {
 				groupedDetails.transporter.detail.push({
@@ -262,10 +291,9 @@ export class AuditGuideService {
 				});
 			});
 
-			return {
-				...auditGuide,
-				auditGuideDetails: groupedDetails || [],
-			};
+			auditGuide.auditGuideDetails = groupedDetails;
+
+			return auditGuide;
 		});
 
 		return {

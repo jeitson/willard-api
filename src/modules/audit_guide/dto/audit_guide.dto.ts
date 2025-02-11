@@ -1,10 +1,9 @@
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsString, IsOptional, IsBoolean, IsDateString, IsArray, ArrayNotEmpty, ValidateNested, IsIn, ValidateIf } from 'class-validator';
+import { IsInt, IsString, IsOptional, IsBoolean, IsArray, ArrayNotEmpty, ValidateNested, IsIn, ValidateIf, IsNotEmpty, IsEnum, IsNumber, IsDateString, Matches } from 'class-validator';
 import { PagerDto } from 'src/core/common/dto/pager.dto';
+import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
 import { Reception } from 'src/modules/receptions/entities/reception.entity';
-import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
-import { JoinColumn, OneToOne } from 'typeorm';
 
 export class AuditGuideDetailCreateDto {
 	@ApiProperty({ description: 'ID de producto' })
@@ -113,7 +112,25 @@ export class UpdateReasonDto {
 	key: 'R' | 'T';
 }
 
-export class AuditGuideQueryDto extends IntersectionType(
-	PagerDto<AuditGuideCreateDto>,
-	PartialType(AuditGuideCreateDto),
-) { }
+export class AuditGuideQueryDto extends IntersectionType(PagerDto) {
+	@ApiProperty({ description: 'Número de guía' })
+	@IsString({ message: 'El número de guía debe ser una cadena de caracteres' })
+	guideNumber: string;
+
+	@ApiProperty({ description: 'Fecha (formato YYYY-MM-DD)', example: '2024-02-20' })
+	@Matches(/^\d{4}-\d{2}-\d{2}$/, {
+		message: 'La fecha debe estar en formato YYYY-MM-DD (por ejemplo, 2024-02-20)',
+	})
+	date: string;
+
+	@ApiProperty({
+		description: 'Estado de la guía',
+		enum: AUDIT_GUIDE_STATUS,
+		example: AUDIT_GUIDE_STATUS.WITHOUT_GUIDE,
+	})
+	@IsNotEmpty({ message: 'El campo estado no puede estar vacío.' })
+	@IsEnum(AUDIT_GUIDE_STATUS, {
+		message: `El estado debe ser uno de los siguientes: ${Object.values(AUDIT_GUIDE_STATUS).join(', ')}`,
+	})
+	requestStatus: AUDIT_GUIDE_STATUS; // Usa el tipo de la enumeración
+}
