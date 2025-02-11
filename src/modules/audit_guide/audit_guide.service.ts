@@ -128,16 +128,17 @@ export class AuditGuideService {
 			throw new BusinessException('La auditoría no aplica para realizar esta acción.');
 		}
 
-		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(updateDto, id);
+		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(auditGuide, updateDto, id);
 
-		auditGuide.transporterTotal = transporterTotal;
-		auditGuide.recuperatorTotal = recuperatorTotal;
-		auditGuide.modifiedBy = userId;
-		await this.auditGuideRepository.save(auditGuide);
+		await this.auditGuideRepository.update(auditGuide.id, {
+			transporterTotal,
+			recuperatorTotal,
+			modifiedBy: userId,
+		});
 	}
 
 	async confirm(id: number, { comment, auditGuideDetails, giveReason }: AuditGuideConfirmUpdateDto): Promise<void> {
-		const { id: userId } = this.userContextService.getUserDetails();
+		const { id: modifiedBy } = this.userContextService.getUserDetails();
 
 		const auditGuide = await this.findAuditGuideById(id);
 		if (+auditGuide.requestStatusId !== AUDIT_GUIDE_STATUS.BY_CONCILLIATE) {
@@ -149,12 +150,13 @@ export class AuditGuideService {
 
 		auditGuide.inFavorRecuperator = giveReason === 'R';
 
-		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails({ auditGuideDetails }, id);
+		const { transporterTotal, recuperatorTotal } = await this.updateAuditDetails(auditGuide, { auditGuideDetails }, id);
 
-		auditGuide.transporterTotal = transporterTotal;
-		auditGuide.recuperatorTotal = recuperatorTotal;
-		auditGuide.modifiedBy = userId;
-		await this.auditGuideRepository.save(auditGuide);
+		await this.auditGuideRepository.update(auditGuide.id, {
+			transporterTotal,
+			recuperatorTotal,
+			modifiedBy,
+		});
 
 		// crear reporte_ph
 		// auditGuide.auditGuideDetails.forEach(async (element) => {
@@ -373,7 +375,7 @@ export class AuditGuideService {
 		return auditGuide;
 	}
 
-	private async updateAuditDetails(updateDto: AuditGuideDetailUpdateDto, id: number): Promise<{ transporterTotal: number; recuperatorTotal: number }> {
+	private async updateAuditDetails(auditGuide: AuditGuide, updateDto: AuditGuideDetailUpdateDto, id: number): Promise<{ transporterTotal: number; recuperatorTotal: number }> {
 		const { id: userId } = this.userContextService.getUserDetails();
 
 		let transporterTotal = 0;
@@ -407,6 +409,8 @@ export class AuditGuideService {
 				}
 
 				const newDetail = this.auditGuideDetailRepository.create({
+					auditGuide: { id: auditGuide.id },
+					auditGuideId: auditGuide.id,
 					product,
 					isRecuperator: detail.type === 'R',
 					quantity: detail.quantityCollection,
@@ -416,7 +420,7 @@ export class AuditGuideService {
 
 				const savedDetail = await this.auditGuideDetailRepository.save(newDetail);
 
-				const createdBy = userId, modifiedBy = userId;
+				const createdBy = null, modifiedBy = null;
 
 				if (detail.type === 'T') {
 					this.transporterTravelDetailRepository.save({
