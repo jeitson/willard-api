@@ -21,6 +21,7 @@ import { ReportsPhService } from '../reports_ph/reports_ph.service';
 import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
 import { Reception } from '../receptions/entities/reception.entity';
 import { ReceptionDetail } from '../receptions/entities/reception_detail.entity';
+import { ProductsService } from '../products/products.service';
 
 @Injectable()
 export class AuditGuideService {
@@ -202,20 +203,65 @@ export class AuditGuideService {
 			pageSize: query.pageSize,
 		});
 
+		const allProducts = await this.productRepository.find({ where: { status: true } });
+
 		const groupedResults: any = rawResults.items.map(auditGuide => {
 			const groupedDetails = auditGuide.auditGuideDetails.reduce((acc, detail) => {
 				if (detail.isRecuperator) {
-					acc.recuperator.detail = [...acc.recuperator.detail, detail]
+					acc.recuperator.detail = [...acc.recuperator.detail, detail];
 					acc.recuperator.quantity += detail.quantity;
 					acc.recuperator.quantityCollection += detail.quantityCollection;
 				} else {
-					acc.transporter.detail = [...acc.transporter.detail, detail]
+					acc.transporter.detail = [...acc.transporter.detail, detail];
 					acc.transporter.quantity += detail.quantity;
 					acc.transporter.quantityCollection += detail.quantityCollection;
 				}
-
+				if (+auditGuide.requestStatusId === AUDIT_GUIDE_STATUS.CONFIRMED) {
+					acc.conciliation.detail = [...acc.conciliation.detail, detail];
+					acc.conciliation.quantity += detail.quantity;
+					acc.conciliation.quantityCollection += detail.quantityCollection;
+				}
 				return acc;
-			}, { recuperator: { detail: [], quantity: 0, quantityCollection: 0 }, transporter: { detail: [], quantity: 0, quantityCollection: 0 } });
+			}, {
+				recuperator: { detail: [], quantity: 0, quantityCollection: 0 },
+				transporter: { detail: [], quantity: 0, quantityCollection: 0 },
+				conciliation: { detail: [], quantity: 0, quantityCollection: 0 },
+			});
+
+			const existingRecuperatorProductIds = auditGuide.auditGuideDetails
+				.filter(detail => detail.isRecuperator)
+				.map(detail => detail.product.id);
+			const existingTransporterProductIds = auditGuide.auditGuideDetails
+				.filter(detail => !detail.isRecuperator)
+				.map(detail => detail.product.id);
+
+			const missingRecuperatorProducts = allProducts.filter(product =>
+				!existingRecuperatorProductIds.includes(product.id)
+			);
+			missingRecuperatorProducts.forEach(product => {
+				groupedDetails.recuperator.detail.push({
+					product: product,
+					quantity: 0,
+					quantityCollection: 0,
+					isRecuperator: true,
+					auditGuideId: auditGuide.id,
+					type: 'R'
+				});
+			});
+
+			const missingTransporterProducts = allProducts.filter(product =>
+				!existingTransporterProductIds.includes(product.id)
+			);
+			missingTransporterProducts.forEach(product => {
+				groupedDetails.transporter.detail.push({
+					product: product,
+					quantity: 0,
+					quantityCollection: 0,
+					isRecuperator: false,
+					type: 'T',
+				});
+			});
+
 			return {
 				...auditGuide,
 				auditGuideDetails: groupedDetails || [],
@@ -498,7 +544,7 @@ export class AuditGuideService {
 		try {
 			_guidesNumber = _guidesNumber.map((guideId) => guideId.toString().toUpperCase());
 
-			const transporterTravels = await this.transporterTravelRepository.find({ where: { guideId: In(_guidesNumber) }, relations: ['details']})
+			const transporterTravels = await this.transporterTravelRepository.find({ where: { guideId: In(_guidesNumber) }, relations: ['details'] })
 
 			const auditsGuides = await this.auditGuideRepository.find({
 				where: { guideNumber: In(_guidesNumber), requestStatusId: In([AUDIT_GUIDE_STATUS.WITHOUT_GUIDE.toString(), AUDIT_GUIDE_STATUS.TRANSIT.toString()]) },
