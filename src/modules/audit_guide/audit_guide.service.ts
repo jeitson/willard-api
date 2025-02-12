@@ -288,7 +288,7 @@ export class AuditGuideService {
 				);
 			}
 
-			if ([AUDIT_GUIDE_STATUS.TRANSIT, AUDIT_GUIDE_STATUS.WITHOUT_GUIDE].includes(+auditGuide.requestStatusId)) {
+			if ([AUDIT_GUIDE_STATUS.BY_CONCILLIATE].includes(+auditGuide.requestStatusId)) {
 				const existingProductIdsByType = auditGuide.auditGuideDetails.reduce(
 					(acc, detail) => {
 						if (detail.isRecuperator) {
