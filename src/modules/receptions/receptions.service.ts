@@ -307,7 +307,7 @@ export class ReceptionsService {
 
 		if (![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+existingRecord.auditGuide.requestStatusId)) {
 			throw new BusinessException(
-				`No se puede actualizar el registro, ya que tiene una vinculación activa en un estado diferente a "SIN GUÍA" o "EN TRANSITO".`
+				`No se puede actualizar el registro, ya que tiene una vinculación activa con una transportadora.`
 			);
 		}
 

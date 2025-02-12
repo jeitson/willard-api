@@ -288,7 +288,7 @@ export class TransporterTravelService {
 
 		if (hasInvalidStatus) {
 			throw new BusinessException(
-				`No se puede actualizar el registro, ya que tiene una vinculación activa en un estado diferente a "SIN GUÍA" o "EN TRANSITO".`,
+				`No se puede actualizar el registro, ya que tiene una vinculación activa con una recuperadora.`
 			);
 		}
 
