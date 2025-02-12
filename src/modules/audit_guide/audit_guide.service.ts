@@ -112,6 +112,8 @@ export class AuditGuideService {
 			}
 
 			await queryRunner.commitTransaction();
+
+			await this.deleteData();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
 			throw new BusinessException(error.message || 'Error inesperado en la creación de la auditoría.', 500);
@@ -155,6 +157,8 @@ export class AuditGuideService {
 			inFavorRecuperator: giveReason === 'R',
 			modifiedBy,
 		});
+
+		await this.deleteData();
 
 		// crear reporte_ph
 		// auditGuide.auditGuideDetails.forEach(async (element) => {
@@ -500,10 +504,46 @@ export class AuditGuideService {
 			});
 			await queryRunner.manager.save(auditGuideRoute);
 
+			await this.deleteData();
+
 			await queryRunner.commitTransaction();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
 			throw error;
+		} finally {
+			await queryRunner.release();
+		}
+	}
+
+	async deleteData(): Promise<void> {
+		const queryRunner = this.auditGuideRepository.manager.connection.createQueryRunner();
+		await queryRunner.connect();
+		await queryRunner.startTransaction();
+
+		try {
+			const items = await queryRunner.manager.find(AuditGuide, {
+				where: {
+					requestStatusId: In([
+						AUDIT_GUIDE_STATUS.CONFIRMED.toString(),
+						AUDIT_GUIDE_STATUS.BY_CONCILLIATE.toString(),
+					]),
+					transporterId: null,
+					recuperatorId: null,
+				},
+			});
+
+			if (items.length > 0) {
+				const auditGuideIds = items.map((item) => item.id);
+
+				await queryRunner.manager.delete(AuditGuideRoute, { auditGuideId: In(auditGuideIds) });
+				await queryRunner.manager.delete(AuditGuideDetail, { auditGuideId: In(auditGuideIds) });
+				await queryRunner.manager.delete(AuditGuide, { id: In(auditGuideIds) });
+			}
+
+			await queryRunner.commitTransaction();
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			throw new Error(`Error al eliminar datos: ${error.message}`);
 		} finally {
 			await queryRunner.release();
 		}
@@ -646,6 +686,8 @@ export class AuditGuideService {
 			}
 
 			await queryRunner.commitTransaction();
+
+			await this.deleteData();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
 			throw new BusinessException(`Error al sincronizar guías de auditoría: ${error.message}`);
@@ -722,6 +764,8 @@ export class AuditGuideService {
 			}
 
 			await queryRunner.commitTransaction();
+
+			await this.deleteData();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
 			throw new BusinessException(error.message || 'Error inesperado en la creación de la auditoría.', 500);
