@@ -18,6 +18,7 @@ import { CatalogsService } from '../catalogs/catalogs.service';
 import { formatToDate } from 'src/core/utils';
 import { AUDIT_GUIDE_STATUS, RECEIPT_STATUS } from 'src/core/constants/status.constant';
 import { PICKUP_LOCATION_TYPE } from 'src/core/constants/types.constant';
+import { ROL } from 'src/core/constants/rol.constant';
 
 
 /** Estados ID
@@ -89,7 +90,7 @@ export class ReceptionsService {
 				await this.saveReceptionPhotos(savedReception, (createReceptionDto.photos as any[]).map(url => ({ url })));
 			}
 
-			if (roles.includes(20)) {
+			if (roles.includes(ROL.RECUPERADORA)) {
 				await this.auditGuideService.create({
 					reception: savedReception,
 					guideNumber: reception.guideNumber,

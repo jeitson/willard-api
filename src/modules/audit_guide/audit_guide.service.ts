@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Or, Repository } from 'typeorm';
+import { In, IsNull, Or, Repository } from 'typeorm';
 import { AuditGuideConfirmUpdateDto, AuditGuideCreateDto, AuditGuideDetailUpdateDto, AuditGuideQueryDto } from './dto/audit_guide.dto';
 import { AuditGuide } from './entities/audit_guide.entity';
 import { AuditGuideDetail } from './entities/audit_guide_detail.entity';
@@ -557,8 +557,8 @@ export class AuditGuideService {
 						AUDIT_GUIDE_STATUS.CONFIRMED.toString(),
 						AUDIT_GUIDE_STATUS.BY_CONCILLIATE.toString(),
 					]),
-					transporterId: null,
-					recuperatorId: null,
+					transporterId: IsNull(),
+					recuperatorId: IsNull(),
 				},
 			});
 
