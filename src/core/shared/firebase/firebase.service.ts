@@ -19,7 +19,7 @@ export class FirebaseService {
 					firebaseStorageDownloadTokens: fileName,
 				},
 			});
-			return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media&token=${fileName}`;
+			return encodeURIComponent(fileName);
 		} catch (error) {
 			throw new BadRequestException('Error uploading file: ' + error.message);
 		}
@@ -28,13 +28,18 @@ export class FirebaseService {
 	async getFileUrl(fileName: string): Promise<string> {
 		const bucket = getFirebaseStorage();
 		const file = bucket.file(fileName);
-		const exists = await file.exists();
 
-		if (!exists[0]) {
+		const [exists] = await file.exists();
+		if (!exists) {
 			throw new BadRequestException('File not found');
 		}
 
-		return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
+		const url = await file.getSignedUrl({
+			action: 'read',
+			expires: Date.now() + 60 * 60 * 1000,
+		});
+
+		return url[0];
 	}
 
 	async deleteFile(fileName: string): Promise<void> {
