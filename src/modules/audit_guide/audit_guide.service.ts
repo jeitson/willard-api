@@ -248,11 +248,11 @@ export class AuditGuideService {
 				if (detail.isRecuperator) {
 					acc.recuperator.detail.push(detail);
 					acc.recuperator.quantity += detail.quantity;
-					acc.recuperator.quantityCollection += detail.quantityCollection;
+					acc.recuperator.quantityCollection += detail.quantity;
 				} else {
 					acc.transporter.detail.push(detail);
 					acc.transporter.quantity += detail.quantity;
-					acc.transporter.quantityCollection += detail.quantityCollection;
+					acc.transporter.quantityCollection += detail.quantity;
 				}
 
 				if (+auditGuide.requestStatusId === AUDIT_GUIDE_STATUS.CONFIRMED && _detail) {
@@ -288,45 +288,47 @@ export class AuditGuideService {
 				);
 			}
 
-			const existingProductIdsByType = auditGuide.auditGuideDetails.reduce(
-				(acc, detail) => {
-					if (detail.isRecuperator) {
-						acc.recuperator.push(detail.product.id);
-					} else {
-						acc.transporter.push(detail.product.id);
-					}
-					return acc;
-				},
-				{ recuperator: [], transporter: [] }
-			);
+			if ([AUDIT_GUIDE_STATUS.TRANSIT, AUDIT_GUIDE_STATUS.WITHOUT_GUIDE].includes(+auditGuide.requestStatusId)) {
+				const existingProductIdsByType = auditGuide.auditGuideDetails.reduce(
+					(acc, detail) => {
+						if (detail.isRecuperator) {
+							acc.recuperator.push(detail.product.id);
+						} else {
+							acc.transporter.push(detail.product.id);
+						}
+						return acc;
+					},
+					{ recuperator: [], transporter: [] }
+				);
 
-			const missingRecuperatorProducts = allProducts.filter(
-				product => !existingProductIdsByType.recuperator.includes(product.id)
-			);
-			missingRecuperatorProducts.forEach(product => {
-				groupedDetails.recuperator.detail.push({
-					product: product,
-					quantity: 0,
-					quantityCollection: 0,
-					isRecuperator: true,
-					productId: product.id,
-					type: 'R',
+				const missingRecuperatorProducts = allProducts.filter(
+					product => !existingProductIdsByType.recuperator.includes(product.id)
+				);
+				missingRecuperatorProducts.forEach(product => {
+					groupedDetails.recuperator.detail.push({
+						product: product,
+						quantity: 0,
+						quantityCollection: 0,
+						isRecuperator: true,
+						productId: product.id,
+						type: 'R',
+					});
 				});
-			});
 
-			const missingTransporterProducts = allProducts.filter(
-				product => !existingProductIdsByType.transporter.includes(product.id)
-			);
-			missingTransporterProducts.forEach(product => {
-				groupedDetails.transporter.detail.push({
-					product: product,
-					quantity: 0,
-					quantityCollection: 0,
-					isRecuperator: false,
-					productId: product.id,
-					type: 'T',
+				const missingTransporterProducts = allProducts.filter(
+					product => !existingProductIdsByType.transporter.includes(product.id)
+				);
+				missingTransporterProducts.forEach(product => {
+					groupedDetails.transporter.detail.push({
+						product: product,
+						quantity: 0,
+						quantityCollection: 0,
+						isRecuperator: false,
+						productId: product.id,
+						type: 'T',
+					});
 				});
-			});
+			}
 
 			for (const key in groupedDetails) {
 				groupedDetails[key].detail.sort((a, b) => {
