@@ -305,5 +305,6 @@ export class TransporterTravelService {
 		await this.transporterTravelRepository.update(existingRecord.id, { guideId });
 
 		await this.auditGuideService.checkAndSyncAuditGuides([guideId]);
+		await this.auditGuideService.deleteData();
 	}
 }
