@@ -108,7 +108,7 @@ export class AuditGuideService {
 			if (transporterTravel) {
 				await this.saveAuditRoute(queryRunner, auditGuideSaved, transporterTravel, userId);
 
-				this.checkAndSyncAuditGuides([transporterTravel.guideId]);
+				await this.checkAndSyncAuditGuides([transporterTravel.guideId]);
 			}
 
 			await queryRunner.commitTransaction();
@@ -717,8 +717,6 @@ export class AuditGuideService {
 			}
 
 			await queryRunner.commitTransaction();
-
-			await this.deleteData();
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
 			throw new BusinessException(`Error al sincronizar guías de auditoría: ${error.message}`);
