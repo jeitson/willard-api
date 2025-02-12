@@ -124,7 +124,7 @@ export class ReceptionsService {
 			}
 		}
 
-		return Promise.all(details.map(async ({ productId: id, quantity: qty }) => await this.productRepository.findOneBy({ id })));
+		return Promise.all(await this.productRepository.find({ where: { id: In(details.map(({ productId: id }) => { id }))}}));
 	}
 
 	private async saveReceptionDetails(reception: Reception, details: ReceptionDetailDto[]): Promise<ReceptionDetail[]> {
