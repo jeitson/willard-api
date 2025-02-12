@@ -118,34 +118,13 @@ export class ReceptionsService {
 	}
 
 	private async validateReceptionDetails(details: ReceptionDetailDto[]): Promise<Product[]> {
-		if (!details || details.length === 0) {
-			throw new BadRequestException('Los detalles de recepción no pueden estar vacíos.');
-		}
-
-		const productIds = new Set<number>();
 		for (const { productId: id, quantity: qty } of details) {
-			if (!id) {
-				throw new BadRequestException(`El ID del producto (${id}) no es válido.`);
-			}
-
 			if (qty < 1 || qty > 10000) {
 				throw new BadRequestException(`La cantidad del producto ${id} debe estar entre 1 y 10,000.`);
 			}
-
-			productIds.add(id);
 		}
 
-		const products = await this.productRepository.find({
-			where: { id: In([...productIds]) },
-		});
-
-		const foundProductIds = products.map(product => product.id);
-		const missingProductIds = [...productIds].filter(id => !foundProductIds.includes(id));
-		if (missingProductIds.length > 0) {
-			throw new BadRequestException(`Los siguientes productos no existen: ${missingProductIds.join(', ')}`);
-		}
-
-		return products;
+		return Promise.all(details.map(async ({ productId: id, quantity: qty }) => await this.productRepository.findOneBy({ id })));
 	}
 
 	private async saveReceptionDetails(reception: Reception, details: ReceptionDetailDto[]): Promise<ReceptionDetail[]> {
