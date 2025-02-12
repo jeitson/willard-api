@@ -278,6 +278,7 @@ export class ReceptionsService {
 		const reception = await this.receptionRepository
 			.createQueryBuilder('reception')
 			.leftJoinAndSelect('reception.receptionDetails', 'details')
+			.leftJoinAndSelect('details.product', 'product')
 			.leftJoinAndSelect('reception.receptionPhotos', 'photos')
 			.leftJoinAndMapOne('reception.child', Child, 'child', 'child.id = reception.receptionStatusId')
 			.where('reception.id = :id', { id })
