@@ -4,6 +4,7 @@ import { Reception } from "src/modules/receptions/entities/reception.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import { AuditGuideDetail } from "./audit_guide_detail.entity";
 import { AuditGuideRoute } from "./audit_guide-ruta.entity";
+import { AUDIT_GUIDE_REASON } from "src/core/constants/status.constant";
 
 @Entity({ name: 'auditoria_guia' })
 export class AuditGuide extends CompleteEntity {
@@ -43,9 +44,9 @@ export class AuditGuide extends CompleteEntity {
 	@Column({ type: 'bigint', name: 'EstadoAuditoriaId' })
 	requestStatusId: number;
 
-	@ApiProperty({ description: 'A Favor Recuperadora' })
-	@Column({ type: 'boolean', name: 'AFavorRecuperadora', nullable: true, default: null })
-	inFavorRecuperator: boolean;
+	@ApiProperty({ description: 'Razón' })
+	@Column({ type: 'enum', name: 'Razon', nullable: true, default: AUDIT_GUIDE_REASON.NONE, enum: AUDIT_GUIDE_REASON })
+	reason: AUDIT_GUIDE_REASON;
 
 	@ApiProperty({ description: 'Comentario' })
 	@Column({ type: 'varchar', length: 100, name: 'Comentario', default: null, nullable: true })

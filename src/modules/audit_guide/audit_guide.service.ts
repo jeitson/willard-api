@@ -16,7 +16,7 @@ import { Child } from '../catalogs/entities/child.entity';
 import { User } from '../users/entities/user.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
 import { Shipment } from '../shipments/entities/shipment.entity';
-import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
+import { AUDIT_GUIDE_REASON, AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
 import { ReportsPhService } from '../reports_ph/reports_ph.service';
 import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
 import { Reception } from '../receptions/entities/reception.entity';
@@ -154,7 +154,7 @@ export class AuditGuideService {
 			recuperatorTotal,
 			requestStatusId: AUDIT_GUIDE_STATUS.CONFIRMED,
 			comment,
-			inFavorRecuperator: giveReason === 'R',
+			reason: giveReason as AUDIT_GUIDE_REASON,
 			modifiedBy,
 		});
 
@@ -190,7 +190,7 @@ export class AuditGuideService {
 		pageSize,
 		date,
 		guideNumber,
-		requestStatus
+		requestStatus,
 	}: AuditGuideQueryDto): Promise<Pagination<AuditGuide>> {
 		const queryBuilder = this.auditGuideRepository.createQueryBuilder('auditGuide')
 			.leftJoinAndSelect('auditGuide.auditGuideDetails', 'auditGuideDetails')
@@ -212,7 +212,6 @@ export class AuditGuideService {
 			const startOfDay = new Date(date);
 			const endOfDay = new Date(startOfDay);
 			endOfDay.setDate(endOfDay.getDate() + 1);
-
 			queryBuilder.andWhere('auditGuide.updatedAt >= :startOfDay AND auditGuide.updatedAt < :endOfDay', {
 				startOfDay,
 				endOfDay,
@@ -236,8 +235,16 @@ export class AuditGuideService {
 
 		const groupedResults = rawResults.items.map(auditGuide => {
 			const groupedDetails: any = auditGuide.auditGuideDetails.reduce((acc, detail: any) => {
-				detail.type = detail.isRecuperator ? 'R' : 'T' ;
+				detail.type = detail.isRecuperator ? 'R' : 'T';
 				detail.productId = detail.product.id;
+
+				let _detail = null;
+				if (detail.isRecuperator && auditGuide.reason === AUDIT_GUIDE_REASON.RECOVERY) {
+					_detail = detail;
+				} else if (!detail.isRecuperator && auditGuide.reason === AUDIT_GUIDE_REASON.TRANSPORTER) {
+					_detail = detail;
+				}
+
 				if (detail.isRecuperator) {
 					acc.recuperator.detail.push(detail);
 					acc.recuperator.quantity += detail.quantity;
@@ -247,17 +254,39 @@ export class AuditGuideService {
 					acc.transporter.quantity += detail.quantity;
 					acc.transporter.quantityCollection += detail.quantityCollection;
 				}
-				if (+auditGuide.requestStatusId === AUDIT_GUIDE_STATUS.CONFIRMED) {
-					acc.conciliation.detail.push(detail);
-					acc.conciliation.quantity += detail.quantity;
-					acc.conciliation.quantityCollection += detail.quantityCollection;
+
+				if (+auditGuide.requestStatusId === AUDIT_GUIDE_STATUS.CONFIRMED && _detail) {
+					acc.conciliation.detail.push(_detail);
+					acc.conciliation.quantity += _detail.quantity;
+					acc.conciliation.quantityCollection += _detail.quantityCollection;
 				}
+
 				return acc;
 			}, {
 				recuperator: { detail: [], quantity: 0, quantityCollection: 0 },
 				transporter: { detail: [], quantity: 0, quantityCollection: 0 },
 				conciliation: { detail: [], quantity: 0, quantityCollection: 0 },
 			});
+
+			if (+auditGuide.requestStatusId === AUDIT_GUIDE_STATUS.CONFIRMED && auditGuide.reason === AUDIT_GUIDE_REASON.BOTH) {
+				const uniqueConciliationDetails = Object.values(
+					groupedDetails.conciliation.detail.reduce((acc, detail) => {
+						const productId = detail.product.id;
+						if (!acc[productId] || acc[productId].updatedAt < detail.updatedAt) {
+							acc[productId] = detail;
+						}
+						return acc;
+					}, {})
+				);
+				groupedDetails.conciliation.detail = uniqueConciliationDetails;
+
+				groupedDetails.conciliation.quantity = groupedDetails.conciliation.detail.reduce(
+					(sum, detail) => sum + detail.quantity, 0
+				);
+				groupedDetails.conciliation.quantityCollection = groupedDetails.conciliation.detail.reduce(
+					(sum, detail) => sum + detail.quantityCollection, 0
+				);
+			}
 
 			const existingProductIdsByType = auditGuide.auditGuideDetails.reduce(
 				(acc, detail) => {
@@ -493,6 +522,7 @@ export class AuditGuideService {
 				date: externalData.movementDate,
 				zoneId: zone.id,
 				requestStatusId: isConfirmed ? AUDIT_GUIDE_STATUS.CONFIRMED : AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
+				reason: isConfirmed ? AUDIT_GUIDE_REASON.BOTH : AUDIT_GUIDE_REASON.NONE,
 				modifiedBy: user_id,
 			});
 
@@ -619,7 +649,7 @@ export class AuditGuideService {
 			throw new BusinessException('La auditoría debe estar en estado pendiente para actualizar.');
 		}
 
-		auditGuide.inFavorRecuperator = key === 'R';
+		auditGuide.reason = key as AUDIT_GUIDE_REASON;
 
 		await this.auditGuideRepository.save(auditGuide);
 	}
@@ -671,6 +701,7 @@ export class AuditGuideService {
 						date: transporterTravel.movementDate,
 						zoneId: zone.id,
 						requestStatusId: isConfirmed ? AUDIT_GUIDE_STATUS.CONFIRMED : AUDIT_GUIDE_STATUS.BY_CONCILLIATE,
+						reason: isConfirmed ? AUDIT_GUIDE_REASON.BOTH : AUDIT_GUIDE_REASON.NONE,
 						modifiedBy: this.userContextService.getUserDetails()?.id,
 					}
 				);
