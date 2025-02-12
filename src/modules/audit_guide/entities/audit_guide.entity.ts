@@ -49,7 +49,7 @@ export class AuditGuide extends CompleteEntity {
 	reason: AUDIT_GUIDE_REASON;
 
 	@ApiProperty({ description: 'Comentario' })
-	@Column({ type: 'varchar', length: 100, name: 'Comentario', default: null, nullable: true })
+	@Column({ type: 'varchar', length: 1000, name: 'Comentario', default: null, nullable: true })
 	comment: string;
 
 	@OneToMany(() => AuditGuideDetail, (auditGuideDetail) => auditGuideDetail.auditGuide)
