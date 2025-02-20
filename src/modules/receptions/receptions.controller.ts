@@ -3,7 +3,7 @@ import { ReceptionsService } from './receptions.service';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/core/common/decorators/role.decorator';
-import { ReceptionDto, ReceptionGuideNumberDto, ReceptionQueryDto, ReceptionUpdateDto } from './dto/create-reception.dto';
+import { ReceptionDto, ReceptionRouteIdDto, ReceptionQueryDto, ReceptionUpdateDto } from './dto/create-reception.dto';
 import { Reception } from './entities/reception.entity';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
@@ -47,7 +47,7 @@ export class ReceptionsController {
 	@Put(':id')
 	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
 	@ApiOperation({ summary: 'Actualizar número de guía' })
-	async update(@IdParam('id') id: string, @Body() updateDto: ReceptionGuideNumberDto): Promise<void> {
-		return this.receptionsService.updateGuideNumber(+id, updateDto);
+	async update(@IdParam('id') id: string, @Body() updateDto: ReceptionRouteIdDto): Promise<void> {
+		return this.receptionsService.updateRouteId(+id, updateDto);
 	}
 }

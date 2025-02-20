@@ -5,7 +5,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Public } from 'src/core/common/decorators/public.decorator';
 import { TransporterTravelService } from './transporter_travel.service';
-import { TransporterTravelDto, TransporterTravelGuideNumberDto } from './dto/transporter_travel.dto';
+import { TransporterTravelDto, TransporterTravelRouteIdDto } from './dto/transporter_travel.dto';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 import { ResponseCodeTransporterTravel } from './entities/response';
 import { Roles } from 'src/core/common/decorators/role.decorator';
@@ -48,13 +48,13 @@ export class TransporterTravelController {
 		return this.transporterTravelService.findAll(query);
 	}
 
-	@Patch('guia/:id')
+	@Patch('route/:id')
 	@Roles(ROL.AUDITORIA_PH)
-	@ApiOperation({ summary: 'Actualizar número de guía por su por ID' })
-	async updateAuditGuideDetails(
+	@ApiOperation({ summary: 'Actualizar número de ruta por su por ID' })
+	async updateRouteId(
 		@IdParam('id') id: number,
-		@Body() detailsToUpdate: TransporterTravelGuideNumberDto,
+		@Body() detailsToUpdate: TransporterTravelRouteIdDto,
 	): Promise<void> {
-		await this.transporterTravelService.updateGuideNumber(id, detailsToUpdate);
+		await this.transporterTravelService.updateRouteId(id, detailsToUpdate);
 	}
 }

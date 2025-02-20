@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { ReceptionDto, ReceptionDetailDto, ReceptionPhotoDto, ReceptionQueryDto, ReceptionUpdateDto, ReceptionGuideNumberDto } from './dto/create-reception.dto';
+import { ReceptionDto, ReceptionDetailDto, ReceptionPhotoDto, ReceptionQueryDto, ReceptionUpdateDto, ReceptionRouteIdDto } from './dto/create-reception.dto';
 import { Reception } from './entities/reception.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,9 +13,6 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { Child } from '../catalogs/entities/child.entity';
-import { AuditGuideService } from '../audit_guide/audit_guide.service';
-import { CatalogsService } from '../catalogs/catalogs.service';
-import { formatToDate } from 'src/core/utils';
 import { AUDIT_GUIDE_STATUS, RECEIPT_STATUS } from 'src/core/constants/status.constant';
 import { PICKUP_LOCATION_TYPE } from 'src/core/constants/types.constant';
 import { ROL } from 'src/core/constants/rol.constant';
@@ -40,7 +37,6 @@ export class ReceptionsService {
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
-		private readonly auditGuideService: AuditGuideService,
 		private readonly userContextService: UserContextService
 	) { }
 
@@ -91,20 +87,20 @@ export class ReceptionsService {
 			}
 
 			if (roles.includes(ROL.RECUPERADORA)) {
-				await this.auditGuideService.create({
-					reception: savedReception,
-					guideNumber: reception.guideNumber,
-					recuperatorId: user_id,
-					recuperatorTotal: createReceptionDto.details.reduce((acc, item) => acc += item.quantity, 0),
-					transporterId: transporter.id,
-					transporterTotal: 0,
-					auditGuideDetails: createReceptionDto.details.map((item) => ({
-						productId: item.productId,
-						isRecuperator: true,
-						quantity: item.quantity,
-						quantityCollection: item.quantity
-					}))
-				});
+				// await this.auditGuideService.create({
+				// 	reception: savedReception,
+				// 	routeId: reception.routeId,
+				// 	recuperatorId: user_id,
+				// 	recuperatorTotal: createReceptionDto.details.reduce((acc, item) => acc += item.quantity, 0),
+				// 	transporterId: transporter.id,
+				// 	transporterTotal: 0,
+				// 	auditGuideDetails: createReceptionDto.details.map((item) => ({
+				// 		productId: item.productId,
+				// 		isRecuperator: true,
+				// 		quantity: item.quantity,
+				// 		quantityCollection: item.quantity
+				// 	}))
+				// });
 			}
 
 		} catch (error) {
@@ -297,7 +293,7 @@ export class ReceptionsService {
 		return reception;
 	}
 
-	async updateGuideNumber(id: number, { guideNumber }: ReceptionGuideNumberDto): Promise<void> {
+	async updateRouteId(id: number, { routeId }: ReceptionRouteIdDto): Promise<void> {
 		const existingRecord = await this.receptionRepository.findOne({
 			where: { id },
 			relations: ['auditGuide'],
@@ -306,22 +302,22 @@ export class ReceptionsService {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		if (![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+existingRecord.auditGuide.requestStatusId)) {
-			throw new BusinessException(
-				`No se puede actualizar el registro, ya que tiene una vinculación activa con una transportadora.`
-			);
-		}
+		// if (![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+existingRecord.auditGuide.requestStatusId)) {
+		// 	throw new BusinessException(
+		// 		`No se puede actualizar el registro, ya que tiene una vinculación activa con una transportadora.`
+		// 	);
+		// }
 
-		const guideNumberOld = JSON.parse(JSON.stringify(existingRecord.guideNumber));
+		const routeIdOld = JSON.parse(JSON.stringify(existingRecord.routeId));
 
-		existingRecord.guideNumber = guideNumber;
+		existingRecord.routeId = routeId;
 
-		await this.receptionRepository.update(id, { guideNumber });
+		await this.receptionRepository.update(id, { routeId });
 
-		if (existingRecord.auditGuide) {
-			await this.auditGuideService.updateGuideNumber(guideNumberOld, guideNumber);
-		}
+		// if (existingRecord.auditGuide) {
+		// 	await this.auditGuideService.updateRouteId(routeIdOld, routeId);
+		// }
 
-		await this.auditGuideService.checkAndSyncAuditGuides([guideNumber]);
+		// await this.auditGuideService.checkAndSyncAuditGuides([routeId]);
 	}
 }

@@ -5,7 +5,6 @@ import { Transporter } from "src/modules/transporters/entities/transporter.entit
 import { ReceptionDetail } from "./reception_detail.entity";
 import { ReceptionPhoto } from "./reception_photo.entity";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { AuditGuide } from "src/modules/audit_guide/entities/audit_guide.entity";
 
 @Entity({ name: 'recepcion' })
 export class Reception extends CompleteEntity {
@@ -28,9 +27,9 @@ export class Reception extends CompleteEntity {
 	@Column({ type: 'varchar', length: 50, name: 'Conductor' })
 	driver: string;
 
-	@ApiProperty({ description: 'Número de guía' })
-	@Column({ type: 'varchar', length: 50, name: 'NumeroGuia' })
-	guideNumber: string;
+	@ApiProperty({ description: 'Número de Ruta' })
+	@Column({ type: 'varchar', length: 50, name: 'RutaId' })
+	routeId: string;
 
 	@ApiProperty({ description: 'Documento de referencia 1' })
 	@Column({ type: 'varchar', length: 50, name: 'DocReferencia1', nullable: true })
@@ -49,7 +48,4 @@ export class Reception extends CompleteEntity {
 
 	@OneToMany(() => ReceptionPhoto, (photo) => photo.reception)
 	receptionPhotos: ReceptionPhoto[];
-
-	@OneToOne(() => AuditGuide, (auditGuide) => auditGuide.reception)
-	auditGuide: AuditGuide;
 }

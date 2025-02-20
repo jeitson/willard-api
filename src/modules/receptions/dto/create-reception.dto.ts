@@ -28,16 +28,16 @@ export class ReceptionPhotoDto {
 	url: string;
 }
 
-export class ReceptionGuideNumberDto {
-	@ApiProperty({ description: 'Número de guía' })
-	@IsNotEmpty({ message: 'NumeroGuia es obligatorio.' })
-	@IsString({ message: 'NumeroGuia debe ser un texto.' })
+export class ReceptionRouteIdDto {
+	@ApiProperty({ description: 'Número de ruta' })
+	@IsNotEmpty({ message: 'Número de ruta es obligatorio.' })
+	@IsString({ message: 'Número de ruta debe ser un texto.' })
 	@MaxLength(10, { message: 'Debe de tener máximo 10 caracteres.' })
-	// @Matches(/^[A-Z0-9]{10}$/, { message: 'NumeroGuia debe ser alfanumérico, de 10 dígitos y en mayúsculas.' })
-	guideNumber: string;
+	// @Matches(/^[A-Z0-9]{10}$/, { message: 'Número de ruta debe ser alfanumérico, de 10 dígitos y en mayúsculas.' })
+	routeId: string;
 }
 
-export class ReceptionDto extends ReceptionGuideNumberDto {
+export class ReceptionDto extends ReceptionRouteIdDto {
 	@ApiProperty({ description: 'ID de la transportadora' })
 	@IsNotEmpty({ message: 'TransportadoraId es obligatorio.' })
 	@IsInt({ message: 'TransportadoraId debe ser un número entero.' })

@@ -28,7 +28,6 @@ import { ReceptionsModule } from './modules/receptions/receptions.module';
 import { TransporterTravelModule } from './modules/transporter_travel/transporter_travel.module';
 import { FilesModule } from './modules/files/files.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
-import { AuditGuideModule } from './modules/audit_guide/audit_guide.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 import { ApiModule } from './modules/integrations/ph_central/api.module';
@@ -65,7 +64,6 @@ import { HistoryJobsModule } from './modules/history_jobs/history_jobs.module';
 		TransporterTravelModule,
 		FilesModule,
 		ShipmentsModule,
-		AuditGuideModule,
 		ReportsPhModule,
 		ApiModule,
 		IntegrationsModule,

@@ -7,11 +7,10 @@ import { plainToClass } from 'class-transformer';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { excelDateToJSDate, excelTimeToJSDate } from 'src/core/utils';
 import { TransporterTravel } from './entities/transporter_travel.entity';
-import { TransporterTravelDto, TransporterTravelGuideNumberDto } from './dto/transporter_travel.dto';
+import { TransporterTravelDto, TransporterTravelRouteIdDto } from './dto/transporter_travel.dto';
 import { Product } from '../products/entities/product.entity';
 import { Child } from '../catalogs/entities/child.entity';
 import { ResponseCodeTransporterTravel } from './entities/response';
-import { AuditGuideService } from '../audit_guide/audit_guide.service';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
@@ -25,7 +24,6 @@ export class TransporterTravelService {
 		private readonly productRepository: Repository<Product>,
 		@InjectRepository(Child)
 		private readonly childrensRepository: Repository<Child>,
-		private readonly auditGuideService: AuditGuideService,
 	) { }
 
 	async createFromJson(data: TransporterTravelDto): Promise<ResponseCodeTransporterTravel[]> {
@@ -54,7 +52,7 @@ export class TransporterTravelService {
 				const travelRecord = this.transporterTravelRepository.create(item);
 				const savedRecord = await this.transporterTravelRepository.save(travelRecord);
 
-				this.auditGuideService.createByTransporter(savedRecord);
+				// this.auditGuideService.createByTransporter(savedRecord);
 
 				return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 			}
@@ -132,7 +130,7 @@ export class TransporterTravelService {
 				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
 			];
 
-			await this.auditGuideService.createByTransporter(allSavedRecords);
+			// await this.auditGuideService.createByTransporter(allSavedRecords);
 
 			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {
@@ -144,7 +142,6 @@ export class TransporterTravelService {
 		return {
 			routeId: row['idRuta'],
 			guideId: row['idGuia'],
-			guidePreviousId: row['idGuiaAntes'],
 			type: row['tipo'],
 			sequence: row['secuencia'],
 			movementDate: row['fechaMov'],
@@ -179,7 +176,7 @@ export class TransporterTravelService {
 		});
 
 		if (!existingRecord) {
-			throw new BusinessException(`No se encontró ningún registro con idGuiaAntes: ${item.guidePreviousId}`);
+			throw new BusinessException(`No se encontró ningún registro con idRutaAntes: ${item.guidePreviousId}`);
 		}
 
 		// Validar el registro antes de proceder
@@ -209,7 +206,7 @@ export class TransporterTravelService {
 		// Actualizar detalles
 		existingRecord.details = this.convertDetail(item.details);
 
-		this.auditGuideService.checkAndSyncAuditGuides([existingRecord.guideId]);
+		// this.auditGuideService.checkAndSyncAuditGuides([existingRecord.guideId]);
 	}
 
 	private async validateAllRecords(records: any[]): Promise<void> {
@@ -270,7 +267,7 @@ export class TransporterTravelService {
 		});
 	}
 
-	async updateGuideNumber(id: number, { idGuia: guideId }: TransporterTravelGuideNumberDto): Promise<void> {
+	async updateRouteId(id: number, { idRuta: routeId }: TransporterTravelRouteIdDto): Promise<void> {
 		const existingRecord = await this.transporterTravelRepository.findOne({
 			where: { id },
 			relations: ['transportersTravels', 'transportersTravels.auditGuide', 'details'],
@@ -280,31 +277,19 @@ export class TransporterTravelService {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		const hasInvalidStatus = existingRecord.transportersTravels.some(
-			({ auditGuide }) =>
-				auditGuide &&
-				![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+auditGuide.requestStatusId),
-		);
+		// const routeIdOld = JSON.parse(JSON.stringify(existingRecord.routeId));
 
-		if (hasInvalidStatus) {
-			throw new BusinessException(
-				`No se puede actualizar el registro, ya que tiene una vinculación activa con una recuperadora.`
-			);
-		}
+		// existingRecord.routeId = routeId;
 
-		const guideNumberOld = JSON.parse(JSON.stringify(existingRecord.guideId));
+		// for (const transporterTravel of existingRecord) {
+		// 	if (transporterTravel.auditGuide) {
+		// 		await this.auditGuideService.updateRouteId(routeIdOld, routeId);
+		// 	}
+		// }
 
-		existingRecord.guideId = guideId;
+		await this.transporterTravelRepository.update(existingRecord.id, { routeId });
 
-		for (const transporterTravel of existingRecord.transportersTravels) {
-			if (transporterTravel.auditGuide) {
-				await this.auditGuideService.updateGuideNumber(guideNumberOld, guideId);
-			}
-		}
-
-		await this.transporterTravelRepository.update(existingRecord.id, { guideId });
-
-		await this.auditGuideService.checkAndSyncAuditGuides([guideId]);
-		await this.auditGuideService.deleteData();
+		// await this.auditGuideService.checkAndSyncAuditGuides([routeId]);
+		// await this.auditGuideService.deleteData();
 	}
 }

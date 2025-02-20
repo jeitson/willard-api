@@ -7,12 +7,11 @@ import { TransporterTravelDetail } from './entities/transporter_travel_detail.en
 import { TransporterTravelController } from './transporter_travel.controller';
 import { ProductsModule } from '../products/products.module';
 import { CatalogsModule } from '../catalogs/catalogs.module';
-import { AuditGuideModule } from '../audit_guide/audit_guide.module';
 
 const providers = [TransporterTravelService];
 
 @Module({
-	imports: [TypeOrmModule.forFeature([TransporterTravel, TransporterTravelDetail]), UsersModule, ProductsModule, CatalogsModule, forwardRef(() => AuditGuideModule)],
+	imports: [TypeOrmModule.forFeature([TransporterTravel, TransporterTravelDetail]), UsersModule, ProductsModule, CatalogsModule],
 	controllers: [TransporterTravelController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

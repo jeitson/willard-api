@@ -21,7 +21,7 @@ const dataSourceOptions: DataSourceOptions = {
 	entities: ['dist/modules/**/*.entity{.ts,.js}'],
 	migrations: ['dist/migrations/*{.ts,.js}'],
 	subscribers: ['dist/modules/**/*.subscriber{.ts,.js}'],
-	ssl: true
+	ssl: false
 };
 
 
