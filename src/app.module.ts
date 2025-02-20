@@ -28,7 +28,6 @@ import { ReceptionsModule } from './modules/receptions/receptions.module';
 import { TransporterTravelModule } from './modules/transporter_travel/transporter_travel.module';
 import { FilesModule } from './modules/files/files.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
-import { SeedModule } from './modules/seed/seed.module';
 import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 import { ApiModule } from './modules/integrations/ph_central/api.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
@@ -70,7 +69,6 @@ import { ConciliationModule } from './modules/conciliation/conciliation.module';
 		IntegrationsModule,
 		HistoryJobsModule,
 		ConciliationModule,
-		// SeedModule
 	],
 	controllers: [],
 	providers: [
