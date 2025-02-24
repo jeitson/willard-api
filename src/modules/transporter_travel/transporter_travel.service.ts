@@ -13,7 +13,6 @@ import { Child } from '../catalogs/entities/child.entity';
 import { ResponseCodeTransporterTravel } from './entities/response';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
-import { AUDIT_GUIDE_STATUS } from 'src/core/constants/status.constant';
 
 @Injectable()
 export class TransporterTravelService {

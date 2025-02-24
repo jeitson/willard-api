@@ -13,7 +13,7 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { Child } from '../catalogs/entities/child.entity';
-import { AUDIT_GUIDE_STATUS, RECEIPT_STATUS } from 'src/core/constants/status.constant';
+import { RECEIPT_STATUS } from 'src/core/constants/status.constant';
 import { PICKUP_LOCATION_TYPE } from 'src/core/constants/types.constant';
 import { ROL } from 'src/core/constants/rol.constant';
 
