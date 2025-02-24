@@ -32,7 +32,6 @@ import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 import { ApiModule } from './modules/integrations/ph_central/api.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HistoryJobsModule } from './modules/history_jobs/history_jobs.module';
-import { ConciliationModule } from './modules/conciliation/conciliation.module';
 import { AuditRouteModule } from './modules/audit_route/audit_route.module';
 
 @Module({
@@ -69,7 +68,6 @@ import { AuditRouteModule } from './modules/audit_route/audit_route.module';
 		ApiModule,
 		IntegrationsModule,
 		HistoryJobsModule,
-		ConciliationModule,
 		AuditRouteModule,
 	],
 	controllers: [],
