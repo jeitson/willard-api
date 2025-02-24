@@ -182,7 +182,7 @@ export class TransporterTravelService {
 		await this.validateAllRecords([item]);
 
 		// Actualizar campos
-		existingRecord.routeId = item.routeId;
+		// existingRecord.routeId = item.routeId;
 		existingRecord.guideId = item.guideId;
 		existingRecord.type = item.type;
 		existingRecord.sequence = item.sequence;
@@ -286,7 +286,7 @@ export class TransporterTravelService {
 		// 	}
 		// }
 
-		await this.transporterTravelRepository.update(existingRecord.id, { routeId });
+		// await this.transporterTravelRepository.update(existingRecord.id, { routeId });
 
 		// await this.auditGuideService.checkAndSyncAuditGuides([routeId]);
 		// await this.auditGuideService.deleteData();

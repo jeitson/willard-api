@@ -21,19 +21,20 @@ export class ConciliationService {
 	) {}
 
 	async findAll(): Promise<ListConciliationDto[]> {
-		const transporterTravels = this.transporterTravelRepository.find({
-			where: { status: true },
-			relations: ['reception', 'reception.collectionSite', 'reception.transporter'],
-		});
+		// const transporterTravels = this.transporterTravelRepository.find({
+		// 	where: { status: true },
+		// 	relations: ['reception', 'reception.collectionSite', 'reception.transporter'],
+		// });
+		return [];
 
-		return (await transporterTravels).map((element) => ({
-			transporter: element.driver,
-			id: element.id,
-			route: element.routeId,
-			zone: element.zone,
-			recuperator: '',
-			totalQuantity: 0,
-			status: '',
-		}));
+		// return (await transporterTravels).map((element) => ({
+		// 	transporter: element.driver,
+		// 	id: element.id,
+		// 	route: element.auditRoutes,
+		// 	zone: element.zone,
+		// 	recuperator: '',
+		// 	totalQuantity: 0,
+		// 	status: '',
+		// }));
 	}
 }

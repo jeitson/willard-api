@@ -4,6 +4,7 @@ import { Reception } from "src/modules/receptions/entities/reception.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import { AUDIT_ROUTE_REASON } from "src/core/constants/status.constant";
 import { AuditRouteDetail } from "./audit_route_detail.entity";
+import { TransporterTravel } from "src/modules/transporter_travel/entities/transporter_travel.entity";
 
 @Entity({ name: 'auditoria_ruta' })
 export class AuditRoute extends CompleteEntity {
@@ -12,8 +13,9 @@ export class AuditRoute extends CompleteEntity {
 	@ManyToOne(() => Reception, (reception) => reception.auditRoutes)
 	reception: Reception;
 
-	@ApiProperty({ description: 'Número de ruta' })
-	@Column({ type: 'varchar', length: 20, name: 'RutaId' })
+	@JoinColumn({ name: 'RutaId' })
+	@ApiProperty({ description: 'ID de la ruta (FK)' })
+	@ManyToOne(() => TransporterTravel, (transporterTravel) => transporterTravel.auditRoutes)
 	routeNumber: string;
 
 	@ApiProperty({ description: 'Fecha' })

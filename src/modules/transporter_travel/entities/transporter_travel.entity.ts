@@ -1,12 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { CompleteEntity } from 'src/core/common/entity/common.entity';
 import { TransporterTravelDetail } from './transporter_travel_detail.entity';
+import { AuditRoute } from 'src/modules/audit_route/entities/audit_route.entity';
 
 @Entity({ name: 'transportadora_viaje' })
 export class TransporterTravel extends CompleteEntity {
-	@Column({ type: 'varchar', length: 10, name: 'IdRuta' })
-	routeId: string;
-
 	@Column({ type: 'varchar', length: 10, name: 'IdGuia' })
 	guideId: string;
 
@@ -63,4 +61,7 @@ export class TransporterTravel extends CompleteEntity {
 
 	@OneToMany(() => TransporterTravelDetail, detail => detail.travelRecord, { cascade: true })
 	details: TransporterTravelDetail[];
+
+	@OneToMany(() => AuditRoute, (auditRoute) => auditRoute.routeNumber)
+	auditRoutes: AuditRoute[];
 }
