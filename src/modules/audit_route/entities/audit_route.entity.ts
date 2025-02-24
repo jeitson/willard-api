@@ -8,15 +8,19 @@ import { TransporterTravel } from "src/modules/transporter_travel/entities/trans
 
 @Entity({ name: 'auditoria_ruta' })
 export class AuditRoute extends CompleteEntity {
+	@ApiProperty({ description: 'Fecha' })
+	@Column({ type: 'varchar', length: 20, name: 'Fecha', nullable: true })
+	routeId: string;
+
 	@JoinColumn({ name: 'RecepcionId' })
 	@ApiProperty({ description: 'ID de recepción (FK)' })
 	@ManyToOne(() => Reception, (reception) => reception.auditRoutes)
 	reception: Reception;
 
-	@JoinColumn({ name: 'RutaId' })
-	@ApiProperty({ description: 'ID de la ruta (FK)' })
+	@JoinColumn({ name: 'TransportadoraViajeId' })
+	@ApiProperty({ description: 'ID de la transportadora viaje (FK)' })
 	@ManyToOne(() => TransporterTravel, (transporterTravel) => transporterTravel.auditRoutes)
-	routeNumber: string;
+	transporterTravel: TransporterTravel;
 
 	@ApiProperty({ description: 'Fecha' })
 	@Column({ type: 'varchar', length: 20, name: 'Fecha', nullable: true })
