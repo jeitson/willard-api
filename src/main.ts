@@ -46,9 +46,6 @@ async function bootstrap() {
 		}),
 	);
 
-	// app.useGlobalInterceptors(new LoggingInterceptor());
-	// if (isDev) app.useGlobalInterceptors(new LoggingInterceptor());
-
 	setupSwagger(app, configService); // Llama a setupSwagger pasando la app y el ConfigService
 
 	await app.listen(env('PORT'));
