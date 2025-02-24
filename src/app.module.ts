@@ -33,6 +33,7 @@ import { ApiModule } from './modules/integrations/ph_central/api.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HistoryJobsModule } from './modules/history_jobs/history_jobs.module';
 import { AuditRouteModule } from './modules/audit_route/audit_route.module';
+import { InitializationService } from './core/services/initialization-service.service';
 
 @Module({
 	imports: [
@@ -77,6 +78,7 @@ import { AuditRouteModule } from './modules/audit_route/audit_route.module';
 		{ provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
 		{ provide: APP_INTERCEPTOR, useFactory: () => new TimeoutInterceptor(15 * 1000) },
 		{ provide: APP_INTERCEPTOR, useClass: AllExceptionsFilter },
+		InitializationService,
 	],
 })
 export class AppModule { }
