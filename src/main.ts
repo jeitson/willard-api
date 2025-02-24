@@ -3,8 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger';
-import { env, isDev } from './core/global/env';
-import { LoggingInterceptor } from './core/common/interceptors/logging.interceptor';
+import { env } from './core/global/env';
 import {
 	HttpStatus,
 	UnprocessableEntityException,
