@@ -44,7 +44,6 @@ export class CatalogsService {
 			...childData,
 			name,
 			catalogCode,
-			parentId: parent.id,
 			parent: parent,
 			createdBy: user_id, modifiedBy: user_id
 		});
@@ -111,7 +110,6 @@ export class CatalogsService {
 		}
 		const user_id = this.userContextService.getUserDetails().id;
 
-		child.parentId = parentId;
 		child.parent = parent;
 		child.modifiedBy = user_id;
 
@@ -165,7 +163,7 @@ export class CatalogsService {
 	}
 
 	async getChildrenByKeyAndParent(key: string, parentId: number): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { catalogCode: key.toUpperCase(), parentId, status: true }});
+		return await this.childrensRepository.find({ where: { catalogCode: key.toUpperCase(), parent: { id: parentId }, status: true }});
 	}
 
 	async getChildrenByKeys(keys: string[]): Promise<Child[]> {

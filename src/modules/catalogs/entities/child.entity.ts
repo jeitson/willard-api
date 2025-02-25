@@ -1,14 +1,10 @@
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { Parent } from "./parent.entity";
 import { ApiProperty } from "@nestjs/swagger";
 
 @Entity({ name: 'catalogo_hijo' })
 export class Child extends CompleteEntity {
-	@ApiProperty({ description: 'parentId' })
-	@Column({ type: 'bigint', name: 'PadreId' })
-	parentId: number;
-
 	@ApiProperty({ description: 'catalogCode' })
 	@Column({ type: 'varchar', length: 50, name: 'CodigoCatalogo' })
 	catalogCode: string;
@@ -47,5 +43,6 @@ export class Child extends CompleteEntity {
 
 	@ApiProperty({ description: 'parent' })
 	@ManyToOne(() => Parent, (parent) => parent.children)
+	@JoinColumn({ name: 'PadreId' })
 	parent: Parent;
 }
