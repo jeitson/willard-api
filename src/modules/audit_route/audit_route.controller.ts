@@ -16,6 +16,6 @@ export class AuditRouteController {
 	@ApiOperation({ summary: 'Listado de registros de transportadora' })
 	// @ApiResult({ type: [] })
 	async findAll(@Query() query: any) {
-		// return this.auditRouteService.findAll(query);
+		return this.auditRouteService.findAll();
 	}
 }
