@@ -15,7 +15,7 @@ import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Transportadora Viaje')
 // @UseGuards(RolesGuard)
-@Controller('registro')
+@Controller('transporter-travel')
 export class TransporterTravelController {
 	constructor(private readonly transporterTravelService: TransporterTravelService) { }
 

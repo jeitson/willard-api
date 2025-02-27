@@ -256,9 +256,6 @@ export class TransporterTravelService {
 		const queryBuilder = this.transporterTravelRepository
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndSelect('transporter_travel.details', 'details')
-			.leftJoinAndSelect('transporter_travel.transportersTravels', 'transportersTravels')
-			.leftJoinAndSelect('transportersTravels.auditGuide', 'auditGuide')
-			.leftJoinAndMapOne('auditGuide.requestStatus', Child, 'requestStatus', 'requestStatus.id = auditGuide.requestStatusId');
 
 		return await paginate<TransporterTravel>(queryBuilder, {
 			page: query.page,
