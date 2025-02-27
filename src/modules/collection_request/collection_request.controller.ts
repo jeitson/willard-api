@@ -3,7 +3,7 @@ import { CollectionRequestService } from './collection_request.service';
 
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiResult } from "src/core/common/decorators/api-result.decorator";
-import { CollectionRequestCreateDto, CollectionRequestCompleteDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
+import { CollectionRequestCreateDto, CollectionRequestCompleteDto, CollectionRequestUpdateDto, CollectionRequestRouteInfoDto } from "./dto/collection_request.dto";
 import { CollectionRequest } from './entities/collection_request.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
@@ -76,5 +76,21 @@ export class CollectionRequestController {
 	@ApiOperation({ summary: 'Eliminar solicitud' })
 	async delete(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.delete(id);
+	}
+
+	@Get('routes-pending')
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@ApiOperation({ summary: 'Listar solicitudes pendiente por cargar' })
+	@ApiResult({ type: [CollectionRequest] })
+	async findAllRoutePendingUpload(): Promise<CollectionRequest[]> {
+		return this.collectionsRequestervice.findAllRoutePendingUpload();
+	}
+
+	@Post('routes-pending')
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@ApiOperation({ summary: 'Obtener información complementaria de las solicitudes pendiente por cargar' })
+	@ApiResult({ type: [CollectionRequest] })
+	async getRouteInfoPendingUpload(@Body() createDto: CollectionRequestRouteInfoDto): Promise<CollectionRequest[]> {
+		return this.collectionsRequestervice.getRouteInfoPendingUpload(createDto);
 	}
 }

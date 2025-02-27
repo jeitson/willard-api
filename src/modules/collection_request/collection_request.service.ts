@@ -5,7 +5,7 @@ import { BusinessException } from "src/core/common/exceptions/biz.exception";
 import { Pagination } from "src/core/helper/paginate/pagination";
 import { paginate } from "src/core/helper/paginate";
 import { CollectionRequest } from "./entities/collection_request.entity";
-import { CollectionRequestCompleteDto, CollectionRequestCreateDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
+import { CollectionRequestCompleteDto, CollectionRequestCreateDto, CollectionRequestRouteInfoDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
 import { PickUpLocation } from "../pick_up_location/entities/pick_up_location.entity";
 import { CollectionRequestAudit } from "../collection_request_audits/entities/collection_request_audit.entity";
 import { Transporter } from "../transporters/entities/transporter.entity";
@@ -275,9 +275,9 @@ export class CollectionRequestService {
 
 		if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
 
-			// if (zones.length === 0) {
-			// 	throw new BusinessException('El usuario no tiene zonas configuradas', 400);
-			// }
+			if (zones.length === 0) {
+				throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+			}
 
 			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING })
 
@@ -369,5 +369,47 @@ export class CollectionRequestService {
 		await this.collectionRequestAuditRepository.save(collectionRequestAudit);
 
 		await this.collectionRequestRepository.update(id, { status: false, modifiedBy: user_id });
+	}
+
+	async findAllRoutePendingUpload(): Promise<CollectionRequest[]> {
+		const queryBuilder = this.collectionRequestRepository.createQueryBuilder('collectionRequest')
+			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
+			.leftJoinAndMapOne('pickUpLocation.zoneId', Child, 'zone', 'zone.id = pickUpLocation.zoneId');
+
+		let { zones } = this.userContextService.getUserDetails();
+		zones = zones.map(({ zoneId }) => +zoneId);
+
+		if (zones.length === 0) {
+			throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+		}
+
+		queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
+		queryBuilder.andWhere('zone.id IN (:...zones)', { zones })
+
+		return queryBuilder.getMany();
+	}
+
+	async getRouteInfoPendingUpload({ routes }: CollectionRequestRouteInfoDto): Promise<CollectionRequest[]> {
+		let { zones } = this.userContextService.getUserDetails();
+		zones = zones.map(({ zoneId }) => +zoneId);
+
+		if (zones.length === 0) {
+			throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+		}
+
+		const queryBuilder = this.collectionRequestRepository.createQueryBuilder('collectionRequest')
+			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
+			.leftJoinAndMapOne('pickUpLocation.zoneId', Child, 'zone', 'zone.id = pickUpLocation.zoneId');
+
+		queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
+		.andWhere('zone.id IN (:...zones) AND collectionRequest.routeId IN (:...routes)', { zones, routes });
+
+		const results = await queryBuilder.getMany();
+
+		if (results.length === 0) {
+			throw new BusinessException('La información enviada, no aplica para la generación de la información', 400);
+		}
+
+		return results;
 	}
 }

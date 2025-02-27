@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType, PartialType } from "@nestjs/swagger";
-import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsNumber, MaxLength, ValidateIf, Min, IsNotEmpty } from "class-validator";
+import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsNumber, MaxLength, ValidateIf, Min, IsNotEmpty, IsArray } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
 
 export class CollectionRequestCreateDto {
@@ -85,7 +85,6 @@ export class CollectionRequestCompleteDto {
 	transporterId: number = null;
 
 	@ApiProperty({ description: 'Id de Ruta' })
-	@IsOptional()
 	@IsString({ message: 'Debe de ser un texto' })
 	routeId: string = null;
 }
@@ -164,6 +163,12 @@ export class CollectionRequestUpdateDto {
 	@IsOptional()
 	@IsInt({ message: 'Debe de ser un número' })
 	transporterId: number = null;
+}
+
+export class CollectionRequestRouteInfoDto {
+	@ApiProperty({ description: 'Rutas', isArray: true, type: String })
+	@IsArray({ message: 'Debe de ser un array' })
+	routes: string[];
 }
 
 export class CollectionRequestQueryDto extends IntersectionType(
