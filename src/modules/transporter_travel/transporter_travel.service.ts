@@ -288,4 +288,10 @@ export class TransporterTravelService {
 		// await this.auditGuideService.checkAndSyncAuditGuides([routeId]);
 		// await this.auditGuideService.deleteData();
 	}
+
+	private async updateQuantityConciliate(item: any): Promise<void> {
+
+
+		// this.auditGuideService.checkAndSyncAuditGuides([existingRecord.guideId]);
+	}
 }
