@@ -39,16 +39,16 @@ export class AuditRoute extends CompleteEntity {
 	transporterId: number;
 
 	@ApiProperty({ description: 'Recuperadora Total' })
-	@Column({ type: 'int', name: 'RecuperadoraTotal' })
+	@Column({ type: 'int', name: 'RecuperadoraTotal', nullable: true, default: null })
 	recuperatorTotal: number;
 
 	@ApiProperty({ description: 'Transportadora Total' })
-	@Column({ type: 'int', name: 'TransportadoraTotal' })
+	@Column({ type: 'int', name: 'TransportadoraTotal', nullable: true, default: null })
 	transporterTotal: number;
 
 	@ApiProperty({ description: 'Conciliación Total' })
-	@Column({ type: 'boolean', name: 'ConciliacionTotal', nullable: true, default: null })
-	conciliationTotal: boolean;
+	@Column({ type: 'int', name: 'ConciliacionTotal', nullable: true, default: null })
+	conciliationTotal: number;
 
 	@ApiProperty({ description: 'Estado de la auditoria' })
 	@Column({ type: 'bigint', name: 'EstadoId' })
