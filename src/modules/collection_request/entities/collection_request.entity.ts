@@ -91,7 +91,7 @@ export class CollectionRequest extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Recomendaciones' })
 	recommendations: string;
 
-	@Column({ type: 'varchar', length: 10, name: 'IdRuta', nullable: true })
+	@Column({ type: 'varchar', length: 20, name: 'IdRuta', nullable: true })
     routeId: string;
 
 	@OneToMany(() => CollectionRequestAudit, (collectionRequestAudit) => collectionRequestAudit.collectionRequest)
