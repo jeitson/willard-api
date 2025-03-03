@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ConciliateByTypesAuditRouteDto, ConciliateTotalsAuditRouteDto, ListAuditRouteDto } from './dto/audit_route.dto';
+import { ConciliateTotalsAuditRouteDto, ConfirmAuditRouteDto, ListAuditRouteDto } from './dto/audit_route.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,8 @@ import { Child } from '../catalogs/entities/child.entity';
 import { AUDIT_ROUTE_STATUS } from 'src/core/constants/status.constant';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { AuditRouteDetail } from './entities/audit_route_detail.entity';
+import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
+import { Product } from '../products/entities/product.entity';
 
 @Injectable()
 export class AuditRouteService {
@@ -16,6 +18,8 @@ export class AuditRouteService {
 	constructor(
 		@InjectRepository(TransporterTravel)
 		private readonly transporterTravelRepository: Repository<TransporterTravel>,
+		@InjectRepository(TransporterTravelDetail)
+		private readonly transporterTravelDetailRepository: Repository<TransporterTravelDetail>,
 		@InjectRepository(Reception)
 		private readonly receptionRepository: Repository<Reception>,
 		@InjectRepository(AuditRoute)
@@ -85,7 +89,7 @@ export class AuditRouteService {
 			.getMany();
 	}
 
-	async conciliateTotals(id: number, content: ConciliateTotalsAuditRouteDto): Promise<void> {
+	async confirm(id: number, content: ConfirmAuditRouteDto): Promise<void> {
 		let auditRoute = await this.auditRouteRepository.findOne({ where: { id, status: true } });
 
 		if (!auditRoute) {
@@ -96,25 +100,49 @@ export class AuditRouteService {
 			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 404);
 		}
 
-		await this.auditRouteRepository.update(id, content);
-	}
+		const { transporter, products, ..._content } = content;
 
-	async conciliateByTypes(id: number, { content }: ConciliateByTypesAuditRouteDto): Promise<void> {
-		const auditRoute = await this.auditRouteRepository.findOne({ where: { id, status: true } });
-		if (!auditRoute) {
-			throw new BusinessException('Auditoria de ruta no encontrada', 404);
-		}
+		await this.auditRouteRepository.update(id, _content);
 
-		if (auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.BY_CONCILLIATE) {
-			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
-		}
+		// Transportadora
+		const createItemsTransporter = transporter.filter((element) => !element.id && element.productName && element.isNew);
+		const updateItemsTransporter = transporter.filter((element) => element.id);
 
-		const createItems = content.filter((element) => !element.id && element.productId);
-		const updateItems = content.filter((element) => element.id);
+		await this.transporterTravelRepository.manager.transaction(async (transactionalEntityManager) => {
+			if (createItemsTransporter.length > 0) {
+				const createdItemsTransporter = createItemsTransporter.map(({ productName, quantity, guideNumber: guideId }) => {
+
+					const transporterTravel = this.transporterTravelRepository.find({ where: { guideId }});
+
+					if (!transporterTravel) {
+						// TODO: Hace fatla verificar que ocurre en este caso
+						return;
+					}
+
+					return this.transporterTravelDetailRepository.create({
+						batteryType: productName,
+						quantity: quantity,
+						quantityConciliated: quantity
+					})
+				});
+
+				await transactionalEntityManager.save(createdItemsTransporter);
+			}
+
+			if (updateItemsTransporter.length > 0) {
+				for (const { id, quantity: quantityConciliated } of updateItemsTransporter) {
+					await transactionalEntityManager.update(TransporterTravelDetail, id, { quantityConciliated });
+				}
+			}
+		});
+
+		// Productos
+		const createItemsProducts = products.filter((element) => !element.id && element.productId);
+		const updateItemsProducts = products.filter((element) => element.id);
 
 		await this.auditRouteDetailRepository.manager.transaction(async (transactionalEntityManager) => {
-			if (createItems.length > 0) {
-				const createdItems = createItems.map(({ productId, quantity }) =>
+			if (createItemsProducts.length > 0) {
+				const createdItemsProducts = createItemsProducts.map(({ productId, quantity }) =>
 					this.auditRouteDetailRepository.create({
 						auditRoute: { id },
 						product: { id: productId },
@@ -122,11 +150,11 @@ export class AuditRouteService {
 						quantityConciliated: quantity,
 					})
 				);
-				await transactionalEntityManager.save(createdItems);
+				await transactionalEntityManager.save(createdItemsProducts);
 			}
 
-			if (updateItems.length > 0) {
-				for (const { id, quantity: quantityConciliated } of updateItems) {
+			if (updateItemsProducts.length > 0) {
+				for (const { id, quantity: quantityConciliated } of updateItemsTransporter) {
 					await transactionalEntityManager.update(AuditRouteDetail, id, { quantityConciliated });
 				}
 			}

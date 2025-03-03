@@ -8,8 +8,8 @@ import { TransporterTravel } from "src/modules/transporter_travel/entities/trans
 
 @Entity({ name: 'auditoria_ruta' })
 export class AuditRoute extends CompleteEntity {
-	@ApiProperty({ description: 'Fecha' })
-	@Column({ type: 'varchar', length: 20, name: 'Fecha', nullable: true })
+	@ApiProperty({ description: 'RutaId' })
+	@Column({ type: 'varchar', length: 20, name: 'RutaId', nullable: true })
 	routeId: string;
 
 	@JoinColumn({ name: 'RecepcionId' })

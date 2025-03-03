@@ -13,4 +13,7 @@ export class TransporterTravelDetail extends CompleteEntity {
 
     @Column({ type: 'int', name: 'Cantidad' })
     quantity: number;
+
+	@Column({ type: 'int', name: 'CantidadConciliada' })
+	quantityConciliated: number;
 }

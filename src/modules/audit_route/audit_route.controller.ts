@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuditRouteService } from './audit_route.service';
 import { Roles } from 'src/core/common/decorators/role.decorator';
-import { Public } from 'src/core/common/decorators/public.decorator';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
-import { ConciliateByTypesAuditRouteDto, ConciliateTotalsAuditRouteDto, ListAuditRouteDto } from './dto/audit_route.dto';
+import { ConfirmAuditRouteDto, ListAuditRouteDto } from './dto/audit_route.dto';
 import { AuditRoute } from './entities/audit_route.entity';
 import { ROL } from 'src/core/constants/rol.constant';
 import { RolesGuard } from 'src/core/guards/roles.guard';
@@ -32,17 +31,10 @@ export class AuditRouteController {
 		return this.auditRouteService.findAll();
 	}
 
-	@Patch('conciliate-totals/:id')
+	@Post('confirm/:id')
 	@Roles(ROL.AUDITORIA_PH)
-	@ApiOperation({ summary: 'Conciliación total' })
-	async conciliateTotals(@IdParam('id') id: string, @Body() body: ConciliateTotalsAuditRouteDto) {
-		return this.auditRouteService.conciliateTotals(+id, body);
-	}
-
-	@Patch('conciliate-by-types/:id')
-	@Roles(ROL.AUDITORIA_PH)
-	@ApiOperation({ summary: 'Conciliación por tipos' })
-	async conciliateByTypes(@IdParam('id') id: string, @Body() body: ConciliateByTypesAuditRouteDto) {
-		return this.auditRouteService.conciliateByTypes(+id, body);
+	@ApiOperation({ summary: 'Confirmación de conciliación' })
+	async confirm(@IdParam('id') id: string, @Body() body: ConfirmAuditRouteDto) {
+		return this.auditRouteService.confirm(+id, body);
 	}
 }
