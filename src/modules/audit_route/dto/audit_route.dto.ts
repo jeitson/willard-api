@@ -66,15 +66,15 @@ export class ConciliateTransporterAuditRouteDto {
 	@IsString({ message: 'Producto debe ser un texto.' })
 	productName?: string;
 
-	@ApiProperty({ description: 'Cantidad, debe ser un texto.' })
-	@IsNotEmpty({ message: 'Cantidad es obligatorio y debe ser un texto.' })
-	@IsString({ message: 'Cantidad debe ser un texto.' })
+	@ApiProperty({ description: 'Número de Guía, debe ser un texto.' })
+	@IsNotEmpty({ message: 'Número de Guía es obligatorio y debe ser un texto.' })
+	@IsString({ message: 'Número de Guía debe ser un texto.' })
 	guideNumber: string;
 
-	@ApiProperty({ description: 'Cantidad, debe ser un booleano.' })
-	@IsNotEmpty({ message: 'Cantidad es obligatorio y debe ser un booleano.' })
-	@IsBoolean({ message: 'Cantidad debe ser un booleano.' })
-	isNew: string;
+	@ApiProperty({ description: 'isNew, debe ser un booleano.' })
+	@IsNotEmpty({ message: 'isNew es obligatorio y debe ser un booleano.' })
+	@IsBoolean({ message: 'isNew debe ser un booleano.' })
+	isNew: boolean;
 }
 
 export class ConfirmAuditRouteDto extends ConciliateTotalsAuditRouteDto {
@@ -91,4 +91,9 @@ export class ConfirmAuditRouteDto extends ConciliateTotalsAuditRouteDto {
 	@ValidateNested({ each: true, message: 'Cada registro debe ser válido' })
 	@Type(() => ConciliateTransporterAuditRouteDto)
 	transporter: ConciliateTransporterAuditRouteDto[];
+
+	@ApiProperty({ description: 'IsSave es un valor booleano.' })
+	@IsNotEmpty({ message: 'IsSave es obligatorio y debe ser un booleano.' })
+	@IsBoolean({ message: 'IsSave debe ser un booleano.' })
+	isSave: boolean;
 }
