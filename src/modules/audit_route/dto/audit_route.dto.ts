@@ -1,8 +1,95 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { ArrayNotEmpty, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, ValidateNested } from "class-validator";
 
-export class CreateAuditRouteDto { }
+export class CreateAuditRouteDetailDto {
+	@ApiProperty({ description: 'Guia ID', required: true })
+	@IsString()
+	@IsNotEmpty()
+	guideId: string;
+
+	@ApiProperty({ description: 'ID del producto', required: true })
+	@IsNumber()
+	@IsNotEmpty()
+	productId: number;
+
+	@ApiProperty({ description: 'Cantidad', required: true })
+	@IsInt()
+	@Min(1)
+	quantity: number;
+
+	@ApiProperty({ description: 'Cantidad Conciliada', required: true })
+	@IsInt()
+	@Min(0)
+	quantityConciliated: number;
+}
+
+export class CreateAuditRouteDto {
+	@ApiProperty({ description: 'RutaId', required: false })
+	@IsString()
+	@IsOptional()
+	routeId?: string;
+
+	@ApiProperty({ description: 'ID de recepción (FK)', required: true })
+	@IsNotEmpty()
+	receptionId: number;
+
+	@ApiProperty({ description: 'ID de la transportadora viaje (FK)', required: true })
+	@IsNotEmpty()
+	transporterTravelId: number;
+
+	@ApiProperty({ description: 'Fecha', required: true })
+	@IsString()
+	@IsNotEmpty()
+	date: string;
+
+	@ApiProperty({ description: 'Zona ID', required: false })
+	@IsNumber()
+	@IsOptional()
+	zoneId?: number;
+
+	@ApiProperty({ description: 'Recuperadora ID', required: false })
+	@IsNumber()
+	@IsOptional()
+	recuperatorId?: number;
+
+	@ApiProperty({ description: 'Transportadora ID', required: false })
+	@IsNumber()
+	@IsOptional()
+	transporterId?: number;
+
+	@ApiProperty({ description: 'Recuperadora Total', required: false })
+	@IsInt()
+	@Min(0)
+	@IsOptional()
+	recuperatorTotal?: number;
+
+	@ApiProperty({ description: 'Transportadora Total', required: false })
+	@IsInt()
+	@Min(0)
+	@IsOptional()
+	transporterTotal?: number;
+
+	@ApiProperty({ description: 'Conciliación Total', required: false })
+	@IsInt()
+	@Min(0)
+	@IsOptional()
+	conciliationTotal?: number;
+
+	@ApiProperty({ description: 'Estado de la auditoría', required: true })
+	@IsNumber()
+	@IsNotEmpty()
+	requestStatusId: number;
+
+	@ApiProperty({ description: 'Comentario', required: false })
+	@IsString()
+	@MaxLength(1000)
+	@IsOptional()
+	comment?: string;
+
+	@ApiProperty({ description: 'Detalles de la auditoría', required: true, type: [CreateAuditRouteDetailDto] })
+    details: CreateAuditRouteDetailDto[];
+}
 
 export class ListAuditRouteDto {
 	origin: string;

@@ -8,15 +8,15 @@ import { AuditRoute } from './entities/audit_route.entity';
 import { ROL } from 'src/core/constants/rol.constant';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
+import { Public } from 'src/core/common/decorators/public.decorator';
 
 @ApiTags('Negocio - Auditoria Ruta')
 @Controller('audit-route')
-@UseGuards(RolesGuard)
 export class AuditRouteController {
 	constructor(private readonly auditRouteService: AuditRouteService) { }
 
 	@Get('sync-pending')
-	@Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Listado de registros de transportadora - recepción' })
 	@ApiResult({ type: [ListAuditRouteDto] })
 	async findAllSyncPending() {
@@ -24,7 +24,7 @@ export class AuditRouteController {
 	}
 
 	@Get('')
-	@Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Listado de auditoria de rutas' })
 	@ApiResult({ type: [AuditRoute] })
 	async findAll() {
@@ -32,7 +32,7 @@ export class AuditRouteController {
 	}
 
 	@Post('confirm/:id')
-	@Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Confirmación de conciliación' })
 	async confirm(@IdParam('id') id: string, @Body() body: ConfirmAuditRouteDto) {
 		return this.auditRouteService.confirm(+id, body);

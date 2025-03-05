@@ -8,11 +8,12 @@ import { TransporterTravelModule } from '../transporter_travel/transporter_trave
 import { ReceptionsModule } from '../receptions/receptions.module';
 import { CatalogsModule } from '../catalogs/catalogs.module';
 import { UsersModule } from '../users/users.module';
+import { ProductsModule } from '../products/products.module';
 
 const providers = [AuditRouteService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail]), TransporterTravelModule, ReceptionsModule, CatalogsModule, UsersModule],
+	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail]), TransporterTravelModule, ReceptionsModule, CatalogsModule, UsersModule, ProductsModule],
 	controllers: [AuditRouteController],
 	providers,
 	exports: [TypeOrmModule, ...providers],
