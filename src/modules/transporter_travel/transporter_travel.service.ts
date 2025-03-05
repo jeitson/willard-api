@@ -13,6 +13,7 @@ import { Child } from '../catalogs/entities/child.entity';
 import { ResponseCodeTransporterTravel } from './entities/response';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
+import { AuditRouteService } from '../audit_route/audit_route.service';
 
 @Injectable()
 export class TransporterTravelService {
@@ -23,6 +24,7 @@ export class TransporterTravelService {
 		private readonly productRepository: Repository<Product>,
 		@InjectRepository(Child)
 		private readonly childrensRepository: Repository<Child>,
+		private readonly auditRouteService: AuditRouteService
 	) { }
 
 	async createFromJson(data: TransporterTravelDto): Promise<ResponseCodeTransporterTravel[]> {
@@ -129,6 +131,7 @@ export class TransporterTravelService {
 				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
 			];
 
+			await this.auditRouteService.synchronizeAndCreate(savedRecords.map((element) => element.routeId));
 			// await this.auditGuideService.createByTransporter(allSavedRecords);
 
 			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
@@ -205,7 +208,7 @@ export class TransporterTravelService {
 		// Actualizar detalles
 		existingRecord.details = this.convertDetail(item.details);
 
-		// this.auditGuideService.checkAndSyncAuditGuides([existingRecord.guideId]);
+		await this.auditRouteService.synchronizeAndCreate([item.routeId]);
 	}
 
 	private async validateAllRecords(records: any[]): Promise<void> {
@@ -273,20 +276,8 @@ export class TransporterTravelService {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		// const routeIdOld = JSON.parse(JSON.stringify(existingRecord.routeId));
-
-		// existingRecord.routeId = routeId;
-
-		// for (const transporterTravel of existingRecord) {
-		// 	if (transporterTravel.auditGuide) {
-		// 		await this.auditGuideService.updateRouteId(routeIdOld, routeId);
-		// 	}
-		// }
-
 		await this.transporterTravelRepository.update(existingRecord.id, { routeId });
-
-		// await this.auditGuideService.checkAndSyncAuditGuides([routeId]);
-		// await this.auditGuideService.deleteData();
+		await this.auditRouteService.synchronizeAndCreate([routeId]);
 	}
 
 	private async updateQuantityConciliate(item: any): Promise<void> {

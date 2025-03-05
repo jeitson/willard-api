@@ -16,6 +16,7 @@ import { Child } from '../catalogs/entities/child.entity';
 import { RECEIPT_STATUS } from 'src/core/constants/status.constant';
 import { PICKUP_LOCATION_TYPE } from 'src/core/constants/types.constant';
 import { ROL } from 'src/core/constants/rol.constant';
+import { AuditRouteService } from '../audit_route/audit_route.service';
 
 
 /** Estados ID
@@ -37,7 +38,8 @@ export class ReceptionsService {
 		private readonly transporterRepository: Repository<Transporter>,
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
-		private readonly userContextService: UserContextService
+		private readonly userContextService: UserContextService,
+		private readonly auditRouteService: AuditRouteService
 	) { }
 
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
@@ -87,20 +89,7 @@ export class ReceptionsService {
 			}
 
 			if (roles.includes(ROL.RECUPERADORA)) {
-				// await this.auditGuideService.create({
-				// 	reception: savedReception,
-				// 	routeId: reception.routeId,
-				// 	recuperatorId: user_id,
-				// 	recuperatorTotal: createReceptionDto.details.reduce((acc, item) => acc += item.quantity, 0),
-				// 	transporterId: transporter.id,
-				// 	transporterTotal: 0,
-				// 	auditGuideDetails: createReceptionDto.details.map((item) => ({
-				// 		productId: item.productId,
-				// 		isRecuperator: true,
-				// 		quantity: item.quantity,
-				// 		quantityCollection: item.quantity
-				// 	}))
-				// });
+				await this.auditRouteService.synchronizeAndCreate([reception.routeId]);
 			}
 
 		} catch (error) {
@@ -197,6 +186,8 @@ export class ReceptionsService {
 			if (updateReceptionDto.photos) {
 				await this.updateReceptionPhotos(savedReception.id, updateReceptionDto.photos);
 			}
+
+			await this.auditRouteService.synchronizeAndCreate([savedReception.routeId]);
 
 			return savedReception;
 
