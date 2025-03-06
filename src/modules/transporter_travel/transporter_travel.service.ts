@@ -43,7 +43,19 @@ export class TransporterTravelService {
 			});
 		}
 
-		const { id: user_id } = this.userContextService.getUserDetails();
+		let { id: user_id, transporter, zones } = this.userContextService.getUserDetails();
+
+		if (!transporter) {
+			throw new BusinessException('El usuario no tiene configurado una transportadora');
+		}
+
+		if (zones.length === 0) {
+			throw new BusinessException('El usuario no tiene configurado zonas');
+		}
+
+		if(!zones.map(({ zone }) => zone.name).includes(travelRecordDto.zona)) {
+			throw new BusinessException('Está intentando ingresar una zona que no tiene asignada');
+		}
 
 		try {
 			const item = this.mapRowToTransporterTravelDto(data);
@@ -55,7 +67,7 @@ export class TransporterTravelService {
 				await this.updateTransporterTravel(item);
 			} else {
 				const travelRecord = this.transporterTravelRepository.create(item);
-				const savedRecord = await this.transporterTravelRepository.save({ ...travelRecord, createdBy: user_id, modifiedBy: user_id });
+				const savedRecord = await this.transporterTravelRepository.save({ ...travelRecord, createdBy: user_id, modifiedBy: user_id, transporter });
 
 				await this.auditRouteService.synchronizeAndCreate(travelRecord.map((element) => element.routeId));
 
@@ -68,6 +80,21 @@ export class TransporterTravelService {
 
 	async createFromExcel(file: any): Promise<ResponseCodeTransporterTravel[]> {
 		try {
+			let { id: user_id, transporter, zones } = this.userContextService.getUserDetails();
+			const createdBy = user_id, modifiedBy = user_id;
+
+			if (!transporter) {
+				throw new BusinessException('El usuario no tiene configurado una transportadora');
+			}
+
+			if (zones.length === 0) {
+				throw new BusinessException('El usuario no tiene configurado zonas');
+			}
+
+			if (!transporter) {
+				throw new BusinessException('El usuario no tiene configurado una transportadora');
+			}
+
 			const workbook = XLSX.read(file.buffer, { type: 'buffer' });
 			const mainSheetName = workbook.SheetNames[0];
 			const mainSheet = workbook.Sheets[mainSheetName];
@@ -92,9 +119,6 @@ export class TransporterTravelService {
 				return acc;
 			}, {});
 
-			const { id: user_id } = this.userContextService.getUserDetails();
-			const createdBy = user_id, modifiedBy = user_id;
-
 			for (const [index, row] of mainData.entries()) {
 				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
 				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
@@ -117,13 +141,19 @@ export class TransporterTravelService {
 				}
 			}
 
+			const _zones = zones.map(({ zone }) => zone.name);
+
+			if(!recordsToCreate.map((element) => element.zona).every((element) => _zones.includes(element))) {
+				throw new BusinessException('Está intentando ingresar una zona que no tiene asignada');
+			}
+
 			await this.validateAllRecords([...recordsToCreate, ...recordsToUpdate]);
 
 			for (const record of recordsToUpdate) {
 				await this.updateTransporterTravel(record);
 			}
 
-			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate);
+			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate.map((element) => ({ ...element, transporter })));
 
 			const allSavedRecords = [
 				...savedRecords,
@@ -253,9 +283,14 @@ export class TransporterTravelService {
 	}
 
 	async findAll(query: any): Promise<Pagination<TransporterTravel>> {
+		let { id: user_id, transporter: { id: transporterId }, zones } = this.userContextService.getUserDetails();
+		zones.map(({ zone }) => zone.name)
+
 		const queryBuilder = this.transporterTravelRepository
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndSelect('transporter_travel.details', 'details')
+			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
+			.where('transporter_travel.zone IN (:...zones) AND createdBy =: user_id && AND transporter.id =: transporterId', { zones, user_id, transporterId });
 
 		return await paginate<TransporterTravel>(queryBuilder, {
 			page: query.page,
@@ -266,7 +301,7 @@ export class TransporterTravelService {
 	async updateRouteId(id: number, { idRuta: routeId }: TransporterTravelRouteIdDto): Promise<void> {
 		const existingRecord = await this.transporterTravelRepository.findOne({
 			where: { id },
-			relations: ['transportersTravels', 'transportersTravels.auditRoute', 'details'],
+			relations: ['transportersTravels', 'details'],
 		});
 
 		if (!existingRecord) {

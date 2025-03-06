@@ -384,6 +384,7 @@ export class UsersService {
 			.leftJoinAndSelect('user.roles', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.leftJoinAndSelect('user.zones', 'userZones')
+			.leftJoinAndMapOne('userZones.zone', Child, 'child', 'child.id = userZones.zoneId')
 			.leftJoinAndSelect('user.transporter', 'transporter')
 			.where('user.oauthId = :id', { id })
 			.getOne()
