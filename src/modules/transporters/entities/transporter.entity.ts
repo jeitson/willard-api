@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
+import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { TransporterTravel } from "src/modules/transporter_travel/entities/transporter_travel.entity";
 import { User } from "src/modules/users/entities/user.entity";
@@ -40,13 +41,14 @@ export class Transporter extends CompleteEntity {
 	referencePH: string;
 
 	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.transporter)
-	collectionsRequests: CollectionRequest[];
+	collectionsRequests: () => CollectionRequest[]; // Lazy resolver
 
 	@OneToMany(() => TransporterTravel, (transporterTravel) => transporterTravel.transporter)
 	transporterTravels: () => TransporterTravel[]; // Lazy resolver
 
+	@OneToMany(() => User, (user) => user.transporter)
+	users: () => User[]; // Lazy resolver
 
-	@ApiProperty({ description: 'usuarios' })
-	@OneToMany(() => User, user => user.transporter)
-	users: User[];
+	@OneToMany(() => AuditRoute, (auditRoute) => auditRoute.transporter)
+	auditRoutes: () => AuditRoute[]; // Lazy resolver
 }

@@ -8,6 +8,7 @@ import { CollectionRequest } from "src/modules/collection_request/entities/colle
 import { UserCollectionSite } from "./user-collection_site.entity";
 import { UserZone } from "./user-zone.entity";
 import { Transporter } from "src/modules/transporters/entities/transporter.entity";
+import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 
 @Entity({ name: 'usuario' })
 export class User extends CompleteEntity {

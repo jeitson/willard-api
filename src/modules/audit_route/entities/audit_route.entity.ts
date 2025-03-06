@@ -1,10 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Reception } from "src/modules/receptions/entities/reception.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
-import { AUDIT_ROUTE_REASON } from "src/core/constants/status.constant";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { AuditRouteDetail } from "./audit_route_detail.entity";
-import { TransporterTravel } from "src/modules/transporter_travel/entities/transporter_travel.entity";
+import { Transporter } from "src/modules/transporters/entities/transporter.entity";
+import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
 
 @Entity({ name: 'auditoria_ruta' })
 export class AuditRoute extends CompleteEntity {
@@ -15,7 +15,7 @@ export class AuditRoute extends CompleteEntity {
 	@JoinColumn({ name: 'RecepcionId' })
 	@ApiProperty({ description: 'ID de recepción (FK)' })
 	@ManyToOne(() => Reception, (reception) => reception.auditRoutes)
-	reception: Reception;
+	reception: () => Reception;
 
 	@ApiProperty({ description: 'Fecha' })
 	@Column({ type: 'varchar', length: 20, name: 'Fecha', nullable: true })
@@ -29,9 +29,13 @@ export class AuditRoute extends CompleteEntity {
 	@Column({ type: 'bigint', name: 'RecuperadoraId', nullable: true, default: null })
 	recuperatorId: number;
 
-	@ApiProperty({ description: 'Transportadora ID' })
-	@Column({ type: 'bigint', name: 'TransportadoraId', nullable: true, default: null })
-	transporterId: number;
+	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.auditRoutes)
+	@JoinColumn({ name: 'RecuperadoraId' })
+	collectionSite: CollectionSite; // Lazy resolver
+
+	@ManyToOne(() => Transporter, (transporter) => transporter.auditRoutes)
+	@JoinColumn({ name: 'TransportadoraId' })
+	transporter:  Transporter; // Lazy resolver
 
 	@ApiProperty({ description: 'Recuperadora Total' })
 	@Column({ type: 'int', name: 'RecuperadoraTotal', nullable: true, default: null })

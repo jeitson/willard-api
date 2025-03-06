@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
+import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
 import { ReportsPh } from "src/modules/reports_ph/entities/reports_ph.entity";
@@ -78,6 +79,6 @@ export class CollectionSite extends CompleteEntity {
 	@ManyToMany(() => User, user => user.collectionSites)
 	users: User[];
 
-	// @OneToMany(() => ReportsPh, (reportsPh) => reportsPh.collectionSite)
-	reportsPh: ReportsPh[];
+	@OneToMany(() => AuditRoute, auditRoutes => auditRoutes.collectionSite)
+	auditRoutes: AuditRoute[]; // Lazy resolver
 }

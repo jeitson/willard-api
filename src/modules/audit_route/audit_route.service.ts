@@ -6,7 +6,7 @@ import { In, Repository } from 'typeorm';
 import { Reception } from '../receptions/entities/reception.entity';
 import { AuditRoute } from './entities/audit_route.entity';
 import { Child } from '../catalogs/entities/child.entity';
-import { AUDIT_ROUTE_STATUS } from 'src/core/constants/status.constant';
+import { AUDIT_ROUTE_REASON, AUDIT_ROUTE_STATUS } from 'src/core/constants/status.constant';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { AuditRouteDetail } from './entities/audit_route_detail.entity';
 import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
@@ -52,7 +52,7 @@ export class AuditRouteService {
 
 		const transporterTravels = await this.transporterTravelRepository
 			.createQueryBuilder('transporterTravel')
-			.leftJoinAndSelect('transporterTravel.auditRoutes', 'auditRoute')
+			.leftJoinAndMapOne('transporterTravel.routeId', AuditRoute, 'auditRoute', 'auditRoute.routeId = transporterTravel.routeId')
 			.where('auditRoute.id IS NULL')
 			.getMany();
 
@@ -78,6 +78,22 @@ export class AuditRouteService {
 				reception,
 				reception.receptionDetails.reduce((acc, detail) => acc + detail.quantity, 0),
 				'SIN GUIA'
+			)
+		);
+
+		const auditsRoutes = await this.auditRouteRepository.find({
+			where: {
+				requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE
+			},
+			relations: ['auditRouteDetails']
+		});
+
+		const mappedAuditsRoutes = auditsRoutes.map((item) =>
+			mapToAuditRouteDto(
+				'',
+				item,
+				item.auditRouteDetails.reduce((acc, detail) => acc + detail.quantity, 0),
+				'POR CONCILIAR'
 			)
 		);
 
