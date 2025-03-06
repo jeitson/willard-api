@@ -17,11 +17,6 @@ export class AuditRoute extends CompleteEntity {
 	@ManyToOne(() => Reception, (reception) => reception.auditRoutes)
 	reception: Reception;
 
-	@JoinColumn({ name: 'TransportadoraViajeId' })
-	@ApiProperty({ description: 'ID de la transportadora viaje (FK)' })
-	@ManyToOne(() => TransporterTravel, (transporterTravel) => transporterTravel.auditRoutes)
-	transporterTravel: TransporterTravel;
-
 	@ApiProperty({ description: 'Fecha' })
 	@Column({ type: 'varchar', length: 20, name: 'Fecha', nullable: true })
 	date: string;

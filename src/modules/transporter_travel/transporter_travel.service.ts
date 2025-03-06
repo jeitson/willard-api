@@ -53,7 +53,7 @@ export class TransporterTravelService {
 				const travelRecord = this.transporterTravelRepository.create(item);
 				const savedRecord = await this.transporterTravelRepository.save(travelRecord);
 
-				// this.auditGuideService.createByTransporter(savedRecord);
+				await this.auditRouteService.synchronizeAndCreate(travelRecord.map((element) => element.routeId));
 
 				return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 			}
@@ -76,7 +76,6 @@ export class TransporterTravelService {
 			const recordsToUpdate = [];
 			const validationErrors = [];
 
-			// Agrupar detalles por guía
 			const detailsByGuide = detailData.reduce((acc, detail) => {
 				const idGuia = detail['idGuia'];
 				if (!acc[idGuia]) {
@@ -89,7 +88,6 @@ export class TransporterTravelService {
 				return acc;
 			}, {});
 
-			// Procesar cada fila del archivo principal
 			for (const [index, row] of mainData.entries()) {
 				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
 				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
@@ -97,7 +95,6 @@ export class TransporterTravelService {
 				const details = detailsByGuide[record.guideId] || [];
 				record.details = this.convertDetail(details);
 
-				// Validar que el registro tenga al menos un detalle
 				if (!record.details || record.details.length === 0) {
 					validationErrors.push({
 						row: index + 1,
@@ -106,7 +103,6 @@ export class TransporterTravelService {
 					continue;
 				}
 
-				// Separar registros para creación y actualización
 				if (record.guidePreviousId) {
 					recordsToUpdate.push(record);
 				} else {
@@ -114,25 +110,20 @@ export class TransporterTravelService {
 				}
 			}
 
-			// Validar todos los registros antes de proceder
 			await this.validateAllRecords([...recordsToCreate, ...recordsToUpdate]);
 
-			// Procesar actualizaciones
 			for (const record of recordsToUpdate) {
 				await this.updateTransporterTravel(record);
 			}
 
-			// Procesar creaciones
 			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate);
 
-			// Combinar resultados de creación y actualización
 			const allSavedRecords = [
 				...savedRecords,
 				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
 			];
 
 			await this.auditRouteService.synchronizeAndCreate(savedRecords.map((element) => element.routeId));
-			// await this.auditGuideService.createByTransporter(allSavedRecords);
 
 			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {
@@ -207,8 +198,6 @@ export class TransporterTravelService {
 
 		// Actualizar detalles
 		existingRecord.details = this.convertDetail(item.details);
-
-		await this.auditRouteService.synchronizeAndCreate([item.routeId]);
 	}
 
 	private async validateAllRecords(records: any[]): Promise<void> {
@@ -269,20 +258,16 @@ export class TransporterTravelService {
 	async updateRouteId(id: number, { idRuta: routeId }: TransporterTravelRouteIdDto): Promise<void> {
 		const existingRecord = await this.transporterTravelRepository.findOne({
 			where: { id },
-			relations: ['transportersTravels', 'transportersTravels.auditGuide', 'details'],
+			relations: ['transportersTravels', 'transportersTravels.auditRoute', 'details'],
 		});
 
 		if (!existingRecord) {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
+		// TODO: Validar si ya tiene auditoria relacionada
+
 		await this.transporterTravelRepository.update(existingRecord.id, { routeId });
 		await this.auditRouteService.synchronizeAndCreate([routeId]);
-	}
-
-	private async updateQuantityConciliate(item: any): Promise<void> {
-
-
-		// this.auditGuideService.checkAndSyncAuditGuides([existingRecord.guideId]);
 	}
 }

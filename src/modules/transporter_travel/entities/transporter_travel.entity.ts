@@ -1,8 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { CompleteEntity } from 'src/core/common/entity/common.entity';
 import { TransporterTravelDetail } from './transporter_travel_detail.entity';
-import { AuditRoute } from 'src/modules/audit_route/entities/audit_route.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
 
 @Entity({ name: 'transportadora_viaje' })
 export class TransporterTravel extends CompleteEntity {
@@ -14,7 +14,7 @@ export class TransporterTravel extends CompleteEntity {
 	guideId: string;
 
 	@Column({ type: 'varchar', name: 'Tipo' })
-	type: string;  // RECOGIDA, ENTREGA o TRANSBORDO
+	type: string; // RECOGIDA, ENTREGA o TRANSBORDO
 
 	@Column({ type: 'int', name: 'Secuencia' })
 	sequence: number;
@@ -64,9 +64,11 @@ export class TransporterTravel extends CompleteEntity {
 	@Column({ type: 'simple-array', name: 'UrlSoportes' })
 	supportUrls: string[];
 
-	@OneToMany(() => TransporterTravelDetail, detail => detail.travelRecord, { cascade: true })
+	@OneToMany(() => TransporterTravelDetail, (detail) => detail.travelRecord, { cascade: true })
 	details: TransporterTravelDetail[];
 
-	@OneToMany(() => AuditRoute, (auditRoute) => auditRoute.transporterTravel)
-	auditRoutes: AuditRoute[];
+	@ManyToOne(() => Transporter, (transporter) => transporter.transporterTravels)
+	@JoinColumn({ name: 'TransportadoraId' })
+	@ApiProperty({ description: 'Transportadora' })
+	transporter: () => Transporter; // Lazy resolver
 }
