@@ -11,11 +11,12 @@ import { UserCollectionSite } from './entities/user-collection_site.entity';
 import { CollectionSitesModule } from '../collection_sites/collection_sites.module';
 import { UserZone } from './entities/user-zone.entity';
 import { CatalogsModule } from '../catalogs/catalogs.module';
+import { TransportersModule } from '../transporters/transporters.module';
 
 const providers = [UsersService, UserContextService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([User, UserRole, UserCollectionSite, UserZone]), RolesModule, CollectionSitesModule, CatalogsModule],
+	imports: [TypeOrmModule.forFeature([User, UserRole, UserCollectionSite, UserZone]), RolesModule, CollectionSitesModule, CatalogsModule, TransportersModule],
 	controllers: [UsersController],
 	providers: [...providers, Auth0Service],
 	exports: [TypeOrmModule, ...providers],

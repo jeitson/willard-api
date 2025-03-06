@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TransportersService } from './transporters.service';
 import { TransportersController } from './transporters.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +8,7 @@ import { UsersModule } from '../users/users.module';
 const providers = [TransportersService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Transporter]), UsersModule],
+	imports: [TypeOrmModule.forFeature([Transporter]), forwardRef(() => UsersModule)],
 	controllers: [TransportersController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

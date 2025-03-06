@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { TransporterTravel } from "src/modules/transporter_travel/entities/transporter_travel.entity";
+import { User } from "src/modules/users/entities/user.entity";
 import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity({ name: 'transportadora' })
@@ -43,4 +44,9 @@ export class Transporter extends CompleteEntity {
 
 	@OneToMany(() => TransporterTravel, (transporterTravel) => transporterTravel.transporter)
 	transporterTravels: () => TransporterTravel[]; // Lazy resolver
+
+
+	@ApiProperty({ description: 'usuarios' })
+	@OneToMany(() => User, user => user.transporter)
+	users: User[];
 }

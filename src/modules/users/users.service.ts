@@ -15,6 +15,7 @@ import { UserCollectionSite } from './entities/user-collection_site.entity';
 import { CollectionSite } from '../collection_sites/entities/collection_site.entity';
 import { UserZone } from './entities/user-zone.entity';
 import { Child } from '../catalogs/entities/child.entity';
+import { Transporter } from '../transporters/entities/transporter.entity';
 
 @Injectable()
 export class UsersService {
@@ -34,6 +35,8 @@ export class UsersService {
 		private readonly userZoneRepository: Repository<UserZone>,
 		@InjectRepository(Child)
 		private readonly childrensRepository: Repository<Child>,
+		@InjectRepository(Transporter)
+		private readonly transporterRepository: Repository<Transporter>,
 		private userContextService: UserContextService,
 		private auth0Service: Auth0Service
 	) { }
@@ -131,12 +134,23 @@ export class UsersService {
 					});
 				}
 
+				let transporter;
+
+				if (data.transporterId) {
+					transporter = await this.transporterRepository.find({ where: { id: data.transporterId }});
+
+					if(!transporter) {
+						throw new BusinessException('No existe la transportadora');
+					}
+				}
+
 				const user = manager.create(User, {
 					auth0Id: auth0User.user_id,
 					email,
 					...data,
 					createdBy: user_id,
 					modifiedBy: user_id,
+					transporter
 				});
 
 				await manager.save(user);

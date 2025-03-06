@@ -76,6 +76,11 @@ export class UserDto {
 	@IsInt({ each: true })
 	@IsOptional()
 	zones?: number[] = [];
+
+	@ApiProperty({ description: 'TransportadoraId', example: '1' })
+	@IsOptional()
+	@IsInt({ message: 'Debe de ser un número' })
+	transporterId?: number;
 }
 
 export class UserOAuthDto {

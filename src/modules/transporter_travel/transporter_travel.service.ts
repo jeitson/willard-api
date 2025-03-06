@@ -43,7 +43,7 @@ export class TransporterTravelService {
 			});
 		}
 
-		const user_id = this.userContextService.getUserDetails()?.id;
+		const { id: user_id } = this.userContextService.getUserDetails();
 
 		try {
 			const item = this.mapRowToTransporterTravelDto(data);
@@ -92,7 +92,7 @@ export class TransporterTravelService {
 				return acc;
 			}, {});
 
-			const user_id = this.userContextService.getUserDetails()?.id;
+			const { id: user_id } = this.userContextService.getUserDetails();
 			const createdBy = user_id, modifiedBy = user_id;
 
 			for (const [index, row] of mainData.entries()) {

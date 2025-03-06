@@ -1,5 +1,5 @@
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity, OneToMany } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { UserRole } from "./user-rol.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from 'class-transformer';
@@ -7,6 +7,7 @@ import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_lo
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { UserCollectionSite } from "./user-collection_site.entity";
 import { UserZone } from "./user-zone.entity";
+import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 
 @Entity({ name: 'usuario' })
 export class User extends CompleteEntity {
@@ -55,4 +56,8 @@ export class User extends CompleteEntity {
 
 	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.user)
 	collectionsRequests: CollectionRequest[];
+
+	@ManyToOne(() => Transporter, transporter => transporter.users)
+	@JoinColumn({ name: 'TransportadoraId' })
+	transporter: Transporter;
 }
