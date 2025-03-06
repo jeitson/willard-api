@@ -79,6 +79,7 @@ export class UsersService {
 	async findUserById(id: string): Promise<User | undefined> {
 		return this.userRepository
 			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.transporter', 'transporter')
 			.leftJoinAndSelect('user.roles', 'userRol')
 			.leftJoinAndSelect('userRol.role', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
@@ -383,6 +384,7 @@ export class UsersService {
 			.leftJoinAndSelect('user.roles', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
 			.leftJoinAndSelect('user.zones', 'userZones')
+			.leftJoinAndSelect('user.transporter', 'transporter')
 			.where('user.oauthId = :id', { id })
 			.getOne()
 	}
@@ -420,6 +422,7 @@ export class UsersService {
 	): Promise<Pagination<User>> {
 		const queryBuilder = this.userRepository
 			.createQueryBuilder('user')
+			.leftJoinAndSelect('user.transporter', 'transporter')
 			.leftJoinAndSelect('user.roles', 'userRol')
 			.leftJoinAndSelect('userRol.role', 'role')
 			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
