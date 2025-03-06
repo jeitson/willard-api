@@ -14,6 +14,7 @@ import { ResponseCodeTransporterTravel } from './entities/response';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { AuditRouteService } from '../audit_route/audit_route.service';
+import { UserContextService } from '../users/user-context.service';
 
 @Injectable()
 export class TransporterTravelService {
@@ -24,7 +25,8 @@ export class TransporterTravelService {
 		private readonly productRepository: Repository<Product>,
 		@InjectRepository(Child)
 		private readonly childrensRepository: Repository<Child>,
-		private readonly auditRouteService: AuditRouteService
+		private readonly auditRouteService: AuditRouteService,
+		private userContextService: UserContextService,
 	) { }
 
 	async createFromJson(data: TransporterTravelDto): Promise<ResponseCodeTransporterTravel[]> {
@@ -41,6 +43,8 @@ export class TransporterTravelService {
 			});
 		}
 
+		const user_id = this.userContextService.getUserDetails()?.id;
+
 		try {
 			const item = this.mapRowToTransporterTravelDto(data);
 			item.details = this.convertDetail(data.detalles);
@@ -51,7 +55,7 @@ export class TransporterTravelService {
 				await this.updateTransporterTravel(item);
 			} else {
 				const travelRecord = this.transporterTravelRepository.create(item);
-				const savedRecord = await this.transporterTravelRepository.save(travelRecord);
+				const savedRecord = await this.transporterTravelRepository.save({ ...travelRecord, createdBy: user_id, modifiedBy: user_id });
 
 				await this.auditRouteService.synchronizeAndCreate(travelRecord.map((element) => element.routeId));
 
@@ -88,6 +92,9 @@ export class TransporterTravelService {
 				return acc;
 			}, {});
 
+			const user_id = this.userContextService.getUserDetails()?.id;
+			const createdBy = user_id, modifiedBy = user_id;
+
 			for (const [index, row] of mainData.entries()) {
 				row['fechaMov'] = excelDateToJSDate(row['fechaMov']);
 				row['horaMov'] = excelTimeToJSDate(row['horaMov']);
@@ -104,9 +111,9 @@ export class TransporterTravelService {
 				}
 
 				if (record.guidePreviousId) {
-					recordsToUpdate.push(record);
+					recordsToUpdate.push({ ...record, modifiedBy });
 				} else {
-					recordsToCreate.push(record);
+					recordsToCreate.push({ ...record, createdBy, modifiedBy });
 				}
 			}
 
@@ -198,6 +205,7 @@ export class TransporterTravelService {
 
 		// Actualizar detalles
 		existingRecord.details = this.convertDetail(item.details);
+		await this.transporterTravelRepository.save({ ...existingRecord, modifiedBy: item.modifiedBy });
 	}
 
 	private async validateAllRecords(records: any[]): Promise<void> {
