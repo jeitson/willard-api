@@ -29,13 +29,9 @@ export class AuditRoute extends CompleteEntity {
 	@Column({ type: 'bigint', name: 'RecuperadoraId', nullable: true, default: null })
 	recuperatorId: number;
 
-	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.auditRoutes)
-	@JoinColumn({ name: 'RecuperadoraId' })
-	collectionSite: CollectionSite; // Lazy resolver
-
-	@ManyToOne(() => Transporter, (transporter) => transporter.auditRoutes)
-	@JoinColumn({ name: 'TransportadoraId' })
-	transporter:  Transporter; // Lazy resolver
+	@ApiProperty({ description: 'Transportadora ID' })
+	@Column({ type: 'bigint', name: 'TransportadoraId', nullable: true, default: null })
+	transporterId: number;
 
 	@ApiProperty({ description: 'Recuperadora Total' })
 	@Column({ type: 'int', name: 'RecuperadoraTotal', nullable: true, default: null })

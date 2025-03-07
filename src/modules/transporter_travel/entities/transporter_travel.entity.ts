@@ -1,7 +1,7 @@
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { CompleteEntity } from 'src/core/common/entity/common.entity';
 import { TransporterTravelDetail } from './transporter_travel_detail.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Transporter } from 'src/modules/transporters/entities/transporter.entity';
 
 @Entity({ name: 'transportadora_viaje' })
@@ -67,8 +67,8 @@ export class TransporterTravel extends CompleteEntity {
 	@OneToMany(() => TransporterTravelDetail, (detail) => detail.travelRecord, { cascade: true })
 	details: TransporterTravelDetail[];
 
+	@ApiHideProperty()
 	@ManyToOne(() => Transporter, (transporter) => transporter.transporterTravels)
 	@JoinColumn({ name: 'TransportadoraId' })
-	@ApiProperty({ description: 'Transportadora' })
-	transporter: () => Transporter; // Lazy resolver
+	transporter: Transporter; // Lazy resolver
 }

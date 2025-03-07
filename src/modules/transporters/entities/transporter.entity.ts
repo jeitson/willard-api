@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
@@ -40,15 +40,15 @@ export class Transporter extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
 
+	@ApiHideProperty()
 	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.transporter)
-	collectionsRequests: () => CollectionRequest[]; // Lazy resolver
+	collectionsRequests: CollectionRequest[];
 
+	@ApiHideProperty()
 	@OneToMany(() => TransporterTravel, (transporterTravel) => transporterTravel.transporter)
-	transporterTravels: () => TransporterTravel[]; // Lazy resolver
+	transporterTravels: TransporterTravel[];
 
+	@ApiHideProperty()
 	@OneToMany(() => User, (user) => user.transporter)
-	users: () => User[]; // Lazy resolver
-
-	@OneToMany(() => AuditRoute, (auditRoute) => auditRoute.transporter)
-	auditRoutes: () => AuditRoute[]; // Lazy resolver
+	users: User[];
 }

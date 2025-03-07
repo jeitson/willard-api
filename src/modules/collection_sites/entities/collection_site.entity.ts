@@ -1,4 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
+import { Exclude, Type } from "class-transformer";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
@@ -78,7 +79,4 @@ export class CollectionSite extends CompleteEntity {
 
 	@ManyToMany(() => User, user => user.collectionSites)
 	users: User[];
-
-	@OneToMany(() => AuditRoute, auditRoutes => auditRoutes.collectionSite)
-	auditRoutes: AuditRoute[]; // Lazy resolver
 }
