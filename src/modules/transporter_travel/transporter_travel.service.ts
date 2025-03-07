@@ -299,7 +299,7 @@ export class TransporterTravelService {
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndSelect('transporter_travel.details', 'details')
 			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
-			.where('transporter_travel.zone IN (:...zones) AND createdBy =: user_id && AND transporter.id =: transporterId', { zones, user_id, transporterId });
+			.where('transporter_travel.zone IN (:...zones) AND createdBy =: user_id AND transporter.id =: transporterId', { zones, user_id, transporterId });
 
 		return await paginate<TransporterTravel>(queryBuilder, {
 			page: query.page,

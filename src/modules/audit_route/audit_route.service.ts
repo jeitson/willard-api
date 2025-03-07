@@ -50,7 +50,7 @@ export class AuditRouteService {
 			status,
 		});
 
-		let { id: user_id, transporter, zones } = this.userContextService.getUserDetails();
+		let { transporter, zones } = this.userContextService.getUserDetails();
 
 		if (!transporter) {
 			throw new BusinessException('El usuario no tiene configurado una transportadora');
@@ -66,7 +66,7 @@ export class AuditRouteService {
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndMapOne('transporter_travel.routeId', AuditRoute, 'auditRoute', 'auditRoute.routeId = transporter_travel.routeId')
 			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
-			.where('transporter_travel.zone IN (:...zones) AND createdBy =: user_id && AND transporter.id =: transporterId', { zones, user_id, transporterId: transporter.id })
+			.where('transporter_travel.zone IN (:...zones) AND transporter.id =: transporterId', { zones, transporterId: transporter.id })
 			.andWhere('auditRoute.id IS NULL')
 			.getMany();
 
@@ -118,7 +118,7 @@ export class AuditRouteService {
 	}
 
 	async findAll(): Promise<AuditRoute[]> {
-		let { id: user_id, transporter, zones } = this.userContextService.getUserDetails();
+		let { transporter, zones } = this.userContextService.getUserDetails();
 
 		if (!transporter) {
 			throw new BusinessException('El usuario no tiene configurado una transportadora');
