@@ -50,10 +50,24 @@ export class AuditRouteService {
 			status,
 		});
 
+		let { id: user_id, transporter, zones } = this.userContextService.getUserDetails();
+
+		if (!transporter) {
+			throw new BusinessException('El usuario no tiene configurado una transportadora');
+		}
+
+		if (zones.length === 0) {
+			throw new BusinessException('El usuario no tiene configurado zonas');
+		}
+
+		zones = zones.map(({ zone }) => zone.name)
+
 		const transporterTravels = await this.transporterTravelRepository
-			.createQueryBuilder('transporterTravel')
-			.leftJoinAndMapOne('transporterTravel.routeId', AuditRoute, 'auditRoute', 'auditRoute.routeId = transporterTravel.routeId')
-			.where('auditRoute.id IS NULL')
+			.createQueryBuilder('transporter_travel')
+			.leftJoinAndMapOne('transporter_travel.routeId', AuditRoute, 'auditRoute', 'auditRoute.routeId = transporter_travel.routeId')
+			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
+			.where('transporter_travel.zone IN (:...zones) AND createdBy =: user_id && AND transporter.id =: transporterId', { zones, user_id, transporterId: transporter.id })
+			.andWhere('auditRoute.id IS NULL')
 			.getMany();
 
 		const mappedTransporterTravels = transporterTravels.map((travel) =>
@@ -66,10 +80,11 @@ export class AuditRouteService {
 		);
 
 		const receptions = await this.receptionRepository
-			.createQueryBuilder('receptions')
-			.leftJoinAndSelect('receptions.receptionDetails', 'receptionDetails')
-			.leftJoinAndSelect('receptions.auditRoutes', 'auditRoute')
-			.where('auditRoute.id IS NULL')
+			.createQueryBuilder('reception')
+			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
+			.leftJoinAndSelect('reception.auditRoutes', 'auditRoute')
+			.leftJoinAndSelect('reception.transporter', 'transporter')
+			.where('auditRoute.id IS NULL AND transporter.id =: transporterId', { transporterId: transporter.id })
 			.getMany();
 
 		const mappedReceptions = receptions.map((reception) =>
@@ -83,29 +98,47 @@ export class AuditRouteService {
 
 		const auditsRoutes = await this.auditRouteRepository.find({
 			where: {
-				requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE
+				requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE,
+				zoneId: In(zones),
+				transporterId: transporter.id,
 			},
 			relations: ['auditRouteDetails']
 		});
 
 		const mappedAuditsRoutes = auditsRoutes.map((item) =>
 			mapToAuditRouteDto(
-				'',
+				'RECUPERADORA - VIAJE TRANSPORTADORA',
 				item,
 				item.auditRouteDetails.reduce((acc, detail) => acc + detail.quantity, 0),
 				'POR CONCILIAR'
 			)
 		);
 
-		return [...mappedTransporterTravels, ...mappedReceptions];
+		return [...mappedTransporterTravels, ...mappedReceptions, ...mappedAuditsRoutes];
 	}
 
 	async findAll(): Promise<AuditRoute[]> {
+		let { id: user_id, transporter, zones } = this.userContextService.getUserDetails();
+
+		if (!transporter) {
+			throw new BusinessException('El usuario no tiene configurado una transportadora');
+		}
+
+		if (zones.length === 0) {
+			throw new BusinessException('El usuario no tiene configurado zonas');
+		}
+
+		zones = zones.map(({ zone }) => zone.name)
+
 		return this.auditRouteRepository.createQueryBuilder('auditRoute')
-			.leftJoinAndSelect('auditRoute.transporterTravel', 'transporterTravel')
 			.leftJoinAndSelect('auditRoute.reception', 'reception')
+			.leftJoinAndSelect('auditRoute.transporter', 'transporter')
 			.leftJoinAndSelect('auditRoute.auditRouteDetails', 'auditRouteDetails')
 			.leftJoinAndMapOne('auditRoute.requestStatusId', Child, 'requestStatus', 'requestStatus.id = auditRoute.requestStatusId')
+			// .leftJoinAndMapOne('auditRoute.zone', Child, 'zone', 'zone.name = auditRoute.zone')
+			.leftJoinAndMapOne('auditRoute.transporterTravel', TransporterTravel, 'transporterTravel', 'transporterTravel.routeId = auditRoute.routeId')
+			.where('zone IN (:...zones) AND transporter.id =: transporterId', { zones, transporterId: transporter.id })
+			// .where('zone.name IN (:...zones) AND transporter.id =: transporterId', { zones, transporterId: transporter.id })
 			.getMany();
 	}
 
@@ -128,19 +161,17 @@ export class AuditRouteService {
 
 		await this.transporterTravelRepository.manager.transaction(async (transactionalEntityManager) => {
 			if (createItemsTransporter.length > 0) {
-				const createdItemsTransporter = createItemsTransporter.map(({ productName, quantity, guideNumber: guideId }) => {
+				const createdItemsTransporter = createItemsTransporter.map(async ({ productName, quantity, guideNumber: guideId }) => {
 
-					const transporterTravel = this.transporterTravelRepository.find({ where: { guideId } });
+					const transporterTravel = await this.transporterTravelRepository.findOne({ where: { guideId } });
 
-					if (!transporterTravel) {
-						// TODO: Hace fatla verificar que ocurre en este caso
-						return;
-					}
+					if (!transporterTravel) return;
 
 					return this.transporterTravelDetailRepository.create({
 						batteryType: productName,
 						quantity: quantity,
-						quantityConciliated: quantity
+						quantityConciliated: quantity,
+						travelRecord: transporterTravel
 					})
 				});
 
