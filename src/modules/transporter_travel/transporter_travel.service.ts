@@ -69,8 +69,6 @@ export class TransporterTravelService {
 				const travelRecord = this.transporterTravelRepository.create(item);
 				const savedRecord = await this.transporterTravelRepository.save({ ...travelRecord, createdBy: user_id, modifiedBy: user_id, transporter });
 
-				await this.auditRouteService.synchronizeAndCreate(travelRecord.map((element) => element.routeId));
-
 				return savedRecord.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 			}
 		} catch (error) {
@@ -159,8 +157,6 @@ export class TransporterTravelService {
 				...savedRecords,
 				...recordsToUpdate.map((record) => ({ type: record.type, id: record.guidePreviousId })),
 			];
-
-			await this.auditRouteService.synchronizeAndCreate(savedRecords.map((element) => element.routeId));
 
 			return allSavedRecords.map(({ type, id }) => ({ codigoSolicitud: `${type.slice(0, 3).toUpperCase()}${id}` }));
 		} catch (error) {
@@ -317,9 +313,6 @@ export class TransporterTravelService {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		// TODO: Validar si ya tiene auditoria relacionada
-
 		await this.transporterTravelRepository.update(existingRecord.id, { routeId });
-		await this.auditRouteService.synchronizeAndCreate([routeId]);
 	}
 }

@@ -87,11 +87,6 @@ export class ReceptionsService {
 			if (createReceptionDto.photos) {
 				await this.saveReceptionPhotos(savedReception, (createReceptionDto.photos as any[]).map(url => ({ url })));
 			}
-
-			if (roles.includes(ROL.RECUPERADORA)) {
-				await this.auditRouteService.synchronizeAndCreate([reception.routeId]);
-			}
-
 		} catch (error) {
 			await this.receptionDetailRepository.delete({ reception: savedReception });
 			await this.receptionPhotoRepository.delete({ reception: savedReception });
@@ -186,8 +181,6 @@ export class ReceptionsService {
 			if (updateReceptionDto.photos) {
 				await this.updateReceptionPhotos(savedReception.id, updateReceptionDto.photos);
 			}
-
-			await this.auditRouteService.synchronizeAndCreate([savedReception.routeId]);
 
 			return savedReception;
 
