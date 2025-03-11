@@ -29,6 +29,8 @@ export class AuditRouteService {
 		private readonly auditRouteDetailRepository: Repository<AuditRouteDetail>,
 		@InjectRepository(Product)
 		private readonly productRepository: Repository<Product>,
+		@InjectRepository(Child)
+		private readonly childRepository: Repository<Child>,
 		private userContextService: UserContextService,
 	) { }
 
@@ -50,23 +52,10 @@ export class AuditRouteService {
 			status,
 		});
 
-		let { transporter, zones } = this.userContextService.getUserDetails();
-
-		if (!transporter) {
-			throw new BusinessException('El usuario no tiene configurado una transportadora');
-		}
-
-		if (zones.length === 0) {
-			throw new BusinessException('El usuario no tiene configurado zonas');
-		}
-
-		zones = zones.map(({ zone }) => zone.name)
-
 		const transporterTravels = await this.transporterTravelRepository
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndMapOne('transporter_travel.routeId', AuditRoute, 'auditRoute', 'auditRoute.routeId = transporter_travel.routeId')
 			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
-			.where('transporter_travel.zone IN (:...zones) AND transporter.id =: transporterId', { zones, transporterId: transporter.id })
 			.andWhere('auditRoute.id IS NULL')
 			.getMany();
 
@@ -84,7 +73,6 @@ export class AuditRouteService {
 			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
 			.leftJoinAndSelect('reception.auditRoutes', 'auditRoute')
 			.leftJoinAndSelect('reception.transporter', 'transporter')
-			.where('auditRoute.id IS NULL AND transporter.id =: transporterId', { transporterId: transporter.id })
 			.getMany();
 
 		const mappedReceptions = receptions.map((reception) =>
@@ -96,64 +84,33 @@ export class AuditRouteService {
 			)
 		);
 
-		const auditsRoutes = await this.auditRouteRepository.find({
-			where: {
-				requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE,
-				zoneId: In(zones),
-				transporterId: transporter.id,
-			},
-			relations: ['auditRouteDetails']
-		});
-
-		const mappedAuditsRoutes = auditsRoutes.map((item) =>
-			mapToAuditRouteDto(
-				'RECUPERADORA - VIAJE TRANSPORTADORA',
-				item,
-				item.auditRouteDetails.reduce((acc, detail) => acc + detail.quantity, 0),
-				'POR CONCILIAR'
-			)
-		);
-
-		return [...mappedTransporterTravels, ...mappedReceptions, ...mappedAuditsRoutes];
+		return [...mappedTransporterTravels, ...mappedReceptions];
 	}
 
 	async findAll(): Promise<AuditRoute[]> {
-		let { transporter, zones } = this.userContextService.getUserDetails();
-
-		if (!transporter) {
-			throw new BusinessException('El usuario no tiene configurado una transportadora');
-		}
-
-		if (zones.length === 0) {
-			throw new BusinessException('El usuario no tiene configurado zonas');
-		}
-
-		zones = zones.map(({ zone }) => zone.name)
-
 		return this.auditRouteRepository.createQueryBuilder('auditRoute')
 			.leftJoinAndSelect('auditRoute.reception', 'reception')
 			.leftJoinAndSelect('auditRoute.transporter', 'transporter')
 			.leftJoinAndSelect('auditRoute.auditRouteDetails', 'auditRouteDetails')
 			.leftJoinAndMapOne('auditRoute.requestStatusId', Child, 'requestStatus', 'requestStatus.id = auditRoute.requestStatusId')
-			// .leftJoinAndMapOne('auditRoute.zone', Child, 'zone', 'zone.name = auditRoute.zone')
 			.leftJoinAndMapOne('auditRoute.transporterTravel', TransporterTravel, 'transporterTravel', 'transporterTravel.routeId = auditRoute.routeId')
-			.where('zone IN (:...zones) AND transporter.id =: transporterId', { zones, transporterId: transporter.id })
-			// .where('zone.name IN (:...zones) AND transporter.id =: transporterId', { zones, transporterId: transporter.id })
+			.where('requestStatus.id =: requestStatusId', { requestStatus: AUDIT_ROUTE_STATUS.CONFIRMED })
 			.getMany();
 	}
 
-	async confirm(id: number, content: ConfirmAuditRouteDto): Promise<void> {
-		let auditRoute = await this.auditRouteRepository.findOne({ where: { id, status: true } });
-
-		if (!auditRoute) {
-			throw new BusinessException('Auditoria de ruta no encontrada', 404);
-		}
+	async confirm({ routeId, transporterId, conciliationTotal, recuperatorTotal, transporterTotal, products, isSave, transporter }: ConfirmAuditRouteDto): Promise<void> {
+		let auditRoute = await this.auditRouteRepository.findOne({ where: { routeId, transporterId } });
 
 		if (auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.BY_CONCILLIATE) {
-			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 404);
+			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
 		}
 
-		const { transporter, products, isSave } = content;
+		// crear la auditoria de ruta
+		const transporterTravels = await this.transporterTravelRepository.find({ where: { routeId, transporter: { id: transporterId }}, relations: ['details']})
+
+		if (transporterTravels.length === 0) {
+			throw new BusinessException('No existe registro en la información de la transportadora viaje', 400);
+		}
 
 		// Transportadora
 		const createItemsTransporter = transporter.filter((element) => !element.id && element.productName && element.isNew);
@@ -185,15 +142,62 @@ export class AuditRouteService {
 			}
 		});
 
+		if (!auditRoute) {
+			const reception = await this.receptionRepository.findOne({ where: { routeId, transporter: { id: transporterId }}})
+
+			if (!reception) {
+				throw new BusinessException('No existe registro en la información de la recepción', 400);
+			}
+
+			const zone = await this.childRepository.findOne({ where: { name: transporterTravels[0].zone.toUpperCase() }})
+
+			if (!zone) {
+				throw new BusinessException('No existe la zone configurada en el registro de la transportadora viaje', 400);
+			}
+
+			const user_id = this.userContextService.getUserDetails()?.id;
+
+			let allProducts: any = await this.productRepository.find({ where: { status: true }});
+			allProducts = allProducts.reduce((acc, product) => acc[product.name] = product, {})
+
+			const _products = transporterTravels.reduce((acc, element) => {
+				element.details.map((detail) => ({
+					guideId: element.guideId,
+					product: allProducts[detail.batteryType],
+					quantity: detail.quantity,
+					quantityConciliated: products.find(product => product.productId === allProducts[detail.batteryType].id)?.quantity
+				}))
+				return acc;
+			}, [])
+
+			this.auditRouteRepository.create(
+				{
+					createdBy: user_id,
+					modifiedBy: user_id,
+					routeId,
+					reception,
+					date: transporterTravels[0].movementDate,
+					zoneId: zone.id,
+					// recuperatorId: transporterTravel.recu
+					transporterId,
+					requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE,
+					conciliationTotal,
+					recuperatorTotal,
+					transporterTotal,
+					auditRouteDetails: _products
+				}
+			);
+		}
+
 		// Productos
-		const createItemsProducts = products.filter((element) => !element.id && element.productId);
+		const createItemsProducts = products.filter((element) => !element.productId);
 		const updateItemsProducts = products.filter((element) => element.id);
 
 		await this.auditRouteDetailRepository.manager.transaction(async (transactionalEntityManager) => {
 			if (createItemsProducts.length > 0) {
 				const createdItemsProducts = createItemsProducts.map(({ productId, quantity }) =>
 					this.auditRouteDetailRepository.create({
-						auditRoute: { id },
+						auditRoute,
 						product: { id: productId },
 						quantity,
 						quantityConciliated: quantity,
@@ -210,7 +214,11 @@ export class AuditRouteService {
 		});
 
 		if (!isSave) {
-			await this.auditRouteRepository.update(id, { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED });
+			await this.auditRouteRepository.update(auditRoute.id, { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED });
 		}
+	}
+
+	async createNoteCredit(auditRoute: AuditRoute): Promise<void> {
+
 	}
 }
