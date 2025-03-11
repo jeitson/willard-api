@@ -43,6 +43,9 @@ export class Child extends CompleteEntity {
 
 	@ApiProperty({ description: 'parent' })
 	@ManyToOne(() => Parent, (parent) => parent.children)
-	@JoinColumn({ name: 'PadreId' })
 	parent: Parent;
+
+	@ApiProperty({ description: 'PadreId' })
+	@Column({ type: 'int', default: null, nullable: true, name: 'PadreId' })
+	parentId: number;
 }

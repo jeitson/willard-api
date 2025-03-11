@@ -44,7 +44,8 @@ export class CatalogsService {
 			...childData,
 			name,
 			catalogCode,
-			parent: parent,
+			parentId: parentChild.id,
+			parent,
 			createdBy: user_id, modifiedBy: user_id
 		});
 
@@ -55,7 +56,7 @@ export class CatalogsService {
 		const child = await this.childrensRepository.findOneBy({ id });
 
 		if (!child) {
-			throw new BusinessException('Hijo no encontrado', 400);
+			throw new BusinessException('Registro no encontrado', 400);
 		}
 
 		let { catalogCode, name, ...updateData } = updatedData;
@@ -68,17 +69,24 @@ export class CatalogsService {
 			throw new BusinessException('Ya existe un catálogo con esa configuración', 400);
 		}
 
-		if (catalogCode) {
-			const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
-			if (parent) {
-				updateData.parentId = parent.id;
+		const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
+		if (!parent) {
+			throw new BusinessException('Padre no encontrado', 400);
+		}
+
+		if (updateData.parentId) {
+			const parentChild = await this.childrensRepository.findOne({ where: { id: updateData.parentId } });
+			if (!parentChild) {
+				throw new BusinessException('Elemento superior de la jerarquía no encontrado', 400);
 			}
+
+			child.parentId = parentChild.id;
 		}
 
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		updatedData = Object.assign(child, updatedData);
-		return await this.childrensRepository.save({ ...updatedData, catalogCode, name, modifiedBy });
+		return await this.childrensRepository.save({ ...updatedData, catalogCode, name, modifiedBy, parent });
 	}
 
 	async changeOrder(id: number, order: number): Promise<Child> {
@@ -95,7 +103,6 @@ export class CatalogsService {
 
 		return await this.childrensRepository.save(child);
 	}
-
 
 	async changeParent(id: number, parentId: number): Promise<Child> {
 		const child = await this.childrensRepository.findOneBy({ id });
