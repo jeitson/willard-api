@@ -121,6 +121,11 @@ export class ConciliateTotalsAuditRouteDto {
 }
 
 export class ConciliateByTypeAuditRouteDto {
+	@ApiProperty({ description: 'El id debe ser un número.' })
+	@IsOptional()
+	@IsNumber({}, { message: 'Id debe ser un número.' })
+	id?: number;
+
 	@ApiProperty({ description: 'Cantidad, debe ser un número.' })
 	@IsNotEmpty({ message: 'Cantidad es obligatorio y debe ser un número.' })
 	@IsNumber({}, { message: 'Cantidad debe ser un número.' })

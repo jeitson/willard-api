@@ -6,12 +6,13 @@ import { In, Repository } from 'typeorm';
 import { Reception } from '../receptions/entities/reception.entity';
 import { AuditRoute } from './entities/audit_route.entity';
 import { Child } from '../catalogs/entities/child.entity';
-import { AUDIT_ROUTE_REASON, AUDIT_ROUTE_STATUS } from 'src/core/constants/status.constant';
+import { AUDIT_ROUTE_REASON, AUDIT_ROUTE_STATUS, NOTE_CREDIT_STATUS } from 'src/core/constants/status.constant';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { AuditRouteDetail } from './entities/audit_route_detail.entity';
 import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
 import { Product } from '../products/entities/product.entity';
 import { UserContextService } from '../users/user-context.service';
+import { NoteCredit } from './entities/note_credit.entity';
 
 @Injectable()
 export class AuditRouteService {
@@ -31,6 +32,8 @@ export class AuditRouteService {
 		private readonly productRepository: Repository<Product>,
 		@InjectRepository(Child)
 		private readonly childRepository: Repository<Child>,
+		@InjectRepository(NoteCredit)
+		private readonly noteCreditRepository: Repository<NoteCredit>,
 		private userContextService: UserContextService,
 	) { }
 
@@ -99,7 +102,7 @@ export class AuditRouteService {
 	}
 
 	async confirm({ routeId, transporterId, conciliationTotal, recuperatorTotal, transporterTotal, products, isSave, transporter }: ConfirmAuditRouteDto): Promise<void> {
-		let auditRoute = await this.auditRouteRepository.findOne({ where: { routeId, transporterId } });
+		const auditRoute = await this.auditRouteRepository.findOne({ where: { routeId, transporterId } });
 
 		if (auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.BY_CONCILLIATE) {
 			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
@@ -170,7 +173,7 @@ export class AuditRouteService {
 				return acc;
 			}, [])
 
-			this.auditRouteRepository.create(
+			const itemSaved = this.auditRouteRepository.create(
 				{
 					createdBy: user_id,
 					modifiedBy: user_id,
@@ -187,6 +190,8 @@ export class AuditRouteService {
 					auditRouteDetails: _products
 				}
 			);
+
+			await this.auditRouteRepository.save(itemSaved);
 		}
 
 		// Productos
@@ -215,10 +220,27 @@ export class AuditRouteService {
 
 		if (!isSave) {
 			await this.auditRouteRepository.update(auditRoute.id, { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED });
+			this.createNoteCredit(auditRoute.id);
 		}
 	}
 
-	async createNoteCredit(auditRoute: AuditRoute): Promise<void> {
+	async createNoteCredit(id: number): Promise<void> {
+		const auditRoute = await this.auditRouteRepository.findOne({ where: { id }, relations: ['auditRouteDetails'] });
 
+		if (auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.CONFIRMED) {
+			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
+		}
+
+		for (const element of auditRoute.auditRouteDetails) {
+			const item = this.noteCreditRepository.create({
+				auditRoute,
+				requestStatusId: NOTE_CREDIT_STATUS.PENDING,
+				product: element.product,
+				quantity: element.quantityConciliated,
+				guideId: element.guideId,
+			})
+
+			await this.noteCreditRepository.save(item);
+		}
 	}
 }

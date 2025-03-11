@@ -9,11 +9,12 @@ import { ReceptionsModule } from '../receptions/receptions.module';
 import { CatalogsModule } from '../catalogs/catalogs.module';
 import { UsersModule } from '../users/users.module';
 import { ProductsModule } from '../products/products.module';
+import { NoteCredit } from './entities/note_credit.entity';
 
 const providers = [AuditRouteService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail]), forwardRef(() => TransporterTravelModule), forwardRef(() => ReceptionsModule), CatalogsModule, UsersModule, ProductsModule],
+	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail, NoteCredit]), forwardRef(() => TransporterTravelModule), forwardRef(() => ReceptionsModule), CatalogsModule, UsersModule, ProductsModule],
 	controllers: [AuditRouteController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

@@ -1,10 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Reception } from "src/modules/receptions/entities/reception.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import { AuditRouteDetail } from "./audit_route_detail.entity";
 import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
+import { NoteCredit } from "./note_credit.entity";
 
 @Entity({ name: 'auditoria_ruta' })
 export class AuditRoute extends CompleteEntity {
@@ -14,8 +15,8 @@ export class AuditRoute extends CompleteEntity {
 
 	@JoinColumn({ name: 'RecepcionId' })
 	@ApiProperty({ description: 'ID de recepción (FK)' })
-	@ManyToOne(() => Reception, (reception) => reception.auditRoutes)
-	reception: () => Reception;
+	@OneToOne(() => Reception, (reception) => reception.auditRoute)
+	reception: Reception;
 
 	@ApiProperty({ description: 'Fecha' })
 	@Column({ type: 'varchar', length: 20, name: 'Fecha', nullable: true })
@@ -55,4 +56,7 @@ export class AuditRoute extends CompleteEntity {
 
 	@OneToMany(() => AuditRouteDetail, (auditRouteDetail) => auditRouteDetail.auditRoute)
 	auditRouteDetails: AuditRouteDetail[];
+
+	@OneToMany(() => NoteCredit, (NoteCredit) => NoteCredit.auditRoute)
+	notesCredits: NoteCredit[];
 }

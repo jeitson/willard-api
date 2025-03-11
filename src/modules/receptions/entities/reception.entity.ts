@@ -50,6 +50,6 @@ export class Reception extends CompleteEntity {
 	@OneToMany(() => ReceptionPhoto, (photo) => photo.reception)
 	receptionPhotos: ReceptionPhoto[];
 
-	@OneToMany(() => AuditRoute, (auditRoute) => auditRoute.reception)
-	auditRoutes: AuditRoute[];
+	@OneToOne(() => AuditRoute, (auditRoute) => auditRoute.reception)
+	auditRoute: AuditRoute;
 }

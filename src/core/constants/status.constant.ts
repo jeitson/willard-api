@@ -34,3 +34,9 @@ export enum AUDIT_ROUTE_REASON {
 	'BOTH' = 'B', // "AMBOS",
 	'NONE' = 'N' // "NINGUNO"
 }
+
+// "NOTA_CREDITO_ESTADO"
+export enum NOTE_CREDIT_STATUS {
+	'PENDING' = 101, // "PENDIENTE",
+	'CONFIRMED' = 103, // "CONFIRMADO",
+}

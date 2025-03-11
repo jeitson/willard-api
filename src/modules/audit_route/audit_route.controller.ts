@@ -31,10 +31,10 @@ export class AuditRouteController {
 		return this.auditRouteService.findAll();
 	}
 
-	@Post('confirm/:id')
+	@Post('save')
 	@Public()
 	@ApiOperation({ summary: 'Confirmación de conciliación' })
-	async confirm(@IdParam('id') id: string, @Body() body: ConfirmAuditRouteDto) {
-		return this.auditRouteService.confirm(+id, body);
+	async confirm(@Body() body: ConfirmAuditRouteDto) {
+		return this.auditRouteService.confirm(body);
 	}
 }
