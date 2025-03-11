@@ -13,6 +13,7 @@ import { TransporterTravelDetail } from '../transporter_travel/entities/transpor
 import { Product } from '../products/entities/product.entity';
 import { UserContextService } from '../users/user-context.service';
 import { NoteCredit } from './entities/note_credit.entity';
+import { CollectionRequest } from '../collection_request/entities/collection_request.entity';
 
 @Injectable()
 export class AuditRouteService {
@@ -34,6 +35,8 @@ export class AuditRouteService {
 		private readonly childRepository: Repository<Child>,
 		@InjectRepository(NoteCredit)
 		private readonly noteCreditRepository: Repository<NoteCredit>,
+		@InjectRepository(CollectionRequest)
+		private readonly collectionRequestRepository: Repository<CollectionRequest>,
 		private userContextService: UserContextService,
 	) { }
 
@@ -155,7 +158,7 @@ export class AuditRouteService {
 			const zone = await this.childRepository.findOne({ where: { name: transporterTravels[0].zone.toUpperCase() }})
 
 			if (!zone) {
-				throw new BusinessException('No existe la zone configurada en el registro de la transportadora viaje', 400);
+				throw new BusinessException('No existe la zona configurada en el registro de la transportadora viaje', 400);
 			}
 
 			const user_id = this.userContextService.getUserDetails()?.id;
@@ -219,7 +222,7 @@ export class AuditRouteService {
 		});
 
 		if (!isSave) {
-			await this.auditRouteRepository.update(auditRoute.id, { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED });
+			await this.auditRouteRepository.update(auditRoute.id, { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED, notify: await this.calculateIsNotify({ routeId, transporterId }) });
 			this.createNoteCredit(auditRoute.id);
 		}
 	}
@@ -242,5 +245,16 @@ export class AuditRouteService {
 
 			await this.noteCreditRepository.save(item);
 		}
+	}
+
+	async calculateIsNotify({ routeId, transporterId }): Promise<boolean> {
+		const collectionRequest = await this.collectionRequestRepository.find({ where: { routeId, transporter: { id: transporterId }, collectionSite: { siteTypeId: 48 }}, relations: ['collectionSite']});
+
+		if (!collectionRequest) {
+			// throw new BusinessException('No existe una solicitud de recogida configurada con la ruta: ' + routeId, 400);
+			return false;
+		}
+
+		return true;
 	}
 }

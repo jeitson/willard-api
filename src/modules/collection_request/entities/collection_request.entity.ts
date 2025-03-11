@@ -10,6 +10,7 @@ import { Route } from "src/modules/routes/entities/route.entity";
 import { User } from "src/modules/users/entities/user.entity";
 import { Driver } from "src/modules/drivers/entities/driver.entity";
 import { Expose } from "class-transformer";
+import { Product } from "src/modules/products/entities/product.entity";
 
 @Entity({ name: 'solicitud_recogida' })
 export class CollectionRequest extends CompleteEntity {
@@ -22,8 +23,9 @@ export class CollectionRequest extends CompleteEntity {
 	@JoinColumn({ name: 'LugarRecogidaId' })
 	pickUpLocation: PickUpLocation;
 
-	@Column({ type: 'bigint', name: 'TipoProductoId' })
-	productTypeId: number;
+	@ManyToOne(() => Product, (product) => product.collectionRequests)
+	@JoinColumn({ name: 'ProductoId' })
+	product: Product;
 
 	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.collectionsRequests)
 	@JoinColumn({ name: 'SedeAcopioId' })
@@ -43,9 +45,6 @@ export class CollectionRequest extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, nullable: true, name: 'Descripcion' })
 	description: string;
 
-	@Column({ type: 'bigint', nullable: true, name: 'MotivoEspecialId' })
-	motiveSpecialId: number;
-
 	@Expose()
 	@CreateDateColumn({
 		type: 'date',
@@ -62,10 +61,6 @@ export class CollectionRequest extends CompleteEntity {
 		nullable: true,
 	})
 	requestTime: string;
-
-	@ApiProperty({ description: 'Número de guía' })
-	@Column({ type: 'varchar', length: 20, name: 'NumeroGuia', nullable: true, default: null })
-	guideNumber: string;
 
 	@Column({ type: 'int', name: 'CantidadEstimada' })
 	estimatedQuantity: number;

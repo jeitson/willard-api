@@ -27,7 +27,7 @@ export class RoutesService {
 		private readonly dataSource: DataSource
 	) { }
 
-	async create(id: number, { transporter, guideNumber, ...dto }: CreateRouteDto): Promise<Route> {
+	async create(id: number, { transporter, routeId, ...dto }: CreateRouteDto): Promise<Route> {
 		const queryRunner = this.dataSource.createQueryRunner();
 		await queryRunner.startTransaction();
 
@@ -50,7 +50,7 @@ export class RoutesService {
 			const route = this.routeRepository.create({ collectionRequest, ...dto, routeStatusId: ROUTE_STATE.CONFIRMED, createdBy: userId, modifiedBy: userId });
 			const routeSaved = await queryRunner.manager.save(Route, route);
 
-			await queryRunner.manager.update(CollectionRequest, id, { transporter: null, requestStatusId: REQUEST_STATUS.CONFIRMED, createdBy: userId, modifiedBy: userId, guideNumber });
+			await queryRunner.manager.update(CollectionRequest, id, { transporter: null, requestStatusId: REQUEST_STATUS.CONFIRMED, createdBy: userId, modifiedBy: userId, routeId });
 
 			await this.driversService.create({ ...transporter, collectionRequestId: id });
 

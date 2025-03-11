@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { AuditRouteDetail } from "src/modules/audit_route/entities/audit_route_detail.entity";
 import { NoteCredit } from "src/modules/audit_route/entities/note_credit.entity";
+import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { ReceptionDetail } from "src/modules/receptions/entities/reception_detail.entity";
 import { ReportsPh } from "src/modules/reports_ph/entities/reports_ph.entity";
 import { ShipmentDetail } from "src/modules/shipments/entities/shipment_detail.entity";
@@ -56,6 +57,9 @@ export class Product extends CompleteEntity {
 	@ApiProperty({ description: 'referencePH' })
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
+
+	@OneToMany(() => CollectionRequest, (collectionRequests) => collectionRequests.product)
+	collectionRequests: CollectionRequest[];
 
 	@OneToMany(() => ReceptionDetail, (receptionDetail) => receptionDetail.product)
 	receptionDetails: ReceptionDetail[];

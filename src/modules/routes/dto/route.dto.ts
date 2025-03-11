@@ -62,11 +62,11 @@ export class CreateRouteDto {
 	@Type(() => DriverDto)
 	transporter: DriverDto;
 
-	@ApiProperty({ description: 'Número de guía' })
-	@IsNotEmpty({ message: 'NumeroGuia es obligatorio.' })
-	@IsString({ message: 'NumeroGuia debe ser un texto.' })
+	@ApiProperty({ description: 'Número de ruta' })
+	@IsNotEmpty({ message: 'NumeroRuta es obligatorio.' })
+	@IsString({ message: 'NumeroRuta debe ser un texto.' })
 	@MaxLength(10, { message: 'Debe de tener máximo 10 caracteres.' })
-	guideNumber: string;
+	routeId: string;
 }
 
 export class UpdateRouteDto {

@@ -54,6 +54,10 @@ export class AuditRoute extends CompleteEntity {
 	@Column({ type: 'varchar', length: 1000, name: 'Comentario', default: null, nullable: true })
 	comment: string;
 
+	@ApiProperty({ description: 'Comentario' })
+	@Column({ name: 'Notificar', default: false, nullable: true })
+	notify: boolean;
+
 	@OneToMany(() => AuditRouteDetail, (auditRouteDetail) => auditRouteDetail.auditRoute)
 	auditRouteDetails: AuditRouteDetail[];
 
