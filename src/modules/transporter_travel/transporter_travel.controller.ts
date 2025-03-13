@@ -3,7 +3,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/core/guards/roles.guard';
-import { Public } from 'src/core/common/decorators/public.decorator';
 import { TransporterTravelService } from './transporter_travel.service';
 import { TransporterTravelDto, TransporterTravelRouteIdDto } from './dto/transporter_travel.dto';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';

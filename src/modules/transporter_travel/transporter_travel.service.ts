@@ -279,11 +279,13 @@ export class TransporterTravelService {
 	}
 
 	async findAll(query: any): Promise<Pagination<TransporterTravel>> {
-		let { id: user_id, transporter: { id: transporterId }, zones } = this.userContextService.getUserDetails();
+		let { id: user_id, transporter: transporter, zones } = this.userContextService.getUserDetails();
 
-		if (!transporterId) {
+		if (!transporter) {
 			throw new BusinessException('El usuario no tiene configurado una transportadora');
 		}
+
+		const transporterId = transporter.id;
 
 		if (zones.length === 0) {
 			throw new BusinessException('El usuario no tiene configurado zonas');
