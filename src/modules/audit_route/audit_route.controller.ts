@@ -3,7 +3,7 @@ import { AuditRouteService } from './audit_route.service';
 import { Roles } from 'src/core/common/decorators/role.decorator';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
-import { ConfirmAuditRouteDto, GetInfoByRouteId, ListAuditRouteDto } from './dto/audit_route.dto';
+import { AuditRouteDto, ConfirmAuditRouteDto, GetInfoByRouteId, ListAuditRouteDto } from './dto/audit_route.dto';
 import { AuditRoute } from './entities/audit_route.entity';
 import { ROL } from 'src/core/constants/rol.constant';
 import { RolesGuard } from 'src/core/guards/roles.guard';
@@ -33,7 +33,7 @@ export class AuditRouteController {
 	@Get('detail')
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Listado de auditoria de rutas' })
-	@ApiResult({ type: [AuditRoute] })
+	@ApiResult({ type: AuditRouteDto })
 	async findOneByRoute(@Query() content: GetInfoByRouteId) {
 		return this.auditRouteService.findOneByRoute(content);
 	}

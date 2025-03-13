@@ -121,16 +121,37 @@ export class ListAuditRouteDto {
 
 
 export class AuditRouteDto {
+	@ApiProperty({ description: 'Transportadora' })
 	transporter: Transporter;
+
+	@ApiProperty({ description: 'Número de Ruta' })
 	routeId: string;
+
+	@ApiProperty({ description: 'Zona' })
 	zone: string;
+
+	@ApiProperty({ description: 'Fecha' })
 	date: string;
+
+	@ApiProperty({ description: 'Recepción' })
 	reception: Reception;
+
+	@ApiProperty({ description: 'Transportadora Viaje' })
 	transporterTravel: TransporterTravel;
+
+	@ApiProperty({ description: 'Total Recuperadora' })
 	recuperatorTotal: number;
+
+	@ApiProperty({ description: 'Total Transportadora' })
 	transporterTotal: number;
+
+	@ApiProperty({ description: 'Total Conciliación' })
 	conciliationTotal: number;
+
+	@ApiProperty({ description: 'Estado Solicitud' })
 	requestStatus: Child;
+
+	@ApiProperty({ description: 'Productos' })
 	products: {
 		id: number;
 		productId: number;
