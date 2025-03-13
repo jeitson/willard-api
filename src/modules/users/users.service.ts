@@ -326,7 +326,7 @@ export class UsersService {
 		const collectionSite = await this.collectionSitesRepository.findOneBy({ id: collectionSiteId });
 
 		if (!user || !collectionSite) {
-			throw new Error('Usuario o Sede de acopio no encontrado');
+			throw new BusinessException('Usuario o Sede de acopio no encontrado');
 		}
 
 		const user_id = this.userContextService.getUserDetails().id;
@@ -345,7 +345,7 @@ export class UsersService {
 		const rol = await this.rolesRepository.findOneBy({ id: rolId });
 
 		if (!user || !rol) {
-			throw new Error('Usuario o Rol no encontrado');
+			throw new BusinessException('Usuario o Rol no encontrado');
 		}
 
 		const user_id = this.userContextService.getUserDetails().id;
@@ -363,8 +363,12 @@ export class UsersService {
 		const user = await this.userRepository.findOneBy({ id: userId });
 		const zone = await this.childrensRepository.findOneBy({ id: zoneId, catalogCode: 'ZONA' });
 
-		if (!user || !zone) {
-			throw new Error('Usuario o Zona no encontrado');
+		if (!user) {
+			throw new BusinessException('Usuario no encontrado');
+		}
+
+		if (!zone) {
+			throw new BusinessException('Zona no encontrada');
 		}
 
 		const user_id = this.userContextService.getUserDetails().id;
@@ -399,7 +403,7 @@ export class UsersService {
 			user = await this.getUserByOauthId(id);
 
 			if (!user) {
-				throw new Error('Error al crear el usuario');
+				throw new BusinessException('Error al crear el usuario');
 			}
 		}
 
