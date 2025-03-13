@@ -14,13 +14,13 @@ import { ROL } from 'src/core/constants/rol.constant';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 
 @ApiTags('Negocio - Transportadora Viaje')
-// @UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 @Controller('transporter-travel')
 export class TransporterTravelController {
 	constructor(private readonly transporterTravelService: TransporterTravelService) { }
 
 	@Post()
-	@Public()
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
 	@UseInterceptors(FileInterceptor('file'))
 	@ApiResult({ type: [ResponseCodeTransporterTravel] })
 	async createRecord(
@@ -40,8 +40,7 @@ export class TransporterTravelController {
 	}
 
 	@Get()
-	@Roles(ROL.AUDITORIA_PH)
-	@Public()
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
 	@ApiOperation({ summary: 'Listado de registros de transportadora' })
 	@ApiResult({ type: [TransporterTravel] })
 	async findAll(@Query() query: any) {
@@ -49,7 +48,7 @@ export class TransporterTravelController {
 	}
 
 	@Patch('route/:id')
-	@Roles(ROL.AUDITORIA_PH)
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
 	@ApiOperation({ summary: 'Actualizar número de ruta por su por ID' })
 	async updateRouteId(
 		@IdParam('id') id: number,
