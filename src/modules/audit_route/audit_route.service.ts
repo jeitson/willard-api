@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { AuditRouteDto, ConciliateTotalsAuditRouteDto, ConfirmAuditRouteDto, CreateAuditRouteDto, GetInfoByRouteId, ListAuditRouteDto } from './dto/audit_route.dto';
+import { AuditRouteDto, ConfirmAuditRouteDto, GetInfoByRouteId, ListAuditRouteDto } from './dto/audit_route.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 import { In, Repository } from 'typeorm';
 import { Reception } from '../receptions/entities/reception.entity';
 import { AuditRoute } from './entities/audit_route.entity';
 import { Child } from '../catalogs/entities/child.entity';
-import { AUDIT_ROUTE_REASON, AUDIT_ROUTE_STATUS, NOTE_CREDIT_STATUS } from 'src/core/constants/status.constant';
+import { AUDIT_ROUTE_STATUS, NOTE_CREDIT_STATUS } from 'src/core/constants/status.constant';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { AuditRouteDetail } from './entities/audit_route_detail.entity';
 import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
