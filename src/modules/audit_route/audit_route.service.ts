@@ -100,7 +100,7 @@ export class AuditRouteService {
 			.leftJoinAndSelect('auditRoute.auditRouteDetails', 'auditRouteDetails')
 			.leftJoinAndMapOne('auditRoute.requestStatusId', Child, 'requestStatus', 'requestStatus.id = auditRoute.requestStatusId')
 			.leftJoinAndMapOne('auditRoute.transporterTravel', TransporterTravel, 'transporterTravel', 'transporterTravel.routeId = auditRoute.routeId')
-			.where('requestStatus.id =: requestStatusId', { requestStatus: AUDIT_ROUTE_STATUS.CONFIRMED })
+			.where('requestStatus.id = :requestStatusId', { requestStatus: AUDIT_ROUTE_STATUS.CONFIRMED })
 			.getMany();
 	}
 
