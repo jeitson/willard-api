@@ -1,6 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { ArrayNotEmpty, IsArray, IsBoolean, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, ValidateNested } from "class-validator";
+import { Child } from "src/modules/catalogs/entities/child.entity";
+import { Product } from "src/modules/products/entities/product.entity";
+import { Reception } from "src/modules/receptions/entities/reception.entity";
+import { TransporterTravel } from "src/modules/transporter_travel/entities/transporter_travel.entity";
+import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 
 export class CreateAuditRouteDetailDto {
 	@ApiProperty({ description: 'Guia ID', required: true })
@@ -91,6 +96,16 @@ export class CreateAuditRouteDto {
     details: CreateAuditRouteDetailDto[];
 }
 
+export class GetInfoByRouteId {
+	@ApiProperty({ description: 'RutaId', required: true })
+	@IsString({ message: 'El número de ruta es requerido' })
+	routeId: string;
+
+	@ApiProperty({ description: 'Transportadora ID', required: true })
+	@IsString({ message: 'La transportadora es requerida' })
+	transporterId: number;
+}
+
 export class ListAuditRouteDto {
 	origin: string;
 	transporter: string | null;
@@ -101,6 +116,27 @@ export class ListAuditRouteDto {
 	quantityTotal: number;
 	gap: string | null;
 	status: string;
+	createdAt: Date;
+}
+
+
+export class AuditRouteDto {
+	transporter: Transporter;
+	routeId: string;
+	zone: string;
+	date: string;
+	reception: Reception;
+	transporterTravel: TransporterTravel;
+	recuperatorTotal: number;
+	transporterTotal: number;
+	conciliationTotal: number;
+	requestStatus: Child;
+	products: {
+		id: number;
+		productId: number;
+		name: string;
+		quantity: number;
+	}[];
 }
 
 export class ConciliateTotalsAuditRouteDto {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ConciliateTotalsAuditRouteDto, ConfirmAuditRouteDto, CreateAuditRouteDto, ListAuditRouteDto } from './dto/audit_route.dto';
+import { AuditRouteDto, ConciliateTotalsAuditRouteDto, ConfirmAuditRouteDto, CreateAuditRouteDto, GetInfoByRouteId, ListAuditRouteDto } from './dto/audit_route.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransporterTravel } from '../transporter_travel/entities/transporter_travel.entity';
 import { In, Repository } from 'typeorm';
@@ -14,6 +14,7 @@ import { Product } from '../products/entities/product.entity';
 import { UserContextService } from '../users/user-context.service';
 import { NoteCredit } from './entities/note_credit.entity';
 import { CollectionRequest } from '../collection_request/entities/collection_request.entity';
+import { Transporter } from '../transporters/entities/transporter.entity';
 
 @Injectable()
 export class AuditRouteService {
@@ -37,6 +38,8 @@ export class AuditRouteService {
 		private readonly noteCreditRepository: Repository<NoteCredit>,
 		@InjectRepository(CollectionRequest)
 		private readonly collectionRequestRepository: Repository<CollectionRequest>,
+		@InjectRepository(Transporter)
+		private readonly transporterRepository: Repository<Transporter>,
 		private userContextService: UserContextService,
 	) { }
 
@@ -56,6 +59,7 @@ export class AuditRouteService {
 			quantityTotal,
 			gap: null,
 			status,
+			createdAt: data.createdAt
 		});
 
 		const transporterTravels = await this.transporterTravelRepository
@@ -77,7 +81,7 @@ export class AuditRouteService {
 		const receptions = await this.receptionRepository
 			.createQueryBuilder('reception')
 			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
-			.leftJoinAndSelect('reception.auditRoutes', 'auditRoute')
+			.leftJoinAndSelect('reception.auditRoute', 'auditRoutes')
 			.leftJoinAndSelect('reception.transporter', 'transporter')
 			.getMany();
 
@@ -90,18 +94,101 @@ export class AuditRouteService {
 			)
 		);
 
-		return [...mappedTransporterTravels, ...mappedReceptions];
+		return [...mappedTransporterTravels, ...mappedReceptions].sort((a, b) => {
+			const dateA = new Date(a.createdAt).getTime();
+			const dateB = new Date(b.createdAt).getTime();
+			return dateB - dateA;
+		});
 	}
 
 	async findAll(): Promise<AuditRoute[]> {
 		return this.auditRouteRepository.createQueryBuilder('auditRoute')
 			.leftJoinAndSelect('auditRoute.reception', 'reception')
-			.leftJoinAndSelect('auditRoute.transporter', 'transporter')
 			.leftJoinAndSelect('auditRoute.auditRouteDetails', 'auditRouteDetails')
 			.leftJoinAndMapOne('auditRoute.requestStatusId', Child, 'requestStatus', 'requestStatus.id = auditRoute.requestStatusId')
 			.leftJoinAndMapOne('auditRoute.transporterTravel', TransporterTravel, 'transporterTravel', 'transporterTravel.routeId = auditRoute.routeId')
-			.where('requestStatus.id = :requestStatusId', { requestStatus: AUDIT_ROUTE_STATUS.CONFIRMED })
+			.leftJoinAndMapOne('auditRoute.transporterId', Transporter, 'transporter', 'transporter.id = auditRoute.transporterId')
+			.where('requestStatus.id = :requestStatusId', { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED })
 			.getMany();
+	}
+
+	async findOneByRoute(content: GetInfoByRouteId): Promise<AuditRouteDto> {
+		const { routeId, transporterId } = content;
+
+		if (!routeId) {
+			throw new BusinessException('El número de ruta es obligatorio', 400);
+		}
+
+		if (!transporterId) {
+			throw new BusinessException('La transportadora es obligatoria', 400);
+		}
+
+		const transporter = await this.transporterRepository.findOne({ where: { id: transporterId, status: true }})
+
+		if (transporter) {
+			throw new BusinessException('No existe registros en los cargues realizados por la transportadora', 400);
+		}
+
+		const transporterTravel = await this.transporterTravelRepository.findOne({ where: { transporter: { id: transporterId }, routeId }, relations: ['details'] })
+
+		if (transporterTravel) {
+			throw new BusinessException('No existe registros en los cargues realizados por la transportadora', 400);
+		}
+
+		const requestStatus = await this.childRepository.findOne({ where: { status: true, id: AUDIT_ROUTE_STATUS.BY_CONCILLIATE }});
+
+		const auditRoute = await this.auditRouteRepository.findOne({ where: { transporterId, routeId } });
+
+		if (auditRoute) {
+			const zone = await this.childRepository.findOne({ where: { status: true, id: auditRoute.zoneId }});
+
+			return {
+				transporter,
+				routeId,
+				zone: zone.name,
+				date: auditRoute.date,
+				reception: auditRoute.reception,
+				transporterTravel,
+				recuperatorTotal: auditRoute.recuperatorTotal,
+				transporterTotal: auditRoute.transporterTotal,
+				conciliationTotal: auditRoute.conciliationTotal,
+				requestStatus,
+				products: auditRoute.auditRouteDetails.map((element) => ({
+					name: element.product.name,
+					productId: element.product.id,
+					quantity: element.quantityConciliated,
+					id: element.id,
+				}))
+			}
+		}
+
+		const reception = await this.receptionRepository.findOne({ where: { transporter: { id: transporterId }, routeId }, relations: ['receptionDetails', 'receptionPhotos'] })
+
+		if (reception) {
+			throw new BusinessException('No existe registros en la información cargada en la recepción', 400);
+		}
+
+		const products = await this.productRepository.find({ where: { status: true }});
+
+		return {
+			transporter,
+			routeId,
+			zone: transporterTravel.zone,
+			date: transporterTravel.movementDate,
+			reception,
+			transporterTravel,
+			recuperatorTotal: reception.receptionDetails.reduce((acc, a) => acc += parseInt(a.quantity.toString()), 0),
+			transporterTotal: transporterTravel.totalQuantity,
+			conciliationTotal: 0,
+			requestStatus,
+			products: products.map((element) => ({
+				name: element.name,
+				productId: element.id,
+				quantity: 0,
+				id: 0,
+			}))
+		}
+
 	}
 
 	async confirm({ routeId, transporterId, conciliationTotal, recuperatorTotal, transporterTotal, products, isSave, transporter }: ConfirmAuditRouteDto): Promise<void> {
@@ -112,7 +199,7 @@ export class AuditRouteService {
 		}
 
 		// crear la auditoria de ruta
-		const transporterTravels = await this.transporterTravelRepository.find({ where: { routeId, transporter: { id: transporterId }}, relations: ['details']})
+		const transporterTravels = await this.transporterTravelRepository.find({ where: { routeId, transporter: { id: transporterId } }, relations: ['details'] })
 
 		if (transporterTravels.length === 0) {
 			throw new BusinessException('No existe registro en la información de la transportadora viaje', 400);
@@ -149,13 +236,13 @@ export class AuditRouteService {
 		});
 
 		if (!auditRoute) {
-			const reception = await this.receptionRepository.findOne({ where: { routeId, transporter: { id: transporterId }}})
+			const reception = await this.receptionRepository.findOne({ where: { routeId, transporter: { id: transporterId } } })
 
 			if (!reception) {
 				throw new BusinessException('No existe registro en la información de la recepción', 400);
 			}
 
-			const zone = await this.childRepository.findOne({ where: { name: transporterTravels[0].zone.toUpperCase() }})
+			const zone = await this.childRepository.findOne({ where: { name: transporterTravels[0].zone.toUpperCase() } })
 
 			if (!zone) {
 				throw new BusinessException('No existe la zona configurada en el registro de la transportadora viaje', 400);
@@ -163,7 +250,7 @@ export class AuditRouteService {
 
 			const user_id = this.userContextService.getUserDetails()?.id;
 
-			let allProducts: any = await this.productRepository.find({ where: { status: true }});
+			let allProducts: any = await this.productRepository.find({ where: { status: true } });
 			allProducts = allProducts.reduce((acc, product) => acc[product.name] = product, {})
 
 			const _products = transporterTravels.reduce((acc, element) => {
@@ -248,7 +335,7 @@ export class AuditRouteService {
 	}
 
 	async calculateIsNotify({ routeId, transporterId }): Promise<boolean> {
-		const collectionRequest = await this.collectionRequestRepository.find({ where: { routeId, transporter: { id: transporterId }, collectionSite: { siteTypeId: 48 }}, relations: ['collectionSite']});
+		const collectionRequest = await this.collectionRequestRepository.find({ where: { routeId, transporter: { id: transporterId }, collectionSite: { siteTypeId: 48 } }, relations: ['collectionSite'] });
 
 		if (!collectionRequest) {
 			// throw new BusinessException('No existe una solicitud de recogida configurada con la ruta: ' + routeId, 400);
