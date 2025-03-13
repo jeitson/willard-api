@@ -123,29 +123,43 @@ export class AuditRouteService {
 			throw new BusinessException('La transportadora es obligatoria', 400);
 		}
 
-		const transporter = await this.transporterRepository.findOne({ where: { id: transporterId, status: true }})
+		const transporter = await this.transporterRepository.findOne({
+			where: { id: transporterId, status: true },
+		});
 
-		if (transporter) {
-			throw new BusinessException('No existe registros en los cargues realizados por la transportadora', 400);
+		if (!transporter) {
+			throw new BusinessException('La transportadora no existe o no está activa', 404);
 		}
 
-		const transporterTravel = await this.transporterTravelRepository.findOne({ where: { transporter: { id: transporterId }, routeId }, relations: ['details'] })
-
-		if (transporterTravel) {
-			throw new BusinessException('No existe registros en los cargues realizados por la transportadora', 400);
+		// Verificar si existe un viaje asociado a la transportadora y la ruta
+		const transporterTravel = await this.transporterTravelRepository.findOne({
+			where: { transporter: { id: transporterId }, routeId },
+			relations: ['details'],
+		});
+		if (!transporterTravel) {
+			throw new BusinessException('No existen registros de viajes realizados por la transportadora', 404);
 		}
 
-		const requestStatus = await this.childRepository.findOne({ where: { status: true, id: AUDIT_ROUTE_STATUS.BY_CONCILLIATE }});
+		// Buscar el estado de solicitud de auditoría
+		const requestStatus = await this.childRepository.findOne({
+			where: { status: true, id: AUDIT_ROUTE_STATUS.BY_CONCILLIATE },
+		});
 
-		const auditRoute = await this.auditRouteRepository.findOne({ where: { transporterId, routeId } });
+		// Verificar si existe una auditoría previa para esta ruta y transportadora
+		const auditRoute = await this.auditRouteRepository.findOne({
+			where: { transporterId, routeId },
+			relations: ['auditRouteDetails']
+		});
 
 		if (auditRoute) {
-			const zone = await this.childRepository.findOne({ where: { status: true, id: auditRoute.zoneId }});
+			const zone = await this.childRepository.findOne({
+				where: { status: true, id: auditRoute.zoneId },
+			});
 
 			return {
 				transporter,
 				routeId,
-				zone: zone.name,
+				zone: zone?.name || 'Sin zona asignada',
 				date: auditRoute.date,
 				reception: auditRoute.reception,
 				transporterTravel,
@@ -158,26 +172,34 @@ export class AuditRouteService {
 					productId: element.product.id,
 					quantity: element.quantityConciliated,
 					id: element.id,
-				}))
-			}
+				})),
+			};
 		}
 
-		const reception = await this.receptionRepository.findOne({ where: { transporter: { id: transporterId }, routeId }, relations: ['receptionDetails', 'receptionPhotos'] })
+		const reception = await this.receptionRepository.findOne({
+			where: { transporter: { id: transporterId }, routeId },
+			relations: ['receptionDetails', 'receptionPhotos'],
+		});
 
-		if (reception) {
-			throw new BusinessException('No existe registros en la información cargada en la recepción', 400);
+		if (!reception) {
+			throw new BusinessException('No existen registros en la información cargada en la recepción', 404);
 		}
 
-		const products = await this.productRepository.find({ where: { status: true }});
+		const products = await this.productRepository.find({ where: { status: true } });
+
+		const recuperatorTotal = reception.receptionDetails.reduce(
+			(acc, detail) => acc + parseInt(detail.quantity.toString(), 10),
+			0
+		);
 
 		return {
 			transporter,
 			routeId,
-			zone: transporterTravel.zone,
+			zone: transporterTravel.zone || 'Sin zona asignada',
 			date: transporterTravel.movementDate,
 			reception,
 			transporterTravel,
-			recuperatorTotal: reception.receptionDetails.reduce((acc, a) => acc += parseInt(a.quantity.toString()), 0),
+			recuperatorTotal,
 			transporterTotal: transporterTravel.totalQuantity,
 			conciliationTotal: 0,
 			requestStatus,
@@ -186,9 +208,8 @@ export class AuditRouteService {
 				productId: element.id,
 				quantity: 0,
 				id: 0,
-			}))
-		}
-
+			})),
+		};
 	}
 
 	async confirm({ routeId, transporterId, conciliationTotal, recuperatorTotal, transporterTotal, products, isSave, transporter }: ConfirmAuditRouteDto): Promise<void> {
