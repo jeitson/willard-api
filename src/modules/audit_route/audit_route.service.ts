@@ -171,7 +171,7 @@ export class AuditRouteService {
 			where: { transporter: { id: +transporterId }, routeId },
 			relations: ['details'],
 		});
-		if (!transporterTravel) {
+		if (transporterTravel.length === 0) {
 			throw new BusinessException('No existen registros de viajes realizados por la transportadora', 404);
 		}
 
@@ -213,14 +213,28 @@ export class AuditRouteService {
 			};
 		}
 
-		const reception = await this.receptionRepository.findOne({
-			where: { transporter: { id: +transporterId }, routeId },
-			relations: ['receptionDetails', 'receptionPhotos'],
-		});
+		// const reception = await this.receptionRepository.findOne({
+		// 	where: { transporter: { id: +transporterId }, routeId },
+		// 	relations: ['receptionDetails', 'receptionPhotos', 'receptionDetails.product', 'receptionDetails.product.productTypeId'],
+		// });
+
+		let reception = await this.receptionRepository.createQueryBuilder('reception')
+			.leftJoinAndSelect('reception.transporter', 'transporter')
+			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
+			.leftJoinAndSelect('reception.receptionPhotos', 'receptionPhotos')
+			.leftJoinAndSelect('receptionDetails.product', 'product')
+			.leftJoinAndMapOne('product.productTypeId', Child, 'productType', 'productType.id = product.productTypeId')
+			.where('transporter.id = :id AND reception.routeId = :routeId', { id: +transporterId, routeId })
+			.getOne();
 
 		if (!reception) {
 			throw new BusinessException('No existen registros en la información cargada en la recepción', 404);
 		}
+
+		reception.receptionDetails = reception.receptionDetails.map((element: any) => ({
+			productTypeName: element.product.productTypeId?.name,
+			...element,
+		}))
 
 		const products = await this.productRepository.find({ where: { status: true } });
 
