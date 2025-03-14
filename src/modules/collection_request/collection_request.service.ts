@@ -16,6 +16,7 @@ import { User } from "../users/entities/user.entity";
 import { Child } from "../catalogs/entities/child.entity";
 import { REQUEST_STATUS } from "src/core/constants/status.constant";
 import { ROL } from "src/core/constants/rol.constant";
+import { Product } from "../products/entities/product.entity";
 
 @Injectable()
 export class CollectionRequestService {
@@ -36,6 +37,8 @@ export class CollectionRequestService {
 		private readonly clientRepository: Repository<Client>,
 		@InjectRepository(Child)
 		private readonly childRepository: Repository<Child>,
+		@InjectRepository(Product)
+		private readonly productRepository: Repository<Product>,
 		private readonly userContextService: UserContextService
 	) { }
 
@@ -54,10 +57,10 @@ export class CollectionRequestService {
 			throw new BusinessException('El cliente no existe', 400);
 		}
 
-		const productTypeId = await this.childRepository.findOneBy({ id: +createDto.productTypeId, catalogCode: 'TIPO_PRODUCTO' })
+		const product = await this.productRepository.findOneBy({ id: +createDto.productId, status: true })
 
-		if (!productTypeId) {
-			throw new BusinessException('El tipo de producto no existe', 400);
+		if (!product) {
+			throw new BusinessException('El producto no existe', 400);
 		}
 
 		const pickUpLocation = await this.pickUpLocationRepository.findOne({
@@ -95,7 +98,8 @@ export class CollectionRequestService {
 				requestStatusId,
 				pickUpLocation,
 				client,
-				transporter
+				transporter,
+				product
 			});
 		}
 
@@ -136,9 +140,10 @@ export class CollectionRequestService {
 			throw new BusinessException('El cliente no existe', 400);
 		}
 
-		const productTypeId = await this.childRepository.findOneBy({ id: +updatedDto.productTypeId, catalogCode: 'TIPO_PRODUCTO' });
-		if (!productTypeId) {
-			throw new BusinessException('El tipo de producto no existe', 400);
+		const product = await this.productRepository.findOneBy({ id: +updatedDto.productId, status: true })
+
+		if (!product) {
+			throw new BusinessException('El producto no existe', 400);
 		}
 
 		let requestStatusId = REQUEST_STATUS.PENDING, pickUpLocation = null, transporter = null;
@@ -177,6 +182,7 @@ export class CollectionRequestService {
 			transporter,
 			user: pickUpLocation.user,
 			modifiedBy: user_id,
+			product,
 		};
 
 		const collectionRequestSaved = await this.collectionRequestRepository.save(collectionRequest);

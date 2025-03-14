@@ -13,10 +13,10 @@ export class CollectionRequestCreateDto {
 	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
-	@ApiProperty({ description: 'ID del tipo de producto, debe ser un número.' })
-	@IsNotEmpty({ message: 'TipoProductoId es obligatorio y debe ser un número.' })
-	@IsNumber({}, { message: 'TipoProductoId debe ser un número.' })
-	productTypeId: number;
+	@ApiProperty({ description: 'ID del del producto, debe ser un número.' })
+	@IsNotEmpty({ message: 'ProductoId es obligatorio y debe ser un número.' })
+	@IsNumber({}, { message: 'ProductoId debe ser un número.' })
+	productId: number;
 
 	@ApiProperty({ description: 'Descripción' })
 	@IsOptional()
@@ -100,10 +100,10 @@ export class CollectionRequestUpdateDto {
 	@Min(1, { message: 'El ID del lugar de recogida no puede ser 0' })
 	pickUpLocationId: number;
 
-	@ApiProperty({ description: 'ID del tipo de producto, debe ser un número.' })
-	@IsNotEmpty({ message: 'TipoProductoId es obligatorio y debe ser un número.' })
-	@IsNumber({}, { message: 'TipoProductoId debe ser un número.' })
-	productTypeId: number;
+	@ApiProperty({ description: 'ID del producto, debe ser un número.' })
+	@IsNotEmpty({ message: 'ProductoId es obligatorio y debe ser un número.' })
+	@IsNumber({}, { message: 'ProductoId debe ser un número.' })
+	productId: number;
 
 	@ApiProperty({ description: 'Nombre' })
 	@IsString({ message: 'Debe de ser un texto' })
