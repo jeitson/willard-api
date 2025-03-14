@@ -167,7 +167,7 @@ export class AuditRouteService {
 		}
 
 		// Verificar si existe un viaje asociado a la transportadora y la ruta
-		const transporterTravel = await this.transporterTravelRepository.findOne({
+		const transporterTravel = await this.transporterTravelRepository.find({
 			where: { transporter: { id: +transporterId }, routeId },
 			relations: ['details'],
 		});
@@ -191,13 +191,15 @@ export class AuditRouteService {
 				where: { status: true, id: auditRoute.requestStatusId },
 			});
 
+			const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element })))
+
 			return {
 				transporter,
 				routeId,
 				zone: zone?.name || 'Sin zona asignada',
 				date: auditRoute.date,
 				reception: auditRoute.reception,
-				transporterTravel,
+				transporterTravel: t,
 				recuperatorTotal: auditRoute.recuperatorTotal,
 				transporterTotal: auditRoute.transporterTotal,
 				conciliationTotal: auditRoute.conciliationTotal,
@@ -232,15 +234,17 @@ export class AuditRouteService {
 			where: { status: true, id: AUDIT_ROUTE_STATUS.BY_CONCILLIATE },
 		});
 
+		const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element })))
+
 		return {
 			transporter,
 			routeId,
-			zone: transporterTravel.zone || 'Sin zona asignada',
-			date: transporterTravel.movementDate,
+			zone: transporterTravel[0].zone || 'Sin zona asignada',
+			date: transporterTravel[0].movementDate,
 			reception,
-			transporterTravel,
+			transporterTravel: t,
 			recuperatorTotal,
-			transporterTotal: transporterTravel.totalQuantity,
+			transporterTotal: transporterTravel[0].totalQuantity,
 			conciliationTotal: 0,
 			requestStatus: requestStatus.name,
 			products: products.map((element) => ({

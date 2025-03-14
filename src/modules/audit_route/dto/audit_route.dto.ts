@@ -137,7 +137,7 @@ export class AuditRouteDto {
 	reception: Reception;
 
 	@ApiProperty({ description: 'Transportadora Viaje' })
-	transporterTravel: TransporterTravel;
+	transporterTravel: any[]
 
 	@ApiProperty({ description: 'Total Recuperadora' })
 	recuperatorTotal: number;
