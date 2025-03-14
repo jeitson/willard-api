@@ -79,7 +79,7 @@ export class AuditRouteService {
 
 		const mappedTransporterTravels = transporterTravels.map((travel) =>
 			mapToAuditRouteDto(
-				'VIAJE TRANSPORTADORA',
+				'TRANSPORTADORA',
 				{
 					transporter: travel.transporter,
 					routeId: travel.routeId,
@@ -101,7 +101,7 @@ export class AuditRouteService {
 
 		const mappedReceptions = receptions.map((reception) =>
 			mapToAuditRouteDto(
-				'RECEPCIÓN',
+				'RECUPERADORA',
 				{
 					transporter: reception.transporter,
 					routeId: reception.routeId,
@@ -120,6 +120,7 @@ export class AuditRouteService {
 			const key = `${item.routeId}-${item.transporter?.id}`;
 
 			if (mergedResults[key]) {
+				mergedResults[key].origin = 'RECUPERADORA';
 				mergedResults[key].status = 'POR CONCILIAR';
 			} else {
 				mergedResults[key] = item;
