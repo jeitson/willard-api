@@ -114,29 +114,21 @@ export class AuditRouteService {
 			)
 		);
 
-		const mergedResults: ListAuditRouteDto[] = [];
-		const seenKeys = new Set<string>();
+		const mergedResults: Record<string, ListAuditRouteDto> = {};
 
 		[...mappedTransporterTravels, ...mappedReceptions].forEach((item) => {
 			const key = `${item.routeId}-${item.transporter?.id}`;
 
-			if (seenKeys.has(key)) {
-				// Si ya existe un elemento con la misma clave, actualizar su estado a 'POR CONCILIAR'
-				const existingItem = mergedResults.find(
-					(result) => `${result.routeId}-${result.transporter?.id}` === key
-				);
-				if (existingItem) {
-					existingItem.status = 'POR CONCILIAR';
-				}
+			if (mergedResults[key]) {
+				mergedResults[key].status = 'POR CONCILIAR';
 			} else {
-				// Agregar el elemento al resultado
-				seenKeys.add(key);
-				mergedResults.push(item);
+				mergedResults[key] = item;
 			}
 		});
 
-		// Ordenar los resultados por fecha de creación (descendente)
-		return mergedResults.sort((a, b) => {
+		const finalResults = Object.values(mergedResults);
+
+		return finalResults.sort((a, b) => {
 			const dateA = new Date(a.createdAt).getTime();
 			const dateB = new Date(b.createdAt).getTime();
 			return dateB - dateA;
