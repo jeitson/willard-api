@@ -7,15 +7,17 @@ import { AuditRouteDto, ConfirmAuditRouteDto, GetInfoByRouteId, ListAuditRouteDt
 import { AuditRoute } from './entities/audit_route.entity';
 import { ROL } from 'src/core/constants/rol.constant';
 import { RolesGuard } from 'src/core/guards/roles.guard';
+import { Public } from 'src/core/common/decorators/public.decorator';
 
 @ApiTags('Negocio - Auditoria Ruta')
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 @Controller('audit-route')
 export class AuditRouteController {
 	constructor(private readonly auditRouteService: AuditRouteService) { }
 
 	@Get('sync-pending')
-	@Roles(ROL.AUDITORIA_PH)
+	// @Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Listado de registros de transportadora - recepción' })
 	@ApiResult({ type: [ListAuditRouteDto] })
 	async findAllSyncPending() {

@@ -108,7 +108,7 @@ export class GetInfoByRouteId {
 
 export class ListAuditRouteDto {
 	origin: string;
-	transporter: string | null;
+	transporter: Transporter;
 	routeId: string;
 	zone: string;
 	date: string;

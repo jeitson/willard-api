@@ -80,7 +80,13 @@ export class AuditRouteService {
 		const mappedTransporterTravels = transporterTravels.map((travel) =>
 			mapToAuditRouteDto(
 				'VIAJE TRANSPORTADORA',
-				travel,
+				{
+					transporter: travel.transporter,
+					routeId: travel.routeId,
+					movementDate: travel.movementDate,
+					zone: travel.zone,
+					createdAt: travel.createdAt
+				},
 				travel.totalQuantity,
 				'EN TRANSITO'
 			)
@@ -96,13 +102,41 @@ export class AuditRouteService {
 		const mappedReceptions = receptions.map((reception) =>
 			mapToAuditRouteDto(
 				'RECEPCIÓN',
-				reception,
+				{
+					transporter: reception.transporter,
+					routeId: reception.routeId,
+					movementDate: '',
+					zone: '',
+					createdAt: reception.createdAt
+				},
 				reception.receptionDetails.reduce((acc, detail) => acc + detail.quantity, 0),
 				'SIN GUIA'
 			)
 		);
 
-		return [...mappedTransporterTravels, ...mappedReceptions].sort((a, b) => {
+		const mergedResults: ListAuditRouteDto[] = [];
+		const seenKeys = new Set<string>();
+
+		[...mappedTransporterTravels, ...mappedReceptions].forEach((item) => {
+			const key = `${item.routeId}-${item.transporter?.id}`;
+
+			if (seenKeys.has(key)) {
+				// Si ya existe un elemento con la misma clave, actualizar su estado a 'POR CONCILIAR'
+				const existingItem = mergedResults.find(
+					(result) => `${result.routeId}-${result.transporter?.id}` === key
+				);
+				if (existingItem) {
+					existingItem.status = 'POR CONCILIAR';
+				}
+			} else {
+				// Agregar el elemento al resultado
+				seenKeys.add(key);
+				mergedResults.push(item);
+			}
+		});
+
+		// Ordenar los resultados por fecha de creación (descendente)
+		return mergedResults.sort((a, b) => {
 			const dateA = new Date(a.createdAt).getTime();
 			const dateB = new Date(b.createdAt).getTime();
 			return dateB - dateA;
