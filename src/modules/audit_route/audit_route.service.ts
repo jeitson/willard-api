@@ -73,8 +73,7 @@ export class AuditRouteService {
 				'transporter_travel.movementDate',
 				'transporter_travel.createdAt',
 				'transporter_travel.zone',
-				'transporter.id AS transporterId',
-				'transporter.name AS transporterName'
+				'transporter'
 			])
 			.getMany();
 
