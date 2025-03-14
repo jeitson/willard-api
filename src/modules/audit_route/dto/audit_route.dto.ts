@@ -149,7 +149,7 @@ export class AuditRouteDto {
 	conciliationTotal: number;
 
 	@ApiProperty({ description: 'Estado Solicitud' })
-	requestStatus: Child;
+	requestStatus: string;
 
 	@ApiProperty({ description: 'Productos' })
 	products: {

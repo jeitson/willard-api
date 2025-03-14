@@ -140,11 +140,6 @@ export class AuditRouteService {
 			throw new BusinessException('No existen registros de viajes realizados por la transportadora', 404);
 		}
 
-		// Buscar el estado de solicitud de auditoría
-		const requestStatus = await this.childRepository.findOne({
-			where: { status: true, id: AUDIT_ROUTE_STATUS.BY_CONCILLIATE },
-		});
-
 		// Verificar si existe una auditoría previa para esta ruta y transportadora
 		const auditRoute = await this.auditRouteRepository.findOne({
 			where: { transporterId: +transporterId, routeId },
@@ -154,6 +149,11 @@ export class AuditRouteService {
 		if (auditRoute) {
 			const zone = await this.childRepository.findOne({
 				where: { status: true, id: auditRoute.zoneId },
+			});
+
+			// Buscar el estado de solicitud de auditoría
+			const requestStatus = await this.childRepository.findOne({
+				where: { status: true, id: auditRoute.requestStatusId },
 			});
 
 			return {
@@ -166,7 +166,7 @@ export class AuditRouteService {
 				recuperatorTotal: auditRoute.recuperatorTotal,
 				transporterTotal: auditRoute.transporterTotal,
 				conciliationTotal: auditRoute.conciliationTotal,
-				requestStatus,
+				requestStatus: requestStatus.name,
 				products: auditRoute.auditRouteDetails.map((element) => ({
 					name: element.product.name,
 					productId: element.product.id,
@@ -192,6 +192,11 @@ export class AuditRouteService {
 			0
 		);
 
+		// Buscar el estado de solicitud de auditoría
+		const requestStatus = await this.childRepository.findOne({
+			where: { status: true, id: AUDIT_ROUTE_STATUS.BY_CONCILLIATE },
+		});
+
 		return {
 			transporter,
 			routeId,
@@ -202,7 +207,7 @@ export class AuditRouteService {
 			recuperatorTotal,
 			transporterTotal: transporterTravel.totalQuantity,
 			conciliationTotal: 0,
-			requestStatus,
+			requestStatus: requestStatus.name,
 			products: products.map((element) => ({
 				name: element.name,
 				productId: element.id,
