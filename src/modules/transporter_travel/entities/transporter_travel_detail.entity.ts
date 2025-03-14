@@ -11,9 +11,9 @@ export class TransporterTravelDetail extends CompleteEntity {
     @Column({ type: 'varchar', length: 10, name: 'TipoBateria' })
     batteryType: string;
 
-    @Column({ type: 'int', name: 'Cantidad' })
+    @Column({ type: 'int', name: 'Cantidad', nullable: true })
     quantity: number;
 
-	@Column({ type: 'int', name: 'CantidadConciliada' })
+	@Column({ type: 'int', name: 'CantidadConciliada', nullable: true })
 	quantityConciliated: number;
 }

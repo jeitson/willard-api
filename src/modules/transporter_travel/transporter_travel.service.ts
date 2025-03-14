@@ -141,7 +141,7 @@ export class TransporterTravelService {
 
 			const _zones = zones.map(({ zone }) => zone.name);
 
-			if(!recordsToCreate.map((element) => element.zona).every((element) => _zones.includes(element))) {
+			if(!recordsToCreate.map((element) => element.zone).every((element) => _zones.includes(element))) {
 				throw new BusinessException('Está intentando ingresar una zona que no tiene asignada');
 			}
 
@@ -151,7 +151,7 @@ export class TransporterTravelService {
 				await this.updateTransporterTravel(record);
 			}
 
-			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate.map((element) => ({ ...element, transporter })));
+			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate.map((element) => ({ ...element, transporter,  })));
 
 			const allSavedRecords = [
 				...savedRecords,
