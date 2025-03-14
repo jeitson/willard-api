@@ -103,7 +103,7 @@ export class GetInfoByRouteId {
 
 	@ApiProperty({ description: 'Transportadora ID', required: true })
 	@IsString({ message: 'La transportadora es requerida' })
-	transporterId: number;
+	transporterId: string;
 }
 
 export class ListAuditRouteDto {

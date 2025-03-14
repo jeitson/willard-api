@@ -124,7 +124,7 @@ export class AuditRouteService {
 		}
 
 		const transporter = await this.transporterRepository.findOne({
-			where: { id: transporterId, status: true },
+			where: { id: +transporterId, status: true },
 		});
 
 		if (!transporter) {
@@ -133,7 +133,7 @@ export class AuditRouteService {
 
 		// Verificar si existe un viaje asociado a la transportadora y la ruta
 		const transporterTravel = await this.transporterTravelRepository.findOne({
-			where: { transporter: { id: transporterId }, routeId },
+			where: { transporter: { id: +transporterId }, routeId },
 			relations: ['details'],
 		});
 		if (!transporterTravel) {
@@ -147,7 +147,7 @@ export class AuditRouteService {
 
 		// Verificar si existe una auditoría previa para esta ruta y transportadora
 		const auditRoute = await this.auditRouteRepository.findOne({
-			where: { transporterId, routeId },
+			where: { transporterId: +transporterId, routeId },
 			relations: ['auditRouteDetails']
 		});
 
@@ -177,7 +177,7 @@ export class AuditRouteService {
 		}
 
 		const reception = await this.receptionRepository.findOne({
-			where: { transporter: { id: transporterId }, routeId },
+			where: { transporter: { id: +transporterId }, routeId },
 			relations: ['receptionDetails', 'receptionPhotos'],
 		});
 
