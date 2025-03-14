@@ -9,7 +9,7 @@ export class Audit extends CompleteEntity {
 	userId: string;
 
 	@ApiProperty({ description: 'name' })
-	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
+	@Column({ type: 'varchar', length: 250, name: 'Nombre', nullable: true })
 	title: string;
 
 	@ApiProperty({ description: 'description' })
