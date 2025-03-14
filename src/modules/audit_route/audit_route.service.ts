@@ -244,7 +244,7 @@ export class AuditRouteService {
 			reception,
 			transporterTravel: t,
 			recuperatorTotal,
-			transporterTotal: transporterTravel[0].totalQuantity,
+			transporterTotal: t.reduce((acc, a) => ( acc += parseInt(a.quantity.toString())), 0),
 			conciliationTotal: 0,
 			requestStatus: requestStatus.name,
 			products: products.map((element) => ({
