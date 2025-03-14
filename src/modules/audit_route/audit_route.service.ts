@@ -67,6 +67,15 @@ export class AuditRouteService {
 			.leftJoinAndMapOne('transporter_travel.routeId', AuditRoute, 'auditRoute', 'auditRoute.routeId = transporter_travel.routeId')
 			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
 			.andWhere('auditRoute.id IS NULL')
+			.select([
+				'transporter_travel.routeId',
+				'transporter_travel.totalQuantity',
+				'transporter_travel.movementDate',
+				'transporter_travel.createdAt',
+				'transporter_travel.zone',
+				'transporter.id AS transporterId',
+				'transporter.name AS transporterName'
+			])
 			.getMany();
 
 		const mappedTransporterTravels = transporterTravels.map((travel) =>

@@ -32,6 +32,22 @@ export class CollectionRequestController {
 		return this.collectionsRequestervice.findAll(query);
 	}
 
+	@Get('routes-pending')
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@ApiOperation({ summary: 'Listar solicitudes pendiente por cargar' })
+	@ApiResult({ type: [CollectionRequest] })
+	async findAllRoutePendingUpload(): Promise<CollectionRequest[]> {
+		return this.collectionsRequestervice.findAllRoutePendingUpload();
+	}
+
+	@Post('routes-pending')
+	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@ApiOperation({ summary: 'Obtener información complementaria de las solicitudes pendiente por cargar' })
+	@ApiResult({ type: [CollectionRequest] })
+	async getRouteInfoPendingUpload(@Body() createDto: CollectionRequestRouteInfoDto): Promise<CollectionRequest[]> {
+		return this.collectionsRequestervice.getRouteInfoPendingUpload(createDto);
+	}
+
 	@Get(':id')
 	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH)
 	@ApiOperation({ summary: 'Obtener solicitud por ID' })
@@ -76,21 +92,5 @@ export class CollectionRequestController {
 	@ApiOperation({ summary: 'Eliminar solicitud' })
 	async delete(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.delete(id);
-	}
-
-	@Get('routes-pending')
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
-	@ApiOperation({ summary: 'Listar solicitudes pendiente por cargar' })
-	@ApiResult({ type: [CollectionRequest] })
-	async findAllRoutePendingUpload(): Promise<CollectionRequest[]> {
-		return this.collectionsRequestervice.findAllRoutePendingUpload();
-	}
-
-	@Post('routes-pending')
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
-	@ApiOperation({ summary: 'Obtener información complementaria de las solicitudes pendiente por cargar' })
-	@ApiResult({ type: [CollectionRequest] })
-	async getRouteInfoPendingUpload(@Body() createDto: CollectionRequestRouteInfoDto): Promise<CollectionRequest[]> {
-		return this.collectionsRequestervice.getRouteInfoPendingUpload(createDto);
 	}
 }
