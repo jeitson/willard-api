@@ -12,7 +12,7 @@ export class AuditRouteDetail extends CompleteEntity {
 	auditRoute: AuditRoute;
 
 	@ApiProperty({ description: 'Guia ID' })
-	@Column({ type: 'varchar', length: 20,  name: 'GuiaId', nullable: false })
+	@Column({ type: 'varchar', length: 20,  name: 'GuiaId', nullable: true })
 	guideId: string;
 
 	@ApiHideProperty()

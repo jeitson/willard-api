@@ -271,7 +271,7 @@ export class AuditRouteService {
 			reception,
 			transporterTravel: t,
 			recuperatorTotal,
-			transporterTotal: t.reduce((acc, a) => ( acc += parseInt(a.quantity.toString())), 0),
+			transporterTotal: t.reduce((acc, a) => (acc += parseInt(a.quantity.toString())), 0),
 			conciliationTotal: 0,
 			requestStatus: requestStatus.name,
 			products: products.map((element) => ({
@@ -287,125 +287,233 @@ export class AuditRouteService {
 		};
 	}
 
-	async confirm({ routeId, transporterId, conciliationTotal, recuperatorTotal, transporterTotal, products, isSave, transporter }: ConfirmAuditRouteDto): Promise<void> {
-		const auditRoute = await this.auditRouteRepository.findOne({ where: { routeId, transporterId } });
+	async confirm({
+		routeId,
+		transporterId,
+		conciliationTotal,
+		recuperatorTotal,
+		transporterTotal,
+		products,
+		isSave,
+		transporter,
+	}: ConfirmAuditRouteDto): Promise<void> {
+		// Validar si existe la auditoría de ruta
+		const auditRoute = await this.auditRouteRepository.findOne({
+			where: { routeId, transporterId },
+		});
 
-		if (auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.BY_CONCILLIATE) {
-			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
+		if (auditRoute && +auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.BY_CONCILLIATE) {
+			throw new BusinessException(
+				'La auditoría de ruta no aplica para la acción a ejecutar',
+				400
+			);
 		}
 
-		// crear la auditoria de ruta
-		const transporterTravels = await this.transporterTravelRepository.find({ where: { routeId, transporter: { id: transporterId } }, relations: ['details'] })
+		// Obtener viajes de la transportadora
+		const transporterTravels = await this.transporterTravelRepository.find({
+			where: { routeId, transporter: { id: transporterId } },
+			relations: ['details'],
+		});
 
 		if (transporterTravels.length === 0) {
-			throw new BusinessException('No existe registro en la información de la transportadora viaje', 400);
+			throw new BusinessException(
+				'No existe registro en la información de la transportadora viaje',
+				400
+			);
 		}
 
-		// Transportadora
-		const createItemsTransporter = transporter.filter((element) => !element.id && element.productName && element.isNew);
-		const updateItemsTransporter = transporter.filter((element) => element.id);
+		// Filtrar productos para crear y actualizar
+		const createTransporterItems = transporter.filter(
+			(item) => !item.id && item.productName && item.isNew
+		);
+		const updateTransporterItems = transporter.filter((item) => item.id);
 
-		await this.transporterTravelRepository.manager.transaction(async (transactionalEntityManager) => {
-			if (createItemsTransporter.length > 0) {
-				const createdItemsTransporter = createItemsTransporter.map(async ({ productName, quantity, guideNumber: guideId }) => {
+		// Crear y actualizar detalles de viaje de la transportadora
+		await this.transporterTravelRepository.manager.transaction(
+			async (transactionalEntityManager) => {
+				// Crear nuevos detalles
+				if (createTransporterItems.length > 0) {
+					const createdTransporterDetails = await Promise.all(
+						createTransporterItems.map(async ({ productName, quantity, guideNumber }) => {
+							const transporterTravel = await this.transporterTravelRepository.findOne({
+								where: { guideId: guideNumber },
+							});
 
-					const transporterTravel = await this.transporterTravelRepository.findOne({ where: { guideId } });
+							if (!transporterTravel) return null;
 
-					if (!transporterTravel) return;
+							return this.transporterTravelDetailRepository.create({
+								batteryType: productName,
+								quantity,
+								quantityConciliated: quantity,
+								travelRecord: transporterTravel,
+							});
+						})
+					);
 
-					return this.transporterTravelDetailRepository.create({
-						batteryType: productName,
-						quantity: quantity,
-						quantityConciliated: quantity,
-						travelRecord: transporterTravel
-					})
-				});
+					await transactionalEntityManager.save(createdTransporterDetails.filter(Boolean));
+				}
 
-				await transactionalEntityManager.save(createdItemsTransporter);
-			}
-
-			if (updateItemsTransporter.length > 0) {
-				for (const { id, quantity: quantityConciliated } of updateItemsTransporter) {
-					await transactionalEntityManager.update(TransporterTravelDetail, id, { quantityConciliated });
+				// Actualizar detalles existentes
+				if (updateTransporterItems.length > 0) {
+					for (const { id, quantity: quantityConciliated } of updateTransporterItems) {
+						await transactionalEntityManager.update(
+							TransporterTravelDetail,
+							id,
+							{ quantityConciliated }
+						);
+					}
 				}
 			}
-		});
+		);
 
+		// Obtener productos activos
+		const activeProducts = await this.productRepository.find({ where: { status: true } });
+		const productMap = activeProducts.reduce((acc, product) => {
+			acc[product.name] = product;
+			return acc;
+		}, {});
+
+		// Crear nueva auditoría de ruta si no existe
 		if (!auditRoute) {
-			const reception = await this.receptionRepository.findOne({ where: { routeId, transporter: { id: transporterId } } })
+			const collectionRequest = await this.collectionRequestRepository.findOne({
+				where: { transporter: { id: +transporterId }, routeId },
+				relations: ['client', 'collectionSite'],
+			});
+
+			if (!collectionRequest) {
+				throw new BusinessException(
+					'No existen registros en las solicitudes de recogida',
+					400
+				);
+			}
+
+			const reception = await this.receptionRepository.findOne({
+				where: { routeId, transporter: { id: transporterId } },
+			});
 
 			if (!reception) {
-				throw new BusinessException('No existe registro en la información de la recepción', 400);
+				throw new BusinessException(
+					'No existe registro en la información de la recepción',
+					400
+				);
 			}
 
-			const zone = await this.childRepository.findOne({ where: { name: transporterTravels[0].zone.toUpperCase() } })
+			const zone = await this.childRepository.findOne({
+				where: { name: transporterTravels[0].zone.toUpperCase() },
+			});
 
 			if (!zone) {
-				throw new BusinessException('No existe la zona configurada en el registro de la transportadora viaje', 400);
+				throw new BusinessException(
+					'No existe la zona configurada en el registro de la transportadora viaje',
+					400
+				);
 			}
 
-			const user_id = this.userContextService.getUserDetails()?.id;
+			const userId = this.userContextService.getUserDetails()?.id;
 
-			let allProducts: any = await this.productRepository.find({ where: { status: true } });
-			allProducts = allProducts.reduce((acc, product) => acc[product.name] = product, {})
-
-			const _products = transporterTravels.reduce((acc, element) => {
-				element.details.map((detail) => ({
-					guideId: element.guideId,
-					product: allProducts[detail.batteryType],
+			const auditRouteDetails = transporterTravels.flatMap((travel) =>
+				travel.details.map((detail) => ({
+					guideId: travel.guideId,
+					product: productMap[detail.batteryType],
 					quantity: detail.quantity,
-					quantityConciliated: products.find(product => product.productId === allProducts[detail.batteryType].id)?.quantity
+					quantityConciliated: products.find(
+						(product) => product.productId === productMap[detail.batteryType]?.id
+					)?.quantity,
 				}))
-				return acc;
-			}, [])
-
-			const itemSaved = this.auditRouteRepository.create(
-				{
-					createdBy: user_id,
-					modifiedBy: user_id,
-					routeId,
-					reception,
-					date: transporterTravels[0].movementDate,
-					zoneId: zone.id,
-					// recuperatorId: transporterTravel.recu
-					transporterId,
-					requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE,
-					conciliationTotal,
-					recuperatorTotal,
-					transporterTotal,
-					auditRouteDetails: _products
-				}
 			);
 
-			await this.auditRouteRepository.save(itemSaved);
+			const newAuditRoute = this.auditRouteRepository.create({
+				createdBy: userId,
+				modifiedBy: userId,
+				routeId,
+				reception,
+				date: transporterTravels[0].movementDate,
+				zoneId: zone.id,
+				recuperatorId: collectionRequest.collectionSite.id,
+				transporterId,
+				requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE,
+				conciliationTotal,
+				recuperatorTotal,
+				transporterTotal,
+				auditRouteDetails,
+			});
+
+			await this.auditRouteRepository.save(newAuditRoute);
 		}
 
-		// Productos
-		const createItemsProducts = products.filter((element) => !element.productId);
-		const updateItemsProducts = products.filter((element) => element.id);
+		// Filtrar productos para crear y actualizar
+		const createProductItems = products.filter(
+			(item) => item.productId && item.id === 0
+		);
+		const updateProductItems = products.filter((item) => item.id);
 
-		await this.auditRouteDetailRepository.manager.transaction(async (transactionalEntityManager) => {
-			if (createItemsProducts.length > 0) {
-				const createdItemsProducts = createItemsProducts.map(({ productId, quantity }) =>
-					this.auditRouteDetailRepository.create({
-						auditRoute,
-						product: { id: productId },
-						quantity,
-						quantityConciliated: quantity,
-					})
-				);
-				await transactionalEntityManager.save(createdItemsProducts);
-			}
+		const guideIdMap = transporterTravels.reduce((acc, travel) => {
+			travel.details.forEach((detail) => {
+				const productId = productMap[detail.batteryType]?.id;
+				if (productId) {
+					acc[productId] = travel.guideId;
+				}
+			});
+			return acc;
+		}, {} as Record<number, string>);
 
-			if (updateItemsProducts.length > 0) {
-				for (const { id, quantity: quantityConciliated } of updateItemsTransporter) {
-					await transactionalEntityManager.update(AuditRouteDetail, id, { quantityConciliated });
+		await this.auditRouteDetailRepository.manager.transaction(
+			async (transactionalEntityManager) => {
+				for (const { productId, quantity } of createProductItems) {
+					const guideId = guideIdMap[productId];
+
+					if (!guideId) continue;
+
+					// Verificar si ya existe un detalle con el mismo productId y guideId
+					const existingDetail = await this.auditRouteDetailRepository.findOne({
+						where: {
+							product: { id: productId },
+							guideId,
+							auditRoute
+						},
+					});
+
+					if (existingDetail) {
+						// Si existe, actualizar la cantidad
+						await transactionalEntityManager.update(
+							AuditRouteDetail,
+							{ id: existingDetail.id },
+							{ quantityConciliated: quantity }
+						);
+					} else {
+						// Si no existe, crear un nuevo detalle
+						const newAuditRouteDetail = this.auditRouteDetailRepository.create({
+							auditRoute: auditRoute || undefined, // Asegurarse de que auditRoute no sea undefined
+							product: { id: +productId }, // Convertir productId a número
+							quantity,
+							quantityConciliated: quantity,
+							guideId,
+						});
+
+						await transactionalEntityManager.save(newAuditRouteDetail);
+					}
+				}
+
+				// Actualizar detalles existentes
+				if (updateProductItems.length > 0) {
+					for (const { id, quantity: quantityConciliated } of updateProductItems) {
+						await transactionalEntityManager.update(
+							AuditRouteDetail,
+							id,
+							{ quantityConciliated }
+						);
+					}
 				}
 			}
-		});
+		);
 
+		// Confirmar auditoría si no se guarda como borrador
 		if (!isSave) {
-			await this.auditRouteRepository.update(auditRoute.id, { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED, notify: await this.calculateIsNotify({ routeId, transporterId }) });
+			await this.auditRouteRepository.update(auditRoute.id, {
+				requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED,
+				notify: await this.calculateIsNotify({ routeId, transporterId }),
+			});
+
 			this.createNoteCredit(auditRoute.id);
 		}
 	}

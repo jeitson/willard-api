@@ -6,7 +6,7 @@ import { AuditRouteDetail } from "./audit_route_detail.entity";
 import { AuditRoute } from "./audit_route.entity";
 import { Product } from "src/modules/products/entities/product.entity";
 
-@Entity({ name: 'auditoria_ruta' })
+@Entity({ name: 'nota_credito' })
 export class NoteCredit extends CompleteEntity {
 	@JoinColumn({ name: 'AuditoriId' })
 	@ApiProperty({ description: 'ID de la auditoria (FK)' })
