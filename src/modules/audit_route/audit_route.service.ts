@@ -163,7 +163,7 @@ export class AuditRouteService {
 		});
 
 		if (!transporter) {
-			throw new BusinessException('La transportadora no existe o no está activa', 404);
+			throw new BusinessException('La transportadora no existe o no está activa', 400);
 		}
 
 		// Verificar si existe un viaje asociado a la transportadora y la ruta
@@ -172,7 +172,16 @@ export class AuditRouteService {
 			relations: ['details'],
 		});
 		if (transporterTravel.length === 0) {
-			throw new BusinessException('No existen registros de viajes realizados por la transportadora', 404);
+			throw new BusinessException('No existen registros de viajes realizados por la transportadora', 400);
+		}
+
+		// Verificar si existe un solicitud asociada
+		const collectionRequest = await this.collectionRequestRepository.findOne({
+			where: { transporter: { id: +transporterId }, routeId },
+			relations: ['client', 'collectionSite'],
+		});
+		if (!collectionRequest) {
+			throw new BusinessException('No existen registros en las solicitudes de recogida', 400);
 		}
 
 		// Verificar si existe una auditoría previa para esta ruta y transportadora
@@ -210,6 +219,10 @@ export class AuditRouteService {
 					quantity: element.quantityConciliated,
 					id: element.id,
 				})),
+				client: {
+					name: collectionRequest.client.name,
+					isAgency: collectionRequest.collectionSite.siteTypeId === 49
+				}
 			};
 		}
 
@@ -267,6 +280,10 @@ export class AuditRouteService {
 				quantity: 0,
 				id: 0,
 			})),
+			client: {
+				name: collectionRequest.client.name,
+				isAgency: collectionRequest.collectionSite.siteTypeId === 49
+			}
 		};
 	}
 

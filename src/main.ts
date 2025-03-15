@@ -26,16 +26,25 @@ async function bootstrap() {
 			errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
 			stopAtFirstError: false, // Procesa todos los errores en lugar de detenerse en el primero
 			exceptionFactory: errors => {
-				const errorMessages = errors.map(error => {
-					const constraints = error.constraints
-						? Object.values(error.constraints)
-						: error.children.flatMap(({ constraints }) => Object.values(constraints));
+				const extractErrorMessages = (error) => {
+					// Si hay constraints, extrae los mensajes
+					if (error.constraints) {
+						return Object.values(error.constraints);
+					}
 
-					return {
-						property: error.property,
-						errors: constraints,
-					};
-				});
+					// Si hay children, extrae recursivamente los mensajes de cada hijo
+					if (error.children && error.children.length > 0) {
+						return error.children.flatMap(child => extractErrorMessages(child));
+					}
+
+					// Si no hay ni constraints ni children, retorna un array vacío
+					return [];
+				};
+
+				const errorMessages = errors.map(error => ({
+					property: error.property,
+					errors: extractErrorMessages(error),
+				}));
 
 				return new UnprocessableEntityException({
 					message: 'Validation failed',
