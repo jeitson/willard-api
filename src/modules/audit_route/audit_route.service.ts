@@ -190,6 +190,24 @@ export class AuditRouteService {
 			relations: ['auditRouteDetails', 'auditRouteDetails.product']
 		});
 
+		let reception = await this.receptionRepository.createQueryBuilder('reception')
+			.leftJoinAndSelect('reception.transporter', 'transporter')
+			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
+			.leftJoinAndSelect('reception.receptionPhotos', 'receptionPhotos')
+			.leftJoinAndSelect('receptionDetails.product', 'product')
+			.leftJoinAndMapOne('product.productTypeId', Child, 'productType', 'productType.id = product.productTypeId')
+			.where('transporter.id = :id AND reception.routeId = :routeId', { id: +transporterId, routeId })
+			.getOne();
+
+		if (!reception) {
+			throw new BusinessException('No existen registros en la información cargada en la recepción', 400);
+		}
+
+		reception.receptionDetails = reception.receptionDetails.map((element: any) => ({
+			productTypeName: element.product.productTypeId?.name,
+			...element,
+		}))
+
 		if (auditRoute) {
 			const zone = await this.childRepository.findOne({
 				where: { status: true, id: auditRoute.zoneId },
@@ -224,7 +242,7 @@ export class AuditRouteService {
 				routeId,
 				zone: zone?.name || 'Sin zona asignada',
 				date: auditRoute.date,
-				reception: auditRoute.reception,
+				reception,
 				transporterTravel: t,
 				recuperatorTotal: auditRoute.recuperatorTotal,
 				transporterTotal: auditRoute.transporterTotal,
@@ -245,24 +263,6 @@ export class AuditRouteService {
 		// 	where: { transporter: { id: +transporterId }, routeId },
 		// 	relations: ['receptionDetails', 'receptionPhotos', 'receptionDetails.product', 'receptionDetails.product.productTypeId'],
 		// });
-
-		let reception = await this.receptionRepository.createQueryBuilder('reception')
-			.leftJoinAndSelect('reception.transporter', 'transporter')
-			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
-			.leftJoinAndSelect('reception.receptionPhotos', 'receptionPhotos')
-			.leftJoinAndSelect('receptionDetails.product', 'product')
-			.leftJoinAndMapOne('product.productTypeId', Child, 'productType', 'productType.id = product.productTypeId')
-			.where('transporter.id = :id AND reception.routeId = :routeId', { id: +transporterId, routeId })
-			.getOne();
-
-		if (!reception) {
-			throw new BusinessException('No existen registros en la información cargada en la recepción', 404);
-		}
-
-		reception.receptionDetails = reception.receptionDetails.map((element: any) => ({
-			productTypeName: element.product.productTypeId?.name,
-			...element,
-		}))
 
 		const products = await this.productRepository.find({ where: { status: true } });
 

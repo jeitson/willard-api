@@ -10,7 +10,7 @@ import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Public } from 'src/core/common/decorators/public.decorator';
 
 @ApiTags('Negocio - Auditoria Ruta')
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 @Controller('audit-route')
 export class AuditRouteController {
 	constructor(private readonly auditRouteService: AuditRouteService) { }
@@ -32,7 +32,8 @@ export class AuditRouteController {
 	}
 
 	@Get('detail')
-	@Roles(ROL.AUDITORIA_PH)
+	// @Roles(ROL.AUDITORIA_PH)
+	@Public()
 	@ApiOperation({ summary: 'Listado de auditoria de rutas' })
 	@ApiResult({ type: AuditRouteDto })
 	async findOneByRoute(@Query() content: GetInfoByRouteId) {
