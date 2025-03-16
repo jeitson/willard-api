@@ -225,7 +225,7 @@ export class AuditRouteService {
 
 			const products = await this.productRepository.find({ where: { status: true } });
 
-			const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element, client })))
+			const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...element, ...y, client })))
 
 			const _products = auditRoute.auditRouteDetails.reduce((acc, element) => {
 				acc[element.product.id] = {
@@ -281,7 +281,7 @@ export class AuditRouteService {
 			isAgency: collectionRequest.collectionSite.siteTypeId === 49
 		}
 
-		const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element, client })))
+		const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...element, ...y, client })))
 
 		return {
 			transporter,
