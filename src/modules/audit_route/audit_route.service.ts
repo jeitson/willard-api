@@ -187,7 +187,7 @@ export class AuditRouteService {
 		// Verificar si existe una auditoría previa para esta ruta y transportadora
 		const auditRoute = await this.auditRouteRepository.findOne({
 			where: { transporterId: +transporterId, routeId },
-			relations: ['auditRouteDetails']
+			relations: ['auditRouteDetails', 'auditRouteDetails.product']
 		});
 
 		if (auditRoute) {
@@ -298,7 +298,7 @@ export class AuditRouteService {
 		transporter,
 	}: ConfirmAuditRouteDto): Promise<void> {
 		// Validar si existe la auditoría de ruta
-		const auditRoute = await this.auditRouteRepository.findOne({
+		let auditRoute = await this.auditRouteRepository.findOne({
 			where: { routeId, transporterId },
 		});
 
@@ -438,7 +438,7 @@ export class AuditRouteService {
 				auditRouteDetails,
 			});
 
-			await this.auditRouteRepository.save(newAuditRoute);
+			auditRoute = await this.auditRouteRepository.save(newAuditRoute);
 		}
 
 		// Filtrar productos para crear y actualizar
