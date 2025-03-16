@@ -66,7 +66,7 @@ export class AuditRouteService {
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndMapOne('transporter_travel.routeId', AuditRoute, 'auditRoute', 'auditRoute.routeId = transporter_travel.routeId')
 			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
-			.andWhere('auditRoute.id IS NULL')
+			.andWhere('auditRoute.id IS NULL OR auditRoute.requestStatusId = :requestStatusId', { requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE })
 			.select([
 				'transporter_travel.routeId',
 				'transporter_travel.totalQuantity',
