@@ -158,12 +158,6 @@ export class AuditRouteDto {
 		name: string;
 		quantity: number;
 	}[];
-
-	@ApiProperty({ description: 'Información Cliente'})
-	client: {
-		name: string;
-		isAgency: boolean;
-	}
 }
 
 export class ConciliateTotalsAuditRouteDto {

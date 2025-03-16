@@ -200,7 +200,24 @@ export class AuditRouteService {
 				where: { status: true, id: auditRoute.requestStatusId },
 			});
 
-			const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element })))
+			const client = {
+				name: collectionRequest.client.name,
+				isAgency: collectionRequest.collectionSite.siteTypeId === 49
+			}
+
+			const products = await this.productRepository.find({ where: { status: true } });
+
+			const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element, client })))
+
+			const _products = auditRoute.auditRouteDetails.reduce((acc, element) => {
+				acc[element.product.id] = {
+					name: element.product.name,
+					productId: element.product.id,
+					quantity: element.quantityConciliated,
+					id: element.id,
+				}
+				return acc;
+			}, {});
 
 			return {
 				transporter,
@@ -213,16 +230,14 @@ export class AuditRouteService {
 				transporterTotal: auditRoute.transporterTotal,
 				conciliationTotal: auditRoute.conciliationTotal,
 				requestStatus: requestStatus.name,
-				products: auditRoute.auditRouteDetails.map((element) => ({
-					name: element.product.name,
-					productId: element.product.id,
-					quantity: element.quantityConciliated,
-					id: element.id,
-				})),
-				client: {
-					name: collectionRequest.client.name,
-					isAgency: collectionRequest.collectionSite.siteTypeId === 49
-				}
+				products: products.map((product) => {
+					return _products[product.id] || {
+						name: product.name,
+						productId: product.id,
+						quantity: 0,
+						id: 0,
+					}
+				}),
 			};
 		}
 
@@ -261,7 +276,12 @@ export class AuditRouteService {
 			where: { status: true, id: AUDIT_ROUTE_STATUS.BY_CONCILLIATE },
 		});
 
-		const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element })))
+		const client = {
+			name: collectionRequest.client.name,
+			isAgency: collectionRequest.collectionSite.siteTypeId === 49
+		}
+
+		const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...y, ...element, client })))
 
 		return {
 			transporter,
@@ -279,11 +299,7 @@ export class AuditRouteService {
 				productId: element.id,
 				quantity: 0,
 				id: 0,
-			})),
-			client: {
-				name: collectionRequest.client.name,
-				isAgency: collectionRequest.collectionSite.siteTypeId === 49
-			}
+			}))
 		};
 	}
 
