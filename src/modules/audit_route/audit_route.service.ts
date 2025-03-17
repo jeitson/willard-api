@@ -136,15 +136,42 @@ export class AuditRouteService {
 		});
 	}
 
-	async findAll(): Promise<AuditRoute[]> {
-		return this.auditRouteRepository.createQueryBuilder('auditRoute')
-			.leftJoinAndSelect('auditRoute.reception', 'reception')
-			.leftJoinAndSelect('auditRoute.auditRouteDetails', 'auditRouteDetails')
-			.leftJoinAndMapOne('auditRoute.requestStatusId', Child, 'requestStatus', 'requestStatus.id = auditRoute.requestStatusId')
-			.leftJoinAndMapOne('auditRoute.transporterTravel', TransporterTravel, 'transporterTravel', 'transporterTravel.routeId = auditRoute.routeId')
-			.leftJoinAndMapOne('auditRoute.transporterId', Transporter, 'transporter', 'transporter.id = auditRoute.transporterId')
-			.where('requestStatus.id = :requestStatusId', { requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED })
-			.getMany();
+	async findAll(requestStatusId = AUDIT_ROUTE_STATUS.CONFIRMED): Promise<ListAuditRouteDto[]> {
+		try {
+			// Consulta optimizada con TypeORM QueryBuilder
+			const items = await this.auditRouteRepository
+				.createQueryBuilder('auditRoute')
+				.leftJoinAndSelect('auditRoute.reception', 'reception')
+				.leftJoinAndSelect('auditRoute.auditRouteDetails', 'auditRouteDetails')
+				.leftJoinAndSelect('auditRoute.collectionRequest', 'collectionRequest')
+				.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
+				.leftJoinAndMapOne('auditRoute.requestStatus', Child, 'requestStatus', 'requestStatus.id = auditRoute.requestStatusId')
+				.leftJoinAndMapOne('auditRoute.zone', Child, 'zone', 'zone.id = auditRoute.zoneId')
+				.leftJoinAndMapOne('auditRoute.transporterTravel', TransporterTravel, 'transporterTravel', 'transporterTravel.routeId = auditRoute.routeId')
+				.leftJoinAndMapOne('auditRoute.transporter', Transporter, 'transporter', 'transporter.id = auditRoute.transporterId')
+				.where('requestStatus.id = :requestStatusId', { requestStatusId })
+				.getMany();
+
+			return items.map((item) => this.mapToDto(item));
+		} catch (error) {
+			console.error('Error fetching audit routes:', error);
+			throw new Error('Failed to retrieve audit routes');
+		}
+	}
+
+	private mapToDto(item: any): ListAuditRouteDto {
+		return {
+			origin: 'RECUPERADORA',
+			transporter: item.transporter?.name || 'N/A',
+			routeId: item.routeId,
+			zone: item.zone?.name || 'N/A',
+			date: item.date,
+			recuperator: item.collectionRequest?.collectionSite?.name || 'N/A',
+			quantityTotal: item.conciliationTotal || 0,
+			gap: (item.recuperatorTotal || 0) - (item.transporterTotal || 0),
+			status: 'CONFIRMADA',
+			createdAt: item.createdAt,
+		};
 	}
 
 	async findOneByRoute(content: GetInfoByRouteId): Promise<AuditRouteDto> {
@@ -352,7 +379,7 @@ export class AuditRouteService {
 					const createdTransporterDetails = await Promise.all(
 						createTransporterItems.map(async ({ productName, quantity, guideNumber }) => {
 							const transporterTravel = await this.transporterTravelRepository.findOne({
-								where: { guideId: guideNumber },
+								where: { guideId: guideNumber, transporter: { id: transporterId }, routeId },
 							});
 
 							if (!transporterTravel) return null;
@@ -378,6 +405,23 @@ export class AuditRouteService {
 							{ quantityConciliated }
 						);
 					}
+				}
+
+				for (const travelRecord of transporterTravels) {
+					const updatedDetails = await transactionalEntityManager.find(TransporterTravelDetail, {
+						where: { travelRecord }
+					});
+
+					const totalQuantity = updatedDetails.reduce(
+						(sum, detail) => sum + (detail.quantity || 0),
+						0
+					);
+
+					await transactionalEntityManager.update(
+						TransporterTravel,
+						travelRecord,
+						{ totalQuantity }
+					);
 				}
 			}
 		);
@@ -452,6 +496,7 @@ export class AuditRouteService {
 				recuperatorTotal,
 				transporterTotal,
 				auditRouteDetails,
+				collectionRequest,
 			});
 
 			auditRoute = await this.auditRouteRepository.save(newAuditRoute);

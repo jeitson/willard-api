@@ -114,7 +114,7 @@ export class ListAuditRouteDto {
 	date: string;
 	recuperator: string | null;
 	quantityTotal: number;
-	gap: string | null;
+	gap: number;
 	status: string;
 	createdAt: Date;
 }

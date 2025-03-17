@@ -16,7 +16,7 @@ import { TransportersModule } from '../transporters/transporters.module';
 const providers = [AuditRouteService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail, NoteCredit]), forwardRef(() => TransporterTravelModule), forwardRef(() => ReceptionsModule), CatalogsModule, UsersModule, ProductsModule, CollectionRequestModule, TransportersModule],
+	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail, NoteCredit]), forwardRef(() => TransporterTravelModule), forwardRef(() => ReceptionsModule), CatalogsModule, UsersModule, ProductsModule, forwardRef(() => CollectionRequestModule), TransportersModule],
 	controllers: [AuditRouteController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

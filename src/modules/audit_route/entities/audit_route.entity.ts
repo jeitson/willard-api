@@ -6,6 +6,7 @@ import { AuditRouteDetail } from "./audit_route_detail.entity";
 import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
 import { NoteCredit } from "./note_credit.entity";
+import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 
 @Entity({ name: 'auditoria_ruta' })
 export class AuditRoute extends CompleteEntity {
@@ -63,4 +64,9 @@ export class AuditRoute extends CompleteEntity {
 
 	@OneToMany(() => NoteCredit, (NoteCredit) => NoteCredit.auditRoute)
 	notesCredits: NoteCredit[];
+
+	@JoinColumn({ name: 'SolicitudRecogidaId' })
+	@ApiProperty({ description: 'ID de la solicitud recogida (FK)' })
+	@OneToOne(() => CollectionRequest, (collectionRequest) => collectionRequest.auditRoute)
+	collectionRequest: CollectionRequest;
 }

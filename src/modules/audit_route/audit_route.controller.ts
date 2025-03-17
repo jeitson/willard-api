@@ -26,7 +26,7 @@ export class AuditRouteController {
 	@Get('')
 	@Roles(ROL.AUDITORIA_PH)
 	@ApiOperation({ summary: 'Listado de auditoria de rutas' })
-	@ApiResult({ type: [AuditRoute] })
+	@ApiResult({ type: [ListAuditRouteDto] })
 	async findAll() {
 		return this.auditRouteService.findAll();
 	}

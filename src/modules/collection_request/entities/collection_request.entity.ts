@@ -11,6 +11,7 @@ import { User } from "src/modules/users/entities/user.entity";
 import { Driver } from "src/modules/drivers/entities/driver.entity";
 import { Expose } from "class-transformer";
 import { Product } from "src/modules/products/entities/product.entity";
+import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 
 @Entity({ name: 'solicitud_recogida' })
 export class CollectionRequest extends CompleteEntity {
@@ -97,4 +98,7 @@ export class CollectionRequest extends CompleteEntity {
 
 	@OneToOne(() => Driver, (driver) => driver.collectionRequest)
 	driver: Driver;
+
+	@OneToOne(() => AuditRoute, (auditRoute) => auditRoute.collectionRequest)
+	auditRoute: AuditRoute;
 }
