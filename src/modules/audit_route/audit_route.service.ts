@@ -97,6 +97,7 @@ export class AuditRouteService {
 			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
 			.leftJoinAndSelect('reception.auditRoute', 'auditRoutes')
 			.leftJoinAndSelect('reception.transporter', 'transporter')
+			.leftJoinAndSelect('reception.collectionSite', 'collectionSite')
 			.getMany();
 
 		const mappedReceptions = receptions.map((reception) =>
@@ -107,7 +108,8 @@ export class AuditRouteService {
 					routeId: reception.routeId,
 					movementDate: '',
 					zone: '',
-					createdAt: reception.createdAt
+					createdAt: reception.createdAt,
+					recuperator: reception?.collectionSite?.name || 'N/A',
 				},
 				reception.receptionDetails.reduce((acc, detail) => acc + detail.quantity, 0),
 				'SIN GUIA'
@@ -162,7 +164,7 @@ export class AuditRouteService {
 	private mapToDto(item: any): ListAuditRouteDto {
 		return {
 			origin: 'RECUPERADORA',
-			transporter: item.transporter?.name || 'N/A',
+			transporter: item.transporter,
 			routeId: item.routeId,
 			zone: item.zone?.name || 'N/A',
 			date: item.date,
@@ -246,7 +248,7 @@ export class AuditRouteService {
 			});
 
 			const client = {
-				name: collectionRequest.client.name,
+				name: collectionRequest.collectionSite.name,
 				isAgency: collectionRequest.collectionSite.siteTypeId === 49
 			}
 
@@ -304,7 +306,7 @@ export class AuditRouteService {
 		});
 
 		const client = {
-			name: collectionRequest.client.name,
+			name: collectionRequest.collectionSite.name,
 			isAgency: collectionRequest.collectionSite.siteTypeId === 49
 		}
 
