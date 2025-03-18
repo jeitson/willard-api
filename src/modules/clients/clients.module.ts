@@ -4,12 +4,12 @@ import { ClientsController } from './clients.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Client } from './entities/client.entity';
 import { UsersModule } from '../users/users.module';
-import { ClientsCronService } from './clients.cron.service';
+import { Branch } from './entities/client_branch.entity';
 
-const providers = [ClientsService, ClientsCronService]
+const providers = [ClientsService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Client]), UsersModule],
+	imports: [TypeOrmModule.forFeature([Client, Branch]), UsersModule],
 	controllers: [ClientsController],
 	providers,
 	exports: [TypeOrmModule, ...providers],

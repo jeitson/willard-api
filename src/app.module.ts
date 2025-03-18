@@ -29,8 +29,6 @@ import { TransporterTravelModule } from './modules/transporter_travel/transporte
 import { FilesModule } from './modules/files/files.module';
 import { ShipmentsModule } from './modules/shipments/shipments.module';
 import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
-import { ApiModule } from './modules/integrations/ph_central/api.module';
-import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HistoryJobsModule } from './modules/history_jobs/history_jobs.module';
 import { AuditRouteModule } from './modules/audit_route/audit_route.module';
 
@@ -65,8 +63,6 @@ import { AuditRouteModule } from './modules/audit_route/audit_route.module';
 		FilesModule,
 		ShipmentsModule,
 		ReportsPhModule,
-		ApiModule,
-		IntegrationsModule,
 		HistoryJobsModule,
 		AuditRouteModule,
 	],

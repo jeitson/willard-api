@@ -4,6 +4,7 @@ import { CollectionRequest } from "src/modules/collection_request/entities/colle
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
 import { ReportsPh } from "src/modules/reports_ph/entities/reports_ph.entity";
 import { Column, Entity, OneToMany } from "typeorm";
+import { Branch } from "./client_branch.entity";
 
 @Entity({ name: 'cliente' })
 export class Client extends CompleteEntity {
@@ -44,6 +45,9 @@ export class Client extends CompleteEntity {
 
 	@OneToMany(() => CollectionRequest, collectionsRequests => collectionsRequests.client)
     collectionsRequests: CollectionRequest[];
+
+	@OneToMany(() => Branch, branch => branch.client)
+    branchs: Branch[];
 
 	// @OneToMany(() => ReportsPh, reportsPh => reportsPh.client)
     reportsPh: ReportsPh[];
