@@ -3,7 +3,7 @@ import { CollectionRequestService } from './collection_request.service';
 
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiResult } from "src/core/common/decorators/api-result.decorator";
-import { CollectionRequestCreateDto, CollectionRequestCompleteDto, CollectionRequestUpdateDto, CollectionRequestRouteInfoDto } from "./dto/collection_request.dto";
+import { CollectionRequestCreateDto, CollectionRequestCompleteDto, CollectionRequestUpdateDto, CollectionRequestRouteInfoDto, CollectionRequestRouteList } from "./dto/collection_request.dto";
 import { CollectionRequest } from './entities/collection_request.entity';
 import { IdParam } from 'src/core/common/decorators/id-param.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
@@ -43,8 +43,8 @@ export class CollectionRequestController {
 	@Post('routes-pending')
 	@Roles(ROL.PLANEADOR_TRANSPORTE)
 	@ApiOperation({ summary: 'Obtener información complementaria de las solicitudes pendiente por cargar' })
-	@ApiResult({ type: [CollectionRequest] })
-	async getRouteInfoPendingUpload(@Body() createDto: CollectionRequestRouteInfoDto): Promise<CollectionRequest[]> {
+	@ApiResult({ type: [CollectionRequestRouteList] })
+	async getRouteInfoPendingUpload(@Body() createDto: CollectionRequestRouteInfoDto): Promise<CollectionRequestRouteList[]> {
 		return this.collectionsRequestervice.getRouteInfoPendingUpload(createDto);
 	}
 

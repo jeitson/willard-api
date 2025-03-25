@@ -5,7 +5,7 @@ import { BusinessException } from "src/core/common/exceptions/biz.exception";
 import { Pagination } from "src/core/helper/paginate/pagination";
 import { paginate } from "src/core/helper/paginate";
 import { CollectionRequest } from "./entities/collection_request.entity";
-import { CollectionRequestCompleteDto, CollectionRequestCreateDto, CollectionRequestRouteInfoDto, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
+import { CollectionRequestCompleteDto, CollectionRequestCreateDto, CollectionRequestRouteInfoDto, CollectionRequestRouteList, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
 import { PickUpLocation } from "../pick_up_location/entities/pick_up_location.entity";
 import { CollectionRequestAudit } from "../collection_request_audits/entities/collection_request_audit.entity";
 import { Transporter } from "../transporters/entities/transporter.entity";
@@ -394,7 +394,7 @@ export class CollectionRequestService {
 		return queryBuilder.getMany();
 	}
 
-	async getRouteInfoPendingUpload({ routes }: CollectionRequestRouteInfoDto): Promise<CollectionRequest[]> {
+	async getRouteInfoPendingUpload({ routes }: CollectionRequestRouteInfoDto): Promise<CollectionRequestRouteList[]> {
 		let { zones } = this.userContextService.getUserDetails();
 		zones = zones.map(({ zoneId }) => +zoneId);
 
@@ -404,7 +404,12 @@ export class CollectionRequestService {
 
 		const queryBuilder = this.collectionRequestRepository.createQueryBuilder('collectionRequest')
 			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
-			.leftJoinAndMapOne('pickUpLocation.zoneId', Child, 'zone', 'zone.id = pickUpLocation.zoneId');
+			.leftJoinAndSelect('collectionRequest.user', 'user')
+			.leftJoinAndSelect('collectionRequest.route', 'route')
+			.leftJoinAndSelect('collectionRequest.driver', 'driver')
+			.leftJoinAndSelect('collectionRequest.collectionSite', 'collectionSite')
+			.leftJoinAndMapOne('pickUpLocation.zone', Child, 'zone', 'zone.id = pickUpLocation.zoneId')
+			.leftJoinAndMapOne('pickUpLocation.city', Child, 'city', 'city.id = pickUpLocation.cityId');
 
 		queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
 		.andWhere('zone.id IN (:...zones) AND collectionRequest.routeId IN (:...routes)', { zones, routes });
@@ -415,6 +420,35 @@ export class CollectionRequestService {
 			throw new BusinessException('La información enviada, no aplica para la generación de la información', 400);
 		}
 
-		return results;
+		return results.map((element) => {
+			return {
+				idRuta: element.routeId,
+				idGuia: '',
+				// TODO: consultar el tipo de movimiento
+				tipo: '',
+				// TODO: ¿Qué es secuencia?
+				secuencia: '',
+				fechaMov: element.requestDate,
+				horaMov: element.requestTime,
+				planeador: element.user.id,
+				zona: (element.pickUpLocation as any).zone.name,
+				ciudad: (element.pickUpLocation as any).city.name,
+				// TODO: buscar el departamento de la ciudad
+				depto: '',
+				placa: element.route.plate,
+				conductor: element.driver.name,
+				nombreSitio: element.collectionSite.name,
+				direccion: element.collectionSite.address,
+				// TODO: ¿Qué es posGps?
+				posGps: '',
+				totCant: element.estimatedQuantity,
+				// TODO: ¿Qué es docReferencia?
+				docReferencia: '',
+				// TODO: ¿Qué es docReferencia2?
+				docReferencia2: '',
+				urlSoportes: '',
+				detalles: '',
+			}
+		});
 	}
 }

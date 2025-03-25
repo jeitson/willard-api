@@ -175,3 +175,67 @@ export class CollectionRequestQueryDto extends IntersectionType(
 	PagerDto<CollectionRequestCreateDto>,
 	PartialType(CollectionRequestCreateDto),
 ) { }
+
+
+export class CollectionRequestRouteList {
+	@ApiProperty({ description: 'idRuta' })
+	idRuta: string;
+
+	@ApiProperty({ description: 'idGuia' })
+	idGuia: string;
+
+	@ApiProperty({ description: 'tipo' })
+	tipo: string;
+
+	@ApiProperty({ description: 'secuencia' })
+	secuencia: string;
+
+	@ApiProperty({ description: 'fechaMov' })
+	fechaMov: Date;
+
+	@ApiProperty({ description: 'horaMov' })
+	horaMov: string;
+
+	@ApiProperty({ description: 'planeador' })
+	planeador: number;
+
+	@ApiProperty({ description: 'zona' })
+	zona: string;
+
+	@ApiProperty({ description: 'ciudad' })
+	ciudad: string;
+
+	@ApiProperty({ description: 'depto' })
+	depto: string;
+
+	@ApiProperty({ description: 'placa' })
+	placa: string;
+
+	@ApiProperty({ description: 'conductor' })
+	conductor: string;
+
+	@ApiProperty({ description: 'nombreSitio' })
+	nombreSitio: string;
+
+	@ApiProperty({ description: 'direccion' })
+	direccion: string;
+
+	@ApiProperty({ description: 'posGps' })
+	posGps: string;
+
+	@ApiProperty({ description: 'totCant' })
+	totCant: number;
+
+	@ApiProperty({ description: 'ocReferencia' })
+	docReferencia: string;
+
+	@ApiProperty({ description: 'docReferencia2' })
+	docReferencia2: string;
+
+	@ApiProperty({ description: 'urlSoportes' })
+	urlSoportes: string;
+
+	@ApiProperty({ description: 'detalles' })
+	detalles: string;
+
+}
