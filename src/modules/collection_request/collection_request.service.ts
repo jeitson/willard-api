@@ -430,7 +430,7 @@ export class CollectionRequestService {
 				secuencia: '',
 				fechaMov: element.requestDate,
 				horaMov: element.requestTime,
-				planeador: element.user.id,
+				planeador: element.user?.id,
 				zona: (element.pickUpLocation as any).zone.name,
 				ciudad: (element.pickUpLocation as any).city.name,
 				// TODO: buscar el departamento de la ciudad
