@@ -112,7 +112,7 @@ export class TransporterTravelService {
 				}
 				acc[idGuia].push({
 					tipoBat: detail['tipoBat'],
-					cantidad: detail['cantidad'],
+					cantidad: detail['cantidad'] || detail['Cantidad'],
 				});
 				return acc;
 			}, {});
@@ -141,7 +141,7 @@ export class TransporterTravelService {
 
 			const _zones = zones.map(({ zone }) => zone.name);
 
-			if(!recordsToCreate.map((element) => element.zone).every((element) => _zones.includes(element))) {
+			if(!recordsToCreate.map((element) => (element.zone || '')?.toUpperCase()).every((element) => _zones.includes(element))) {
 				throw new BusinessException('Está intentando ingresar una zona que no tiene asignada');
 			}
 
