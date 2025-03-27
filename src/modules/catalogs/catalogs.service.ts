@@ -28,13 +28,13 @@ export class CatalogsService {
 			throw new BusinessException('Ya existe el catálogo', 400);
 		}
 
-		const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
-		if (!parent) {
+		const catalogParent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
+		if (!catalogParent) {
 			throw new BusinessException('Padre no encontrado', 400);
 		}
 
-		const parentChild = await this.childrensRepository.findOne({ where: { id: createChildDto.parentId } });
-		if (!parentChild) {
+		const childParent = await this.childrensRepository.findOne({ where: { id: createChildDto.parentId } });
+		if (!childParent) {
 			throw new BusinessException('Elemento superior de la jerarquía no encontrado', 400);
 		}
 
@@ -44,8 +44,8 @@ export class CatalogsService {
 			...childData,
 			name,
 			catalogCode,
-			parentId: parentChild.id,
-			parent,
+			childParent: childParent,
+			catalogParent,
 			createdBy: user_id, modifiedBy: user_id
 		});
 
@@ -69,24 +69,24 @@ export class CatalogsService {
 			throw new BusinessException('Ya existe un catálogo con esa configuración', 400);
 		}
 
-		const parent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
-		if (!parent) {
+		const catalogParent = await this.parentsRepository.findOne({ where: { code: catalogCode } });
+		if (!catalogParent) {
 			throw new BusinessException('Padre no encontrado', 400);
 		}
 
 		if (updateData.parentId) {
-			const parentChild = await this.childrensRepository.findOne({ where: { id: updateData.parentId } });
-			if (!parentChild) {
+			const childParent = await this.childrensRepository.findOne({ where: { id: updateData.parentId } });
+			if (!childParent) {
 				throw new BusinessException('Elemento superior de la jerarquía no encontrado', 400);
 			}
 
-			child.parentId = parentChild.id;
+			child.childParent = childParent;
 		}
 
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		updatedData = Object.assign(child, updatedData);
-		return await this.childrensRepository.save({ ...updatedData, catalogCode, name, modifiedBy, parent });
+		return await this.childrensRepository.save({ ...updatedData, catalogCode, catalogParent, name, modifiedBy, parent });
 	}
 
 	async changeOrder(id: number, order: number): Promise<Child> {
@@ -110,14 +110,14 @@ export class CatalogsService {
 			throw new BusinessException('Hijo no encontrado', 400);
 		}
 
-		const parent = await this.parentsRepository.findOneBy({ id: parentId });
+		const catalogParent = await this.parentsRepository.findOneBy({ id: parentId });
 
-		if (!parent) {
+		if (!catalogParent) {
 			throw new BusinessException('Padre no encontrado', 400);
 		}
 		const user_id = this.userContextService.getUserDetails().id;
 
-		child.parent = parent;
+		child.catalogParent = catalogParent;
 		child.modifiedBy = user_id;
 
 		return await this.childrensRepository.save(child);
@@ -161,12 +161,27 @@ export class CatalogsService {
 		return child;
 	}
 
-	async getChildrenByKey(key: string): Promise<Child[]> {
-		return await this.childrensRepository.find({
-			where: { catalogCode: key.toUpperCase(), status: true }, order: {
-				createdAt: "DESC",
-			},
-		});
+	async getChildrenByKey(key: string): Promise<any[]> {
+		return await this.childrensRepository
+			.createQueryBuilder('child')
+			.leftJoinAndSelect('child.childParent', 'parent')
+			.select([
+				'child.id',
+				'child.catalogCode',
+				'child.name',
+				'child.description',
+				'child.order',
+				'child.extra1',
+				'child.extra2',
+				'child.extra3',
+				'child.extra4',
+				'child.extra5',
+				'parent.name as parentName',
+			])
+			.where('child.catalogCode = :key', { key: key.toUpperCase() })
+			.andWhere('child.status = :status', { status: true })
+			.orderBy('child.createdAt', 'DESC')
+			.getRawMany();
 	}
 
 	async getChildrenByName(name: string): Promise<Child[]> {
@@ -177,12 +192,34 @@ export class CatalogsService {
 		});
 	}
 
-	async getChildrenByKeyAndParent(key: string, parentId: number): Promise<Child[]> {
-		return await this.childrensRepository.find({
-			where: { catalogCode: key.toUpperCase(), parent: { id: parentId }, status: true }, order: {
-				createdAt: "DESC",
-			}
+	async getInternalParentNameById(parentId: number): Promise<string | null> {
+		const parent = await this.childrensRepository
+			.createQueryBuilder('child')
+			.select('child.name')
+			.where('child.id = :parentId', { parentId })
+			.getRawOne();
+
+		return parent?.name || null;
+	}
+
+	async getChildrenByKeyAndParent(key: string, parentId: number): Promise<any[]> {
+		const children = await this.childrensRepository.find({
+			where: {
+				catalogCode: key.toUpperCase(),
+				childParent: { id: parentId },
+				status: true,
+			},
+			order: {
+				createdAt: 'DESC',
+			},
 		});
+
+		const parentName = await this.getInternalParentNameById(parentId);
+
+		return children.map((child) => ({
+			...child,
+			parentName: parentName || null,
+		}));
 	}
 
 	async getChildrenByKeys(keys: string[]): Promise<Child[]> {

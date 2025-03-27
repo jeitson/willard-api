@@ -18,6 +18,6 @@ export class Parent extends CompleteEntity {
 	description: string;
 
 	@ApiProperty({ description: 'children' })
-	@OneToMany(() => Child, (child) => child.parent)
+	@OneToMany(() => Child, (child) => child.catalogParent)
 	children: Child[];
 }
