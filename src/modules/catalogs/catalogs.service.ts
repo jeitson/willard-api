@@ -161,8 +161,8 @@ export class CatalogsService {
 		return child;
 	}
 
-	async getChildrenByKey(key: string): Promise<any[]> {
-		return await this.childrensRepository
+	async getChildrenByKey(key: string): Promise<Child[]> {
+		const t = await this.childrensRepository
 			.createQueryBuilder('child')
 			.leftJoinAndSelect('child.childParent', 'parent')
 			.select([
@@ -184,6 +184,12 @@ export class CatalogsService {
 			.andWhere('child.status = :status', { status: true })
 			.orderBy('child.name', 'DESC')
 			.getRawMany();
+
+		return t.map((element) => ({
+			...element,
+			catalogCode: element.catalogcode,
+			createdAt: element.createdat,
+		}))
 	}
 
 	async getChildrenByName(name: string): Promise<Child[]> {
