@@ -279,7 +279,7 @@ export class TransporterTravelService {
 	}
 
 	async findAll(query: any): Promise<Pagination<TransporterTravel>> {
-		let { id: user_id, transporter: transporter, zones } = this.userContextService.getUserDetails();
+		let { id: user_id, transporter: transporter } = this.userContextService.getUserDetails();
 
 		if (!transporter) {
 			throw new BusinessException('El usuario no tiene configurado una transportadora');
@@ -287,17 +287,11 @@ export class TransporterTravelService {
 
 		const transporterId = transporter.id;
 
-		if (zones.length === 0) {
-			throw new BusinessException('El usuario no tiene configurado zonas');
-		}
-
-		zones.map(({ zone }) => zone.name)
-
 		const queryBuilder = this.transporterTravelRepository
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndSelect('transporter_travel.details', 'details')
 			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
-			.where('transporter_travel.zone IN (:...zones) AND transporter_travel.createdBy = :user_id AND transporter.id = :transporterId', { zones, user_id, transporterId });
+			.where('transporter_travel.createdBy = :user_id AND transporter.id = :transporterId', { user_id, transporterId });
 
 		return await paginate<TransporterTravel>(queryBuilder, {
 			page: query.page,
