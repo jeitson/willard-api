@@ -166,16 +166,16 @@ export class CatalogsService {
 			.createQueryBuilder('child')
 			.leftJoinAndSelect('child.childParent', 'parent')
 			.select([
-				'child.id',
-				'child.catalogCode',
-				'child.name',
-				'child.description',
-				'child.order',
-				'child.extra1',
-				'child.extra2',
-				'child.extra3',
-				'child.extra4',
-				'child.extra5',
+				'child.id AS id',
+				'child.catalogCode AS catalogCode',
+				'child.name AS name',
+				'child.description AS description',
+				'child.order AS order',
+				'child.extra1 AS extra1',
+				'child.extra2 AS extra2',
+				'child.extra3 AS extra3',
+				'child.extra4 AS extra4',
+				'child.extra5 AS extra5',
 				'parent.name as parentName',
 			])
 			.where('child.catalogCode = :key', { key: key.toUpperCase() })
