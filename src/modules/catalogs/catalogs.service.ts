@@ -182,7 +182,7 @@ export class CatalogsService {
 			])
 			.where('child.catalogCode = :key', { key: key.toUpperCase() })
 			.andWhere('child.status = :status', { status: true })
-			.orderBy('child.name', 'DESC')
+			.orderBy('child.name', 'ASC')
 			.getRawMany();
 
 		return t.map((element) => ({
@@ -195,7 +195,7 @@ export class CatalogsService {
 	async getChildrenByName(name: string): Promise<Child[]> {
 		return await this.childrensRepository.find({
 			where: { name: name.toUpperCase(), status: true }, order: {
-				name: "DESC",
+				name: "ASC",
 			}
 		});
 	}
@@ -218,7 +218,7 @@ export class CatalogsService {
 				status: true,
 			},
 			order: {
-				name: 'DESC',
+				name: 'ASC',
 			},
 		});
 
@@ -233,7 +233,7 @@ export class CatalogsService {
 	async getChildrenByKeys(keys: string[]): Promise<Child[]> {
 		return await this.childrensRepository.find({
 			where: { catalogCode: In(keys.map((key) => key.toUpperCase())), status: true }, order: {
-				createdAt: "DESC",
+				createdAt: "ASC",
 			}
 		});
 	}
