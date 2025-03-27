@@ -7,11 +7,10 @@ import { Child } from './entities/child.entity';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/core/common/decorators/role.decorator';
 import { ROL } from 'src/core/constants/rol.constant';
-import { Public } from 'src/core/common/decorators/public.decorator';
 
 @ApiTags('Sistema - Catalogos')
 @Controller('catalogs')
-// UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 export class CatalogsController {
 	constructor(private readonly catalogsService: CatalogsService) { }
 
@@ -64,7 +63,6 @@ export class CatalogsController {
 	}
 
 	@Get('key/:key')
-	@Public()
 	@ApiOperation({ summary: 'Obtener hijos por su llave - KEY' })
 	async getByKey(@Param('key') key: string): Promise<Child[]> {
 		return await this.catalogsService.getChildrenByKey(key);

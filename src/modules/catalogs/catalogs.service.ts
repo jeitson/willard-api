@@ -44,7 +44,7 @@ export class CatalogsService {
 			...childData,
 			name,
 			catalogCode,
-			childParent: childParent,
+			childParent,
 			catalogParent,
 			createdBy: user_id, modifiedBy: user_id
 		});
@@ -86,7 +86,7 @@ export class CatalogsService {
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
 		updatedData = Object.assign(child, updatedData);
-		return await this.childrensRepository.save({ ...updatedData, catalogCode, catalogParent, name, modifiedBy, parent });
+		return await this.childrensRepository.save({ ...updatedData, catalogCode, catalogParent, name, modifiedBy });
 	}
 
 	async changeOrder(id: number, order: number): Promise<Child> {
