@@ -162,18 +162,34 @@ export class CatalogsService {
 	}
 
 	async getChildrenByKey(key: string): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { catalogCode: key.toUpperCase(), status: true }});
+		return await this.childrensRepository.find({
+			where: { catalogCode: key.toUpperCase(), status: true }, order: {
+				createdAt: "DESC",
+			},
+		});
 	}
 
 	async getChildrenByName(name: string): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { name: name.toUpperCase(), status: true }});
+		return await this.childrensRepository.find({
+			where: { name: name.toUpperCase(), status: true }, order: {
+				createdAt: "DESC",
+			}
+		});
 	}
 
 	async getChildrenByKeyAndParent(key: string, parentId: number): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { catalogCode: key.toUpperCase(), parent: { id: parentId }, status: true }});
+		return await this.childrensRepository.find({
+			where: { catalogCode: key.toUpperCase(), parent: { id: parentId }, status: true }, order: {
+				createdAt: "DESC",
+			}
+		});
 	}
 
 	async getChildrenByKeys(keys: string[]): Promise<Child[]> {
-		return await this.childrensRepository.find({ where: { catalogCode: In(keys.map((key) => key.toUpperCase())), status: true }});
+		return await this.childrensRepository.find({
+			where: { catalogCode: In(keys.map((key) => key.toUpperCase())), status: true }, order: {
+				createdAt: "DESC",
+			}
+		});
 	}
 }
