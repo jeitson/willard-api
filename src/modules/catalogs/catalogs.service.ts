@@ -182,14 +182,14 @@ export class CatalogsService {
 			])
 			.where('child.catalogCode = :key', { key: key.toUpperCase() })
 			.andWhere('child.status = :status', { status: true })
-			.orderBy('child.createdAt', 'DESC')
+			.orderBy('child.name', 'DESC')
 			.getRawMany();
 	}
 
 	async getChildrenByName(name: string): Promise<Child[]> {
 		return await this.childrensRepository.find({
 			where: { name: name.toUpperCase(), status: true }, order: {
-				createdAt: "DESC",
+				name: "DESC",
 			}
 		});
 	}
@@ -212,7 +212,7 @@ export class CatalogsService {
 				status: true,
 			},
 			order: {
-				createdAt: 'DESC',
+				name: 'DESC',
 			},
 		});
 
