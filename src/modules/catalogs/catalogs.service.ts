@@ -176,6 +176,8 @@ export class CatalogsService {
 				'child.extra3 AS extra3',
 				'child.extra4 AS extra4',
 				'child.extra5 AS extra5',
+				'child.createdAt AS createdAt',
+				'child.status AS status',
 				'parent.name as parentName',
 			])
 			.where('child.catalogCode = :key', { key: key.toUpperCase() })
