@@ -105,6 +105,7 @@ export class UsersService {
 		roles,
 		collectionSites,
 		zones,
+		transporterId,
 		...data
 	}: UserDto): Promise<void> {
 		const exists = await this.userRepository.findOneBy({ email });
@@ -137,8 +138,8 @@ export class UsersService {
 
 				let transporter;
 
-				if (data.transporterId) {
-					transporter = await this.transporterRepository.find({ where: { id: data.transporterId }});
+				if (transporterId) {
+					transporter = await this.transporterRepository.findOne({ where: { id: transporterId }});
 
 					if(!transporter) {
 						throw new BusinessException('No existe la transportadora');
@@ -224,7 +225,7 @@ export class UsersService {
 		}
 
 		await this.entityManager.transaction(async (manager) => {
-			let { roles, collectionSites, password, zones, ...updatedData } = data;
+			let { roles, collectionSites, password, zones, transporterId, ...updatedData } = data;
 			const user_id = this.userContextService.getUserDetails().id;
 
 			let complete = {}
@@ -238,6 +239,16 @@ export class UsersService {
 				complete = { phone_number: '+' + this.getNumber(data.cellphone || user.cellphone) }
 			}
 
+			let transporter;
+
+			if (transporterId) {
+				transporter = await this.transporterRepository.findOne({ where: { id: transporterId }});
+
+				if(!transporter) {
+					throw new BusinessException('No existe la transportadora');
+				}
+			}
+
 			try {
 				await this.auth0Service.updateUser(user.oauthId, {
 					family_name: this.getName(email),
@@ -249,7 +260,7 @@ export class UsersService {
 				});
 
 				updatedData = Object.assign(user, updatedData);
-				await manager.update(User, id, { ...updatedData, modifiedBy: user_id });
+				await manager.update(User, id, { ...updatedData, modifiedBy: user_id, transporter });
 
 				if (roles && roles.length > 0) {
 					await manager.delete(UserRole, { user: { id: +id } });
