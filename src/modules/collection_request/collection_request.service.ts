@@ -205,7 +205,7 @@ export class CollectionRequestService {
 		return collectionRequestSaved;
 	}
 
-	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId, routeId }: CollectionRequestCompleteDto): Promise<void> {
+	async completeInfo(id: number, { collectionSiteId, consultantId, transporterId }: CollectionRequestCompleteDto): Promise<void> {
 		const collectionRequest = await this.collectionRequestRepository.findOne({ where: { id, status: true } });
 
 		if (!collectionRequest) {
@@ -240,7 +240,7 @@ export class CollectionRequestService {
 
 		const user_id = this.userContextService.getUserDetails().id;
 
-		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, routeId, requestStatusId: REQUEST_STATUS.PENDING, modifiedBy: user_id });
+		const updated = await this.collectionRequestRepository.update(id, { ...collectionRequest, collectionSite, user, transporter, requestStatusId: REQUEST_STATUS.PENDING, modifiedBy: user_id });
 
 		if (!updated) {
 			throw new BusinessException('No se pudó actualizar la información', 400);
