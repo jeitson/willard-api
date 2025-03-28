@@ -57,7 +57,8 @@ export class ProductsService {
 			.leftJoinAndMapOne('product.productType', Child, 'child', 'child.id = product.productTypeId')
 			.where({
 				...(name ? { name: Like(`%${name}%`) } : null),
-			});
+			})
+			.orderBy('product.name', 'ASC');
 
 		if (productTypeId) {
 			queryBuilder.andWhere('product.productTypeId = :productTypeId', { productTypeId });

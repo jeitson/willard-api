@@ -36,6 +36,8 @@ export class CollectionSitesService {
 			queryBuilder.andWhere('pickUpLocations.id = :pickUpLocationId', { pickUpLocationId });
 		}
 
+		queryBuilder.orderBy('collection_sites.name', 'ASC')
+
 		return paginate<CollectionSite>(queryBuilder, { page, pageSize });
 	}
 

@@ -137,7 +137,8 @@ export class ClientsService {
 
 			.where({
 				...(name ? { name: Like(`%${name}%`) } : null),
-			});
+			})
+			.orderBy('client.name', 'ASC');
 
 		return paginate<Client>(queryBuilder, {
 			page,

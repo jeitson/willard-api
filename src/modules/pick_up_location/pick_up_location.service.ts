@@ -93,6 +93,8 @@ export class PickUpLocationsService {
 			queryBuilder.andWhere('client.id = :clientId', { clientId });
 		}
 
+		queryBuilder.orderBy('pick_up_locations.name', 'ASC')
+
 		return paginate<PickUpLocation>(queryBuilder, { page, pageSize });
 	}
 
