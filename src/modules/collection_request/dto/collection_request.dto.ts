@@ -83,10 +83,6 @@ export class CollectionRequestCompleteDto {
 	@IsOptional()
 	@IsInt({ message: 'Debe de ser un número' })
 	transporterId: number = null;
-
-	@ApiProperty({ description: 'Id de Ruta' })
-	@IsString({ message: 'Debe de ser un texto' })
-	routeId: string = null;
 }
 
 export class CollectionRequestUpdateDto {

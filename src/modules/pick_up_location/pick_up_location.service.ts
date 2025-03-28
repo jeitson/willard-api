@@ -10,6 +10,7 @@ import { UserContextService } from '../users/user-context.service';
 import { ClientsService } from '../clients/clients.service';
 import { CollectionSitesService } from '../collection_sites/collection_sites.service';
 import { UsersService } from '../users/users.service';
+import { Child } from '../catalogs/entities/child.entity';
 
 @Injectable()
 export class PickUpLocationsService {
@@ -42,8 +43,6 @@ export class PickUpLocationsService {
 		if (!user) {
 			throw new BusinessException('Asesor no encontrado', 400);
 		}
-
-		// TODO: validar el rol del usuario
 
 		const pickUpLocation = this.pickUpLocationsRepository.create({ ...content, client, collectionSite, user, createdBy: user_id, modifiedBy: user_id });
 		return await this.pickUpLocationsRepository.save(pickUpLocation);
@@ -87,7 +86,8 @@ export class PickUpLocationsService {
 			.leftJoinAndSelect('pick_up_locations.client', 'client')
 			.leftJoinAndSelect('pick_up_locations.collectionSite', 'collectionSite')
 			.leftJoinAndSelect('pick_up_locations.user', 'consultant')
-			.leftJoinAndSelect('pick_up_locations.collectionsRequests', 'collectionsRequests');
+			.leftJoinAndSelect('pick_up_locations.collectionsRequests', 'collectionsRequests')
+			.leftJoinAndMapOne('pick_up_locations.city', Child, 'city', 'city.id = pick_up_locations.cityId')
 
 		if (clientId) {
 			queryBuilder.andWhere('client.id = :clientId', { clientId });
@@ -95,7 +95,11 @@ export class PickUpLocationsService {
 
 		queryBuilder.orderBy('pick_up_locations.name', 'ASC')
 
-		return paginate<PickUpLocation>(queryBuilder, { page, pageSize });
+		let { items, meta } = await paginate<PickUpLocation>(queryBuilder, { page, pageSize });
+
+		items = items.map((element: any) => ({ ...element, citiyName: element.cityId.name }));
+
+		return { items, meta };
 	}
 
 	async findOne(id: number): Promise<PickUpLocation> {
