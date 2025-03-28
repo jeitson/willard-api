@@ -396,8 +396,9 @@ export class UsersService {
 	private async getUserByOauthId(id: string): Promise<User | undefined> {
 		return this.userRepository
 			.createQueryBuilder('user')
-			.leftJoinAndSelect('user.roles', 'role')
-			.leftJoinAndSelect('user.collectionSites', 'collectionSites')
+			.leftJoinAndSelect('user.roles', 'userRole')
+			.leftJoinAndSelect('userRole.role', 'role')
+			.leftJoinAndSelect('user.userCollectionSites', 'collectionSites')
 			.leftJoinAndSelect('user.zones', 'userZones')
 			.leftJoinAndMapOne('userZones.zone', Child, 'child', 'child.id = userZones.zoneId')
 			.leftJoinAndSelect('user.transporter', 'transporter')
