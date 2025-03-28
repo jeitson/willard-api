@@ -43,10 +43,10 @@ export class ReceptionsService {
 	) { }
 
 	async create(createReceptionDto: ReceptionDto): Promise<Reception> {
-		let { collectionSites, id: user_id, roles } = this.userContextService.getUserDetails();
+		let { userCollectionSites, id: user_id, roles } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId);
 
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(collectionSites.map(({ collectionSiteId }) => collectionSiteId)) });
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(userCollectionSites.map(({ collectionSiteId }) => collectionSiteId)) });
 
 		if (!collectionSite) {
 			throw new BadRequestException('El usuario no tiene vinculado una sede de acopio.');
