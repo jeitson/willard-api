@@ -346,7 +346,7 @@ export class UsersService {
 		userCollectionSite.user = user;
 		userCollectionSite.collectionSite = collectionSite;
 		userCollectionSite.createdBy = user_id;
-		userCollectionSite.updatedBy = user_id;
+		userCollectionSite.modifiedBy = user_id;
 
 		return this.userCollectionSiteRepository.save(userCollectionSite);
 	}
@@ -365,7 +365,7 @@ export class UsersService {
 		userRol.user = user;
 		userRol.role = rol;
 		userRol.createdBy = user_id;
-		userRol.updatedBy = user_id;
+		userRol.modifiedBy = user_id;
 
 		return this.userRolRepository.save(userRol);
 	}
@@ -388,7 +388,7 @@ export class UsersService {
 		userZone.user = user;
 		userZone.zoneId = zone.id;
 		userZone.createdBy = user_id;
-		userZone.updatedBy = user_id;
+		userZone.modifiedBy = user_id;
 
 		return this.userZoneRepository.save(userZone);
 	}

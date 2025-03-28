@@ -3,46 +3,17 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsOptional } from 'class-validator';
+import { CompleteEntity } from 'src/core/common/entity/common.entity';
 
 @Entity('usuario_zona')
-export class UserZone {
+export class UserZone extends CompleteEntity {
 	@PrimaryColumn({ type: 'bigint', name: 'UsuarioId' })
 	userId: string;
 
 	@PrimaryColumn({ type: 'bigint', name: 'ZonaId' })
 	zoneId: number;
 
-	@ManyToOne(() => User, user => user.collectionSites)
+	@ManyToOne(() => User, user => user.zones)
 	@JoinColumn({ name: 'UsuarioId' })
 	user: User;
-
-	@ApiHideProperty()
-	@Exclude()
-	@Column({ update: false, comment: 'Creador', type: 'bigint', nullable: true, name: 'CreadoPor' })
-	createdBy: string;
-
-	@ApiHideProperty()
-	@Exclude()
-	@Column({ comment: 'Actualizador', type: 'bigint', nullable: true, name: 'ModificadoPor' })
-	@IsOptional()
-	updatedBy: string;
-
-	@ApiHideProperty()
-	@CreateDateColumn({
-		nullable: true,
-		type: 'timestamp',
-		default: () => 'CURRENT_TIMESTAMP(6)',
-		name: 'FechaCreacion'
-	})
-	createdAt: Date;
-
-	@ApiHideProperty()
-	@UpdateDateColumn({
-		nullable: true,
-		type: 'timestamp',
-		default: () => 'CURRENT_TIMESTAMP(6)',
-		onUpdate: 'CURRENT_TIMESTAMP(6)',
-		name: 'FechaModificado'
-	})
-	updatedAt: Date;
 }

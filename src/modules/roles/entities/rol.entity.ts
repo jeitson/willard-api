@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
+import { UserRole } from "src/modules/users/entities/user-rol.entity";
 import { User } from "src/modules/users/entities/user.entity";
-import { Column, Entity, ManyToMany } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany } from "typeorm";
 
 @Entity({ name: 'rol' })
 export class Role extends CompleteEntity {
@@ -17,6 +18,7 @@ export class Role extends CompleteEntity {
 	@Column({ type: 'varchar', length: 800, default: '[]', nullable: true, name: 'Menujson' })
 	menu: string = '[]';
 
-	@ManyToMany(() => User, user => user.roles)
-	users: User[];
+	@ApiProperty({ description: 'Usuarios asociados a este rol' })
+	@OneToMany(() => UserRole, userRol => userRol.user)
+	userRoles: UserRole[];
 }

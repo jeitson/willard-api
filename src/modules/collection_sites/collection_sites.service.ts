@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { CollectionSite } from './entities/collection_site.entity';
@@ -73,10 +73,26 @@ export class CollectionSitesService {
 	}
 
 	async remove(id: number): Promise<void> {
-		const consultant = await this.findOne(id);
-
 		try {
-			await this.collectionSiteRepository.remove(consultant);
+			const collectionSite = await this.collectionSiteRepository.findOne({ where: { id }, relations: [
+				'pickUpLocations',
+				'collectionsRequests',
+				'userCollectionSites'
+			] });
+
+			if (!collectionSite) {
+				throw new BusinessException(`Centro de acopio con ID ${id} no encontrado`, 404);
+			}
+
+			const { userCollectionSites, pickUpLocations, collectionsRequests } = collectionSite;
+
+			if ([userCollectionSites, pickUpLocations, collectionsRequests].some((element) => element.length > 0)) {
+				throw new BusinessException(
+					`No se puede eliminar el registro con ID ${id} porque tiene relaciones existentes.`,
+				);
+			}
+
+			await this.collectionSiteRepository.remove(collectionSite);
 		} catch (error) {
 			if (error?.code === '23503') {
 				throw new BusinessException(

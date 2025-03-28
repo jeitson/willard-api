@@ -1,5 +1,5 @@
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { UserRole } from "./user-rol.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from 'class-transformer';
@@ -9,6 +9,7 @@ import { UserCollectionSite } from "./user-collection_site.entity";
 import { UserZone } from "./user-zone.entity";
 import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
+import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
 
 @Entity({ name: 'usuario' })
 export class User extends CompleteEntity {
@@ -44,9 +45,9 @@ export class User extends CompleteEntity {
 	@OneToMany(() => UserRole, userRole => userRole.user)
 	roles: UserRole[];
 
-	@ApiProperty({ description: 'collections_sites' })
+	@ApiProperty({ description: 'Sedes de acopio asociadas a este usuario' })
 	@OneToMany(() => UserCollectionSite, userCollectionSite => userCollectionSite.user)
-	collectionSites: UserCollectionSite[];
+    userCollectionSites: UserCollectionSite[];
 
 	@ApiProperty({ description: 'zones' })
 	@OneToMany(() => UserZone, userZone => userZone.user)
