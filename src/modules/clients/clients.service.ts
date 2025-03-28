@@ -147,7 +147,7 @@ export class ClientsService {
 	}
 
 	async findOne(id: number): Promise<Client> {
-		const client = await this.clientsRepository.findOne({ where: { id }, relations: ['branch'] });
+		const client = await this.clientsRepository.findOne({ where: { id }, relations: ['branchs'] });
 		if (!client) {
 			throw new BusinessException('Cliente no encontrado');
 		}
