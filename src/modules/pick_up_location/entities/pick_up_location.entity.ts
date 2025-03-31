@@ -79,4 +79,16 @@ export class PickUpLocation extends CompleteEntity {
 
 	@OneToMany(() => CollectionRequest, (collectionsRequests) => collectionsRequests.pickUpLocation)
 	collectionsRequests: CollectionRequest[];
+
+	@ApiProperty({ description: 'Tipo Camion Sugerido Id' })
+    @Column({ type: 'bigint', name: 'TipoCamionSugeridoId', nullable: true, default: null })
+    truckTypeId: number;
+
+	@ApiProperty({ description: 'Tiene Muelle Carga' })
+	@Column({ type: 'varchar', length: 255, name: 'TieneMuelleCarga', nullable: true, default: null })
+	hasLoadSpring: boolean;
+
+	@ApiProperty({ description: 'Distancia Cargue' })
+    @Column({ type: 'bigint', name: 'DistanciaCargue', nullable: true, default: null })
+    distanceLoad: number;
 }

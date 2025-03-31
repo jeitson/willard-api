@@ -21,6 +21,8 @@ export class PickUpLocationsService {
 		private readonly clientsService: ClientsService,
 		private readonly collectionSitesService: CollectionSitesService,
 		private readonly usersSitesService: UsersService,
+		@InjectRepository(Child)
+		private readonly childsRepository: Repository<Child>,
 	) { }
 
 	async create({ clientId, collectionSiteId, consultantId, ...content }: PickUpLocationCreateDto): Promise<PickUpLocation> {
@@ -42,6 +44,12 @@ export class PickUpLocationsService {
 
 		if (!user) {
 			throw new BusinessException('Asesor no encontrado', 400);
+		}
+
+		const truckType = await this.childsRepository.findOne({ where: { status: true, id: content.truckTypeId, catalogCode: 'TIPO_CAMION_SUGERIDO' }});
+
+		if (!truckType) {
+			throw new BusinessException('El tipo de camión no existe o no está configurado', 400);
 		}
 
 		const pickUpLocation = this.pickUpLocationsRepository.create({ ...content, client, collectionSite, user, createdBy: user_id, modifiedBy: user_id });
@@ -74,6 +82,14 @@ export class PickUpLocationsService {
 			pickUpLocation.collectionSite = collectionSite;
 		}
 
+		if (updatedData.truckTypeId) {
+			const truckType = await this.childsRepository.findOne({ where: { status: true, id: updatedData.truckTypeId, catalogCode: 'TIPO_CAMION_SUGERIDO' }});
+
+			if (!truckType) {
+				throw new BusinessException('El tipo de camión no existe o no está configurado', 400);
+			}
+		}
+
 		updatedData = Object.assign(pickUpLocation, updatedData);
 		const modifiedBy = this.userContextService.getUserDetails().id;
 
@@ -88,6 +104,7 @@ export class PickUpLocationsService {
 			.leftJoinAndSelect('pick_up_locations.user', 'consultant')
 			.leftJoinAndSelect('pick_up_locations.collectionsRequests', 'collectionsRequests')
 			.leftJoinAndMapOne('pick_up_locations.city', Child, 'city', 'city.id = pick_up_locations.cityId')
+			.leftJoinAndMapOne('pick_up_locations.truckType', Child, 'truckType', 'truckType.id = pick_up_locations.truckTypeId')
 
 		if (clientId) {
 			queryBuilder.andWhere('client.id = :clientId', { clientId });
@@ -109,6 +126,7 @@ export class PickUpLocationsService {
 			.leftJoinAndSelect('pick_up_locations.collectionSite', 'collectionSite')
 			.leftJoinAndSelect('pick_up_locations.user', 'consultant')
 			.leftJoinAndSelect('pick_up_locations.collectionsRequests', 'collectionsRequests')
+			.leftJoinAndMapOne('pick_up_locations.truckType', Child, 'truckType', 'truckType.id = pick_up_locations.truckTypeId')
 
 			.where('pick_up_locations.id = :id', { id });
 

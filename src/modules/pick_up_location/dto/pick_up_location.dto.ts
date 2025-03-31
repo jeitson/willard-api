@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, IsOptional, IsInt } from "class-validator";
+import { IsNotEmpty, IsString, IsOptional, IsInt, IsBoolean } from "class-validator";
 import { PagerDto } from "src/core/common/dto/pager.dto";
 
 export class PickUpLocationCreateDto {
@@ -88,6 +88,21 @@ export class PickUpLocationCreateDto {
 	@IsOptional()
 	@IsString({ message: 'La ReferenciaPH debe ser una cadena de texto.' })
 	referencePH?: string;
+
+	@ApiProperty({ description: 'Tipo de camión' })
+	@IsNotEmpty()
+	@IsInt({ message: 'El tipo de camión debe ser una número.' })
+	truckTypeId: number;
+
+	@ApiProperty({ description: 'Tiene Muelle de Carga' })
+	@IsNotEmpty()
+	@IsBoolean({ message: 'Tiene Muelle de Carga debe ser booleano.' })
+	hasLoadSpring: boolean;
+
+	@ApiProperty({ description: 'Distancia de Carga' })
+	@IsNotEmpty()
+	@IsInt({ message: 'La distancia de carga debe ser una número.' })
+	distanceLoad: number;
 }
 
 export class PickUpLocationUpdateDto extends PartialType(PickUpLocationCreateDto) { }
