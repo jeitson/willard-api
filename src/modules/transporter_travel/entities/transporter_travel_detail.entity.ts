@@ -8,7 +8,7 @@ export class TransporterTravelDetail extends CompleteEntity {
 	@JoinColumn({ name: 'TransportadoraViajeId' })
     travelRecord: TransporterTravel;
 
-    @Column({ type: 'varchar', length: 10, name: 'TipoBateria' })
+    @Column({ type: 'varchar', length: 50, name: 'TipoBateria' })
     batteryType: string;
 
     @Column({ type: 'int', name: 'Cantidad', nullable: true })
