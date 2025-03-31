@@ -124,6 +124,7 @@ export class AuditRouteService {
 			if (mergedResults[key]) {
 				mergedResults[key].origin = 'RECUPERADORA';
 				mergedResults[key].status = 'POR CONCILIAR';
+				mergedResults[key].recuperator = mergedResults[key].recuperator || item.recuperator;
 			} else {
 				mergedResults[key] = item;
 			}
