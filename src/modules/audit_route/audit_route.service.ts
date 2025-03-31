@@ -422,7 +422,7 @@ export class AuditRouteService {
 
 					await transactionalEntityManager.update(
 						TransporterTravel,
-						travelRecord,
+						{ id: travelRecord.id },
 						{ totalQuantity }
 					);
 				}
