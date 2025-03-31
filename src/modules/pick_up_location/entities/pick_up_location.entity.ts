@@ -89,6 +89,6 @@ export class PickUpLocation extends CompleteEntity {
 	hasLoadSpring: boolean;
 
 	@ApiProperty({ description: 'Distancia Cargue' })
-    @Column({ type: 'bigint', name: 'DistanciaCargue', nullable: true, default: null })
-    distanceLoad: number;
+    @Column({ type: 'varchar', length: 20, name: 'DistanciaCargue', nullable: true, default: null })
+    distanceLoad: string
 }

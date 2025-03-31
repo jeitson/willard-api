@@ -101,8 +101,8 @@ export class PickUpLocationCreateDto {
 
 	@ApiProperty({ description: 'Distancia de Carga' })
 	@IsNotEmpty()
-	@IsInt({ message: 'La distancia de carga debe ser una número.' })
-	distanceLoad: number;
+	@IsString({ message: 'La distancia de carga debe ser una texto.' })
+	distanceLoad: string;
 }
 
 export class PickUpLocationUpdateDto extends PartialType(PickUpLocationCreateDto) { }
