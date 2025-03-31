@@ -25,7 +25,7 @@ export class Client extends CompleteEntity {
 	documentTypeId: number;
 
 	@ApiProperty({ description: 'countryId' })
-	@Column({ type: 'bigint', name: 'PaisId' })
+	@Column({ type: 'bigint', name: 'PaisId', nullable: true, default: null })
 	countryId: number;
 
 	@ApiProperty({ description: 'documentNumber' })
@@ -33,11 +33,11 @@ export class Client extends CompleteEntity {
 	documentNumber: string;
 
 	@ApiProperty({ description: 'referenceWLL' })
-	@Column({ type: 'varchar', length: 255, name: 'ReferenciaWLL' })
+	@Column({ type: 'varchar', length: 255, name: 'ReferenciaWLL', nullable: true, default: null })
 	referenceWLL: string;
 
 	@ApiProperty({ description: 'referencePH' })
-	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
+	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH', nullable: true, default: null })
 	referencePH: string;
 
 	@OneToMany(() => PickUpLocation, pickUpLocation => pickUpLocation.client)
