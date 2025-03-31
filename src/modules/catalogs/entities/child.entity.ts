@@ -10,7 +10,7 @@ export class Child extends CompleteEntity {
 	catalogCode: string;
 
 	@ApiProperty({ description: 'name' })
-	@Column({ type: 'varchar', length: 50, name: 'Nombre' })
+	@Column({ type: 'varchar', length: 60, name: 'Nombre' })
 	name: string;
 
 	@ApiProperty({ description: 'description' })
