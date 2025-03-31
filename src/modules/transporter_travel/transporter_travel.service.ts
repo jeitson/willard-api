@@ -135,7 +135,7 @@ export class TransporterTravelService {
 				if (record.guidePreviousId) {
 					recordsToUpdate.push({ ...record, modifiedBy });
 				} else {
-					recordsToCreate.push({ ...record, createdBy, modifiedBy });
+					recordsToCreate.push({ ...record, createdBy, modifiedBy, totalQuantity: record.details.reduce((acc, a) => acc += parseInt(a.quantity.toString()), 0) });
 				}
 			}
 

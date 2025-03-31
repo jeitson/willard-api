@@ -111,7 +111,7 @@ export class AuditRouteService {
 					createdAt: reception.createdAt,
 					recuperator: reception?.collectionSite?.name || 'N/A',
 				},
-				reception.receptionDetails.reduce((acc, detail) => acc + detail.quantity, 0),
+				reception.receptionDetails.reduce((acc, detail) => acc += parseInt(detail.quantity.toString()), 0),
 				'SIN GUIA'
 			)
 		);
