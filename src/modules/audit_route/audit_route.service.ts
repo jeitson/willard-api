@@ -294,8 +294,6 @@ export class AuditRouteService {
 		// 	relations: ['receptionDetails', 'receptionPhotos', 'receptionDetails.product', 'receptionDetails.product.productTypeId'],
 		// });
 
-		const products = await this.productRepository.find({ where: { status: true } });
-
 		const recuperatorTotal = reception.receptionDetails.reduce(
 			(acc, detail) => acc + parseInt(detail.quantity.toString(), 10),
 			0
@@ -324,12 +322,7 @@ export class AuditRouteService {
 			transporterTotal: t.reduce((acc, a) => (acc += parseInt(a.quantity.toString())), 0),
 			conciliationTotal: 0,
 			requestStatus: requestStatus.name,
-			products: products.map((element) => ({
-				name: element.name,
-				productId: element.id,
-				quantity: 0,
-				id: 0,
-			}))
+			products: []
 		};
 	}
 
