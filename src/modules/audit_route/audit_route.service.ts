@@ -253,8 +253,6 @@ export class AuditRouteService {
 				isAgency: collectionRequest.collectionSite.siteTypeId === 49
 			}
 
-			const products = await this.productRepository.find({ where: { status: true } });
-
 			const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...element, ...y, client })))
 
 			const _products = auditRoute.auditRouteDetails.reduce((acc, element) => {
@@ -278,14 +276,7 @@ export class AuditRouteService {
 				transporterTotal: auditRoute.transporterTotal,
 				conciliationTotal: auditRoute.conciliationTotal,
 				requestStatus: requestStatus.name,
-				products: products.map((product) => {
-					return _products[product.id] || {
-						name: product.name,
-						productId: product.id,
-						quantity: 0,
-						id: 0,
-					}
-				}),
+				products: Object.values(_products),
 			};
 		}
 
