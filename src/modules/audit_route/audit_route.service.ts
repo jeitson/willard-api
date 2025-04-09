@@ -491,7 +491,7 @@ export class AuditRouteService {
 
 		// Filtrar productos para crear y actualizar
 		const createProductItems = products.filter(
-			(item) => item.productId && item.id === 0
+			(item) => item.productId && !item.id
 		);
 		const updateProductItems = products.filter((item) => item.id);
 
