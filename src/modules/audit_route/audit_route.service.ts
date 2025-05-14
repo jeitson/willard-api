@@ -100,7 +100,6 @@ export class AuditRouteService {
 			.leftJoinAndSelect('reception.collectionSite', 'collectionSite')
 			.andWhere('auditRoute.id IS NULL OR auditRoute.requestStatusId = :requestStatusId', { requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE })
 			.getMany();
-		console.log(receptions);
 
 		const mappedReceptions = receptions.map((reception) =>
 			mapToAuditRouteDto(
@@ -159,7 +158,6 @@ export class AuditRouteService {
 
 			return items.map((item) => this.mapToDto(item));
 		} catch (error) {
-			console.error('Error fetching audit routes:', error);
 			throw new Error('Failed to retrieve audit routes');
 		}
 	}
