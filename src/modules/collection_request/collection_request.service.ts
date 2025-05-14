@@ -432,7 +432,7 @@ export class CollectionRequestService {
 				horaMov: element.requestTime,
 				planeador: element.user?.id,
 				zona: (element.pickUpLocation as any).zone.name,
-				ciudad: (element.pickUpLocation as any).city.name,
+				ciudad: (element.pickUpLocation as any).city?.name,
 				// TODO: buscar el departamento de la ciudad
 				depto: '',
 				placa: element.route.plate,

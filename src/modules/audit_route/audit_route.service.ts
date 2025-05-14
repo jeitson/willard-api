@@ -95,10 +95,12 @@ export class AuditRouteService {
 		const receptions = await this.receptionRepository
 			.createQueryBuilder('reception')
 			.leftJoinAndSelect('reception.receptionDetails', 'receptionDetails')
-			.leftJoinAndSelect('reception.auditRoute', 'auditRoutes')
+			.leftJoinAndSelect('reception.auditRoute', 'auditRoute')
 			.leftJoinAndSelect('reception.transporter', 'transporter')
 			.leftJoinAndSelect('reception.collectionSite', 'collectionSite')
+			.andWhere('auditRoute.id IS NULL OR auditRoute.requestStatusId = :requestStatusId', { requestStatusId: AUDIT_ROUTE_STATUS.BY_CONCILLIATE })
 			.getMany();
+		console.log(receptions);
 
 		const mappedReceptions = receptions.map((reception) =>
 			mapToAuditRouteDto(
