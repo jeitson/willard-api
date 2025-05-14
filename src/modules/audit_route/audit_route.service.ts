@@ -510,7 +510,7 @@ export class AuditRouteService {
 				for (const { productId, quantity } of createProductItems) {
 					const guideId = guideIdMap[productId];
 
-					if (!guideId) continue;
+					// if (!guideId) continue;
 
 					// Verificar si ya existe un detalle con el mismo productId y guideId
 					const existingDetail = await this.auditRouteDetailRepository.findOne({
