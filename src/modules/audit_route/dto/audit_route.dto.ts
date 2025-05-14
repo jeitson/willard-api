@@ -178,44 +178,44 @@ export class ConciliateTotalsAuditRouteDto {
 }
 
 export class ConciliateByTypeAuditRouteDto {
-	@ApiProperty({ description: 'El id debe ser un número.' })
+	@ApiProperty({ name: 'id', description: 'El id debe ser un número.' })
 	@IsOptional()
 	@IsNumber({}, { message: 'Id debe ser un número.' })
 	id?: number;
 
-	@ApiProperty({ description: 'Cantidad, debe ser un número.' })
+	@ApiProperty({ name: 'quantity', description: 'Cantidad, debe ser un número.' })
 	@IsNotEmpty({ message: 'Cantidad es obligatorio y debe ser un número.' })
 	@IsNumber({}, { message: 'Cantidad debe ser un número.' })
 	quantity: number;
 
-	@ApiProperty({ description: 'Producto' })
+	@ApiProperty({ name: 'productId', description: 'Producto' })
 	@IsOptional()
 	@IsNumber({}, { message: 'Producto debe ser un número.' })
 	productId?: number;
 }
 
 export class ConciliateTransporterAuditRouteDto {
-	@ApiProperty({ description: 'El id debe ser un número.' })
+	@ApiProperty({ name: 'id', description: 'El id debe ser un número.' })
 	@IsOptional()
 	@IsNumber({}, { message: 'Id debe ser un número.' })
 	id?: number;
 
-	@ApiProperty({ description: 'Cantidad, debe ser un número.' })
+	@ApiProperty({ name: 'quantity', description: 'Cantidad, debe ser un número.' })
 	@IsNotEmpty({ message: 'Cantidad es obligatorio y debe ser un número.' })
 	@IsNumber({}, { message: 'Cantidad debe ser un número.' })
 	quantity: number;
 
-	@ApiProperty({ description: 'Producto' })
+	@ApiProperty({ name: 'productName', description: 'Producto' })
 	@IsOptional()
 	@IsString({ message: 'Producto debe ser un texto.' })
 	productName?: string;
 
-	@ApiProperty({ description: 'Número de Guía, debe ser un texto.' })
+	@ApiProperty({ name: 'guideNumber', description: 'Número de Guía, debe ser un texto.' })
 	@IsNotEmpty({ message: 'Número de Guía es obligatorio y debe ser un texto.' })
 	@IsString({ message: 'Número de Guía debe ser un texto.' })
 	guideNumber: string;
 
-	@ApiProperty({ description: 'isNew, debe ser un booleano.' })
+	@ApiProperty({ name: 'isNew', description: 'isNew, debe ser un booleano.' })
 	@IsNotEmpty({ message: 'isNew es obligatorio y debe ser un booleano.' })
 	@IsBoolean({ message: 'isNew debe ser un booleano.' })
 	isNew: boolean;
