@@ -59,18 +59,24 @@ export class Auth0Service {
 
 		try {
 			const response = await axios.post(url, {
-				...user,
+				family_name: user.family_name,
+				nickname: user.nickname,
+				given_name: user.given_name,
+				name: user.name,
+				email: user.email,
+				password: user.password,
+				user_metadata: user.user_metadata,
 				connection: this.auth0Connection,
-				client_id: this.auth0ClientId,
 				picture: "https://cafeplatino.com/wp-content/uploads/2023/05/imagen-de-prueba-320x240-1.jpeg"
 			}, {
 				headers: {
-					Authorization: `Bearer ${this.userContextService.getToken()}`,
+					Authorization: `Bearer ${await this.getTokenAPI()}`,
 				},
 			});
 
 			return response.data;
 		} catch (error) {
+			console.log(error)
 			this.handleAxiosError(error, 'Error creating user');
 		}
 	}
@@ -126,7 +132,7 @@ export class Auth0Service {
 		try {
 			await axios.delete(url, {
 				headers: {
-					Authorization: `Bearer ${this.userContextService.getToken()}`,
+					Authorization: `Bearer ${await this.getTokenAPI()}`,
 				},
 			});
 
@@ -142,7 +148,7 @@ export class Auth0Service {
 		try {
 			const response = await axios.get(url, {
 				headers: {
-					Authorization: `Bearer ${this.userContextService.getToken()}`,
+					Authorization: `Bearer ${await this.getTokenAPI()}`,
 				},
 			});
 
