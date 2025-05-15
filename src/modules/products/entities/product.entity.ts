@@ -23,8 +23,8 @@ export class Product extends CompleteEntity {
 	name: string;
 
 	@ApiProperty({ description: 'averageKg' })
-	@Column({ type: 'bigint', name: 'KgPromedio' })
-	averageKg: number;
+	@Column({ type: 'numeric', precision: 8, scale: 2, default: 0, name: 'KgPromedio' })
+	averageKg: string;
 
 	@ApiProperty({ description: 'recoveryPercentage' })
 	@Column({ type: 'numeric', precision: 8, scale: 2, default: 0, name: 'PorcentajeRecuperacion' })

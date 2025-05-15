@@ -21,8 +21,8 @@ export class ProductCreateDto {
 
 	@ApiProperty({ description: 'Kg promedio del producto, debe ser un número entero.' })
 	@IsNotEmpty({ message: 'KgPromedio es obligatorio y debe ser un número entero.' })
-	@IsInt({ message: 'KgPromedio debe ser un número entero.' })
-	averageKg: number;
+	@IsDecimal({}, { message: 'KgPromedio debe ser un número decimal.' })
+	averageKg: string;
 
 	@ApiProperty({ description: 'Porcentaje de recuperación del producto, debe ser un decimal.' })
 	@IsNotEmpty({ message: 'PorcentajeRecuperacion es obligatorio y debe ser un decimal.' })
