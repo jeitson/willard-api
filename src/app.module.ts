@@ -31,6 +31,7 @@ import { ShipmentsModule } from './modules/shipments/shipments.module';
 import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 import { HistoryJobsModule } from './modules/history_jobs/history_jobs.module';
 import { AuditRouteModule } from './modules/audit_route/audit_route.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
 	imports: [
@@ -65,6 +66,7 @@ import { AuditRouteModule } from './modules/audit_route/audit_route.module';
 		ReportsPhModule,
 		HistoryJobsModule,
 		AuditRouteModule,
+		ReportsModule,
 	],
 	controllers: [],
 	providers: [

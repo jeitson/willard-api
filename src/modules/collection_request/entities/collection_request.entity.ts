@@ -25,13 +25,13 @@ export class CollectionRequest extends CompleteEntity {
 
 	@ManyToMany(() => Product)
 	@JoinTable({
-		name: 'collection_request_product',
+		name: 'solicitud_recogida_producto',
 		joinColumn: {
-			name: 'collectionRequestId',
+			name: 'SolicitudRecogidaId',
 			referencedColumnName: 'id'
 		},
 		inverseJoinColumn: {
-			name: 'productId',
+			name: 'ProductoId',
 			referencedColumnName: 'id'
 		}
 	})
