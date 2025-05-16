@@ -172,7 +172,7 @@ export class AuditRouteService {
 			recuperator: item.collectionRequest?.collectionSite?.name || 'N/A',
 			quantityTotal: item.conciliationTotal || 0,
 			gap: (item.recuperatorTotal || 0) - (item.transporterTotal || 0),
-			status: 'CONFIRMADA',
+			status: 'CONFIRMADO',
 			createdAt: item.createdAt,
 		};
 	}
