@@ -58,8 +58,8 @@ export class Product extends CompleteEntity {
 	@Column({ type: 'varchar', length: 255, name: 'ReferenciaPH' })
 	referencePH: string;
 
-	@OneToMany(() => CollectionRequest, (collectionRequests) => collectionRequests.product)
-	collectionRequests: CollectionRequest[];
+	// @OneToMany(() => CollectionRequest, (collectionRequests) => collectionRequests.product)
+	// collectionRequests: CollectionRequest[];
 
 	@OneToMany(() => ReceptionDetail, (receptionDetail) => receptionDetail.product)
 	receptionDetails: ReceptionDetail[];

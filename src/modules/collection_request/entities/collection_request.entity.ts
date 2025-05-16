@@ -1,9 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Client } from "src/modules/clients/entities/client.entity";
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
 import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
-import { Column, Entity, ManyToOne, JoinColumn, OneToMany, OneToOne, CreateDateColumn } from "typeorm";
+import { Column, Entity, ManyToOne, JoinColumn, OneToMany, OneToOne, CreateDateColumn, ManyToMany } from "typeorm";
 import { Transporter } from "src/modules/transporters/entities/transporter.entity";
 import { CollectionRequestAudit } from "src/modules/collection_request_audits/entities/collection_request_audit.entity";
 import { Route } from "src/modules/routes/entities/route.entity";
@@ -24,9 +23,10 @@ export class CollectionRequest extends CompleteEntity {
 	@JoinColumn({ name: 'LugarRecogidaId' })
 	pickUpLocation: PickUpLocation;
 
-	@ManyToOne(() => Product, (product) => product.collectionRequests)
+	// @ManyToOne(() => Product, (product) => product.collectionRequests)
+	@ManyToMany(() => Product)
 	@JoinColumn({ name: 'ProductoId' })
-	product: Product;
+	products: Product[];
 
 	@ManyToOne(() => CollectionSite, (collectionSite) => collectionSite.collectionsRequests)
 	@JoinColumn({ name: 'SedeAcopioId' })

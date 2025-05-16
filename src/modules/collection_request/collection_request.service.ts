@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { BusinessException } from "src/core/common/exceptions/biz.exception";
 import { Pagination } from "src/core/helper/paginate/pagination";
 import { paginate } from "src/core/helper/paginate";
@@ -43,7 +43,7 @@ export class CollectionRequestService {
 	) { }
 
 	async create(createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
-		let { isSpecial, pickUpLocationId, ...content } = createDto;
+		let { isSpecial, pickUpLocationId, products: _products, ...content } = createDto;
 
 		const { id: user_id, roles } = this.userContextService.getUserDetails();
 
@@ -57,10 +57,10 @@ export class CollectionRequestService {
 			throw new BusinessException('El cliente no existe', 400);
 		}
 
-		const product = await this.productRepository.findOneBy({ id: +createDto.productId, status: true })
+		const products = await this.productRepository.findBy({ id: In(_products), status: true })
 
-		if (!product) {
-			throw new BusinessException('El producto no existe', 400);
+		if (products.length !== createDto.products.length) {
+			throw new BusinessException('Algún producto ingresado, no se encuentra configurado', 400);
 		}
 
 		const pickUpLocation = await this.pickUpLocationRepository.findOne({
@@ -73,7 +73,7 @@ export class CollectionRequestService {
 		}
 
 		let requestStatusId = REQUEST_STATUS.PENDING;
-		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation });
+		let collectionRequest = this.collectionRequestRepository.create({ ...createDto, requestStatusId, client, pickUpLocation, products });
 
 		if (isSpecial) {
 			const motiveSpecial = await this.childRepository.findOneBy({ id: +createDto.motiveSpecialId, catalogCode: 'MOTIVO_ESPECIAL' })
@@ -99,7 +99,7 @@ export class CollectionRequestService {
 				pickUpLocation,
 				client,
 				transporter,
-				product
+				products
 			});
 		}
 
@@ -140,10 +140,10 @@ export class CollectionRequestService {
 			throw new BusinessException('El cliente no existe', 400);
 		}
 
-		const product = await this.productRepository.findOneBy({ id: +updatedDto.productId, status: true })
+		const products = await this.productRepository.findBy({ id: In(updatedDto.products), status: true })
 
-		if (!product) {
-			throw new BusinessException('El producto no existe', 400);
+		if (products.length !== updatedDto.products.length) {
+			throw new BusinessException('Algún producto ingresado, no se encuentra configurado', 400);
 		}
 
 		let requestStatusId = REQUEST_STATUS.PENDING, pickUpLocation = null, transporter = null;
@@ -182,7 +182,7 @@ export class CollectionRequestService {
 			transporter,
 			user: pickUpLocation.user,
 			modifiedBy: user_id,
-			product,
+			products,
 		};
 
 		const collectionRequestSaved = await this.collectionRequestRepository.save(collectionRequest);

@@ -1,8 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { UserRole } from "src/modules/users/entities/user-rol.entity";
-import { User } from "src/modules/users/entities/user.entity";
-import { Column, Entity, ManyToMany, OneToMany } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity({ name: 'rol' })
 export class Role extends CompleteEntity {

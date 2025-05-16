@@ -1,13 +1,9 @@
-import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { Exclude, Type } from "class-transformer";
+import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
 import { PickUpLocation } from "src/modules/pick_up_location/entities/pick_up_location.entity";
-import { ReportsPh } from "src/modules/reports_ph/entities/reports_ph.entity";
 import { UserCollectionSite } from "src/modules/users/entities/user-collection_site.entity";
-import { User } from "src/modules/users/entities/user.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity({ name: 'sedes_acopio' })
 export class CollectionSite extends CompleteEntity {
