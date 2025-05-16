@@ -16,7 +16,7 @@ export class RoutesController {
 	constructor(private readonly routesServices: RoutesService) { }
 
 	@Post()
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Crear una nueva ruta' })
 	create(@IdParam('id') id: string, @Body() createRutaDto: CreateRouteDto): Promise<Route> {
 		return this.routesServices.create(+id, createRutaDto);
