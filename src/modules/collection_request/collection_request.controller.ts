@@ -17,7 +17,7 @@ export class CollectionRequestController {
 	constructor(private readonly collectionsRequestervice: CollectionRequestService) { }
 
 	@Post()
-	@Roles(ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH)
+	@Roles(ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Crear solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async create(@Body() createDto: CollectionRequestCreateDto): Promise<CollectionRequest> {
@@ -25,7 +25,7 @@ export class CollectionRequestController {
 	}
 
 	@Get()
-	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH)
+	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Listar solicitudes' })
 	@ApiResult({ type: [CollectionRequest] })
 	async findAll(@Query() query: any): Promise<any> {
@@ -33,7 +33,7 @@ export class CollectionRequestController {
 	}
 
 	@Get('routes-pending')
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Listar solicitudes pendiente por cargar' })
 	@ApiResult({ type: [CollectionRequest] })
 	async findAllRoutePendingUpload(): Promise<CollectionRequest[]> {
@@ -41,7 +41,7 @@ export class CollectionRequestController {
 	}
 
 	@Post('routes-pending')
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Obtener información complementaria de las solicitudes pendiente por cargar' })
 	@ApiResult({ type: [CollectionRequestRouteList] })
 	async getRouteInfoPendingUpload(@Body() createDto: CollectionRequestRouteInfoDto): Promise<CollectionRequestRouteList[]> {
@@ -49,7 +49,7 @@ export class CollectionRequestController {
 	}
 
 	@Get(':id')
-	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH)
+	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Obtener solicitud por ID' })
 	@ApiResult({ type: CollectionRequest })
 	async findOne(@IdParam('id') id: number): Promise<CollectionRequest> {
@@ -57,7 +57,7 @@ export class CollectionRequestController {
 	}
 
 	@Patch(':id')
-	@Roles(ROL.WILLARD_LOGISTICA)
+	@Roles(ROL.WILLARD_LOGISTICA, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Completar información de la solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async completeInfo(@IdParam('id') id: number, @Body() updateDto: CollectionRequestCompleteDto): Promise<void> {
@@ -65,7 +65,7 @@ export class CollectionRequestController {
 	}
 
 	@Post(':id/reject')
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Rechazar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async reject(@IdParam('id') id: number): Promise<void> {
@@ -73,7 +73,7 @@ export class CollectionRequestController {
 	}
 
 	@Put(':id')
-	@Roles(ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH)
+	@Roles(ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Actualizar solicitud' })
 	@ApiResult({ type: CollectionRequest })
 	async update(@IdParam('id') id: number, @Body() updateDto: CollectionRequestUpdateDto): Promise<void> {
@@ -81,14 +81,14 @@ export class CollectionRequestController {
 	}
 
 	@Post(':id/cancel')
-	@Roles(ROL.ASESOR_PH, ROL.AGENCIA_PH)
+	@Roles(ROL.ASESOR_PH, ROL.AGENCIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Cancelar solicitud' })
 	async cancel(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.cancel(id);
 	}
 
 	@Delete(':id')
-	@Roles(ROL.ASESOR_PH, ROL.AGENCIA_PH)
+	@Roles(ROL.ASESOR_PH, ROL.AGENCIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Eliminar solicitud' })
 	async delete(@IdParam('id') id: number): Promise<void> {
 		return this.collectionsRequestervice.delete(id);

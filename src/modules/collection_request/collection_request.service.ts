@@ -272,29 +272,33 @@ export class CollectionRequestService {
 
 		let { roles, id, zones } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId);
-		zones = zones.map(({ zoneId }) => +zoneId);
 
-		if (roles.find((role: number) => [ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH].includes(role))) {
-			queryBuilder.where('collectionRequest.createdBy = :id', { id });
-		}
+		if (!roles.includes(ROL.ADMINISTRATOR)) {
+			zones = zones.map(({ zoneId }) => +zoneId);
 
-		if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
-
-			if (zones.length === 0) {
-				throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+			if (roles.find((role: number) => [ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH].includes(role))) {
+				queryBuilder.where('collectionRequest.createdBy = :id', { id });
 			}
 
-			queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING })
+			if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
 
-			if (zones.length > 0) {
-				queryBuilder.andWhere('zone.id IN (:...zones)', { zones });
+				if (zones.length === 0) {
+					throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+				}
+
+				queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING })
+
+				if (zones.length > 0) {
+					queryBuilder.andWhere('zone.id IN (:...zones)', { zones });
+				}
+			}
+
+			if (roles.includes(ROL.WILLARD_LOGISTICA)) {
+				queryBuilder.where('collectionRequest.isSpecial = :status', { status: true })
+					.andWhere('collectionRequest.requestStatusId = :request_status', { request_status: REQUEST_STATUS.INCOMPLETE });
 			}
 		}
 
-		if (roles.includes(ROL.WILLARD_LOGISTICA)) {
-			queryBuilder.where('collectionRequest.isSpecial = :status', { status: true })
-			.andWhere('collectionRequest.requestStatusId = :request_status', { request_status: REQUEST_STATUS.INCOMPLETE });
-		}
 
 		return paginate<CollectionRequest>(queryBuilder, {
 			page: query.page,
@@ -412,7 +416,7 @@ export class CollectionRequestService {
 			.leftJoinAndMapOne('pickUpLocation.city', Child, 'city', 'city.id = pickUpLocation.cityId');
 
 		queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
-		.andWhere('zone.id IN (:...zones) AND collectionRequest.routeId IN (:...routes)', { zones, routes });
+			.andWhere('zone.id IN (:...zones) AND collectionRequest.routeId IN (:...routes)', { zones, routes });
 
 		const results = await queryBuilder.getMany();
 
