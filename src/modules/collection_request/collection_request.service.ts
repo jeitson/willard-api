@@ -260,7 +260,7 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.user', 'user')
 			.leftJoinAndSelect('collectionRequest.audits', 'audits')
 			.leftJoinAndSelect('collectionRequest.route', 'route')
-			.leftJoinAndSelect('collectionRequest.product', 'product')
+			.leftJoinAndSelect('collectionRequest.products', 'product')
 			.leftJoinAndMapOne('collectionRequest.requestStatusId', Child, 'requestStatus', 'requestStatus.id = collectionRequest.requestStatusId')
 			.leftJoinAndMapOne('collectionSite.cityId', Child, 'city', 'city.id = collectionSite.cityId')
 			.leftJoinAndMapOne('pickUpLocation.zoneId', Child, 'zone', 'zone.id = pickUpLocation.zoneId');
