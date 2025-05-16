@@ -10,9 +10,14 @@ export class ReportsService {
 	) { }
 
 	async getBatteryRecyclingByDate({ startDate, endDate }: ReportQueryDto) {
-		// Consulta directa a la tabla usuario
-		const usuarios = await this.entityManager.query('SELECT * FROM usuario');
-		console.log('Usuarios:', usuarios);
-		return usuarios;
+		const start = new Date(startDate).toISOString().split('T')[0];
+		const end = new Date(endDate).toISOString().split('T')[0];
+
+		return await this.entityManager.query(
+			`SELECT * FROM erc
+     WHERE fechacreacion >= $1
+       AND fechacreacion < $2`,
+			[start, end]
+		);
 	}
 }
