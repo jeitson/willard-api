@@ -385,26 +385,26 @@ export class CollectionRequestService {
 			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
 			.leftJoinAndMapOne('pickUpLocation.zoneId', Child, 'zone', 'zone.id = pickUpLocation.zoneId');
 
-		let { zones } = this.userContextService.getUserDetails();
+		let { zones, roles } = this.userContextService.getUserDetails();
 		zones = zones.map(({ zoneId }) => +zoneId);
+		roles = roles.map(({ roleId }) => +roleId);
 
-		if (zones.length === 0) {
-			throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+		if (!roles.includes(ROL.ADMINISTRATOR)) {
+			if (zones.length === 0) {
+				throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+			}
+			queryBuilder.where('zone.id IN (:...zones)', { zones })
 		}
 
-		queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
-		queryBuilder.andWhere('zone.id IN (:...zones)', { zones })
+		queryBuilder.andWhere('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
 
 		return queryBuilder.getMany();
 	}
 
 	async getRouteInfoPendingUpload({ routes }: CollectionRequestRouteInfoDto): Promise<CollectionRequestRouteList[]> {
-		let { zones } = this.userContextService.getUserDetails();
+		let { zones, roles } = this.userContextService.getUserDetails();
 		zones = zones.map(({ zoneId }) => +zoneId);
-
-		if (zones.length === 0) {
-			throw new BusinessException('El usuario no tiene zonas configuradas', 400);
-		}
+		roles = roles.map(({ roleId }) => +roleId);
 
 		const queryBuilder = this.collectionRequestRepository.createQueryBuilder('collectionRequest')
 			.leftJoinAndSelect('collectionRequest.pickUpLocation', 'pickUpLocation')
@@ -415,8 +415,14 @@ export class CollectionRequestService {
 			.leftJoinAndMapOne('pickUpLocation.zone', Child, 'zone', 'zone.id = pickUpLocation.zoneId')
 			.leftJoinAndMapOne('pickUpLocation.city', Child, 'city', 'city.id = pickUpLocation.cityId');
 
-		queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
-			.andWhere('zone.id IN (:...zones) AND collectionRequest.routeId IN (:...routes)', { zones, routes });
+		if (!roles.includes(ROL.ADMINISTRATOR)) {
+			if (zones.length === 0) {
+				throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+			}
+			queryBuilder.where('zone.id IN (:...zones) AND collectionRequest.routeId IN (:...routes)', { zones, routes })
+		}
+
+		queryBuilder.andWhere('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.CONFIRMED })
 
 		const results = await queryBuilder.getMany();
 
