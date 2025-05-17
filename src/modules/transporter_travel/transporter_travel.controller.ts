@@ -19,7 +19,7 @@ export class TransporterTravelController {
 	constructor(private readonly transporterTravelService: TransporterTravelService) { }
 
 	@Post()
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
 	@UseInterceptors(FileInterceptor('file'))
 	@ApiResult({ type: [ResponseCodeTransporterTravel] })
 	async createRecord(
@@ -39,7 +39,7 @@ export class TransporterTravelController {
 	}
 
 	@Get()
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Listado de registros de transportadora' })
 	@ApiResult({ type: [TransporterTravel] })
 	async findAll(@Query() query: any) {
@@ -47,7 +47,7 @@ export class TransporterTravelController {
 	}
 
 	@Patch('route/:id')
-	@Roles(ROL.PLANEADOR_TRANSPORTE)
+	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Actualizar número de ruta por su por ID' })
 	async updateRouteId(
 		@IdParam('id') id: number,

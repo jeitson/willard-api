@@ -16,14 +16,14 @@ export class ReceptionsController {
 	constructor(private readonly receptionsService: ReceptionsService) { }
 
 	@Post()
-	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
+	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Creación' })
 	create(@Body() createDto: ReceptionDto): Promise<Reception> {
 		return this.receptionsService.create(createDto);
 	}
 
 	@Get()
-	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
+	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Obtener listado - Paginación' })
 	@ApiResult({ type: [Reception], isPage: true })
 	async findAll(@Query() dto: ReceptionQueryDto) {
@@ -31,21 +31,21 @@ export class ReceptionsController {
 	}
 
 	@Get(':id')
-	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
+	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Obtener por ID' })
 	findOne(@IdParam('id') id: string): Promise<Reception> {
 		return this.receptionsService.findOne(+id);
 	}
 
 	// @Put(':id')
-	// 	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
+	// 	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA, ROL.ADMINISTRATOR)
 	// @ApiOperation({ summary: 'Actualizar' })
 	// async update(@IdParam('id') id: string, @Body() updateDto: ReceptionUpdateDto): Promise<Reception> {
 	// 	return this.receptionsService.update(+id, updateDto);
 	// }
 
 	@Put(':id')
-	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA)
+	@Roles(ROL.AGENCIA_PH, ROL.RECUPERADORA, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Actualizar número de guía' })
 	async update(@IdParam('id') id: string, @Body() updateDto: ReceptionRouteIdDto): Promise<void> {
 		return this.receptionsService.updateRouteId(+id, updateDto);

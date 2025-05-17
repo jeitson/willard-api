@@ -16,7 +16,7 @@ export class AuditRouteController {
 	constructor(private readonly auditRouteService: AuditRouteService) { }
 
 	@Get('sync-pending')
-	@Roles(ROL.AUDITORIA_PH)
+	@Roles(ROL.AUDITORIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Listado de registros de transportadora - recepción' })
 	@ApiResult({ type: [ListAuditRouteDto] })
 	async findAllSyncPending() {
@@ -24,7 +24,7 @@ export class AuditRouteController {
 	}
 
 	@Get('')
-	@Roles(ROL.AUDITORIA_PH)
+	@Roles(ROL.AUDITORIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Listado de auditoria de rutas' })
 	@ApiResult({ type: [ListAuditRouteDto] })
 	async findAll() {
@@ -32,7 +32,7 @@ export class AuditRouteController {
 	}
 
 	@Get('detail')
-	@Roles(ROL.AUDITORIA_PH)
+	@Roles(ROL.AUDITORIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Listado de auditoria de rutas' })
 	@ApiResult({ type: AuditRouteDto })
 	async findOneByRoute(@Query() content: GetInfoByRouteId) {
@@ -40,7 +40,7 @@ export class AuditRouteController {
 	}
 
 	@Post('save')
-	@Roles(ROL.AUDITORIA_PH)
+	@Roles(ROL.AUDITORIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Confirmación de conciliación' })
 	async confirm(@Body() body: ConfirmAuditRouteDto) {
 		return this.auditRouteService.confirm(body);
