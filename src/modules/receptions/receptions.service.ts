@@ -46,7 +46,18 @@ export class ReceptionsService {
 		let { userCollectionSites, id: user_id, roles } = this.userContextService.getUserDetails();
 		roles = roles.map(({ roleId }) => +roleId);
 
-		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(userCollectionSites.map(({ collectionSiteId }) => collectionSiteId)) });
+		if (!roles.includes(ROL.ADMINISTRATOR)) {
+			if (!userCollectionSites || userCollectionSites.length === 0) {
+				throw new BadRequestException('El usuario no tiene vinculado una sede de acopio.');
+			}
+		} else {
+			if (!createReceptionDto.collectionSiteId) {
+				throw new BadRequestException('La sede de acopio es obligatoria.');
+			}
+
+		}
+
+		const collectionSite = await this.collectionSiteRepository.findOneBy({ id: In(userCollectionSites.map(({ collectionSiteId }) => collectionSiteId).push(createReceptionDto?.collectionSiteId || 0)) });
 
 		if (!collectionSite) {
 			throw new BadRequestException('El usuario no tiene vinculado una sede de acopio.');
