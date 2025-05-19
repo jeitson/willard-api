@@ -32,9 +32,15 @@ import { ReportsPhModule } from './modules/reports_ph/reports_ph.module';
 import { HistoryJobsModule } from './modules/history_jobs/history_jobs.module';
 import { AuditRouteModule } from './modules/audit_route/audit_route.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Document } from './core/entities/document.entity';
+import { Erc } from './core/entities/erc.entity';
+import { Irc } from './core/entities/irc.entity';
+import { Item } from './core/entities/item.entity';
 
 @Module({
 	imports: [
+		TypeOrmModule.forFeature([Document, Erc, Irc, Item]),
 		ConfigModule.forRoot({
 			isGlobal: true,
 			expandVariables: true,
