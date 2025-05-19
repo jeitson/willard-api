@@ -22,9 +22,19 @@ export function isDateObject(obj: unknown): boolean {
 	return isDate(obj) || dayjs.isDayjs(obj);
 }
 
-export function excelDateToJSDate(excelDate: number): string {
+export function excelDateToJSDate(excelDate: string): string {
+	if (excelDate === '') {
+		return '';
+	}
+
+	if (excelDate.includes('-')) {
+		return excelDate;
+	}
+
+	excelDate = parseInt(excelDate) as any;
+
     const baseDate = new Date(1900, 0, 1);
-    const daysSince1900 = excelDate - 1;
+    const daysSince1900 = parseInt(excelDate.toString()) - 1;
     baseDate.setDate(baseDate.getDate() + daysSince1900 - 1);
     return baseDate.toISOString().split('T')[0];
 }
