@@ -1,8 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Reception } from "src/modules/receptions/entities/reception.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { AuditRouteDetail } from "./audit_route_detail.entity";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { AuditRoute } from "./audit_route.entity";
 import { Product } from "src/modules/products/entities/product.entity";
 
