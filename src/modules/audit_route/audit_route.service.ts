@@ -126,6 +126,7 @@ export class AuditRouteService {
 				mergedResults[key].origin = 'RECUPERADORA';
 				mergedResults[key].status = 'POR CONCILIAR';
 				mergedResults[key].recuperator = mergedResults[key].recuperator || item.recuperator;
+				mergedResults[key].quantityTotal = item.quantityTotal || 0;
 			} else {
 				mergedResults[key] = item;
 			}
@@ -569,9 +570,18 @@ export class AuditRouteService {
 			await this.auditRouteRepository.update(auditRoute.id, {
 				requestStatusId: AUDIT_ROUTE_STATUS.CONFIRMED,
 				notify: await this.calculateIsNotify({ routeId, transporterId }),
+				conciliationTotal,
+				recuperatorTotal,
+				transporterTotal
 			});
 
 			this.createNoteCredit(auditRoute.id);
+		} else {
+			await this.auditRouteRepository.update(auditRoute.id, {
+				conciliationTotal,
+				recuperatorTotal,
+				transporterTotal,
+			});
 		}
 	}
 
