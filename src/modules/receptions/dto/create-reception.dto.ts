@@ -43,6 +43,11 @@ export class ReceptionDto extends ReceptionRouteIdDto {
 	@IsInt({ message: 'TransportadoraId debe ser un número entero.' })
 	transporterId: number;
 
+	@ApiProperty({ description: 'ID de la sede de acopio' })
+	@IsOptional()
+	@IsInt({ message: 'SedeAcopioId debe ser un número entero.' })
+	collectionSiteId: number;
+
 	@ApiProperty({ description: 'Placa del vehículo' })
 	@IsNotEmpty({ message: 'Placa es obligatorio.' })
 	@IsString({ message: 'Placa debe ser un texto.' })
