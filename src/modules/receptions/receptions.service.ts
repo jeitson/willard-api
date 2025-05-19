@@ -13,7 +13,7 @@ import { BusinessException } from 'src/core/common/exceptions/biz.exception';
 import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { Child } from '../catalogs/entities/child.entity';
-import { RECEIPT_STATUS } from 'src/core/constants/status.constant';
+import { AUDIT_ROUTE_REASON, AUDIT_ROUTE_STATUS, RECEIPT_STATUS } from 'src/core/constants/status.constant';
 import { PICKUP_LOCATION_TYPE } from 'src/core/constants/types.constant';
 import { ROL } from 'src/core/constants/rol.constant';
 import { AuditRouteService } from '../audit_route/audit_route.service';
@@ -296,26 +296,27 @@ export class ReceptionsService {
 	async updateRouteId(id: number, { routeId }: ReceptionRouteIdDto): Promise<void> {
 		const existingRecord = await this.receptionRepository.findOne({
 			where: { id },
-			relations: ['auditGuide'],
+			relations: ['auditRoute'],
 		});
+
 		if (!existingRecord) {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		// if (![AUDIT_GUIDE_STATUS.WITHOUT_GUIDE, AUDIT_GUIDE_STATUS.TRANSIT].includes(+existingRecord.auditGuide.requestStatusId)) {
-		// 	throw new BusinessException(
-		// 		`No se puede actualizar el registro, ya que tiene una vinculación activa con una transportadora.`
-		// 	);
-		// }
+		if (![AUDIT_ROUTE_STATUS.CONFIRMED].includes(+existingRecord.auditRoute.requestStatusId)) {
+			throw new BusinessException(
+				`No se puede actualizar el registro, ya que la auditoría de ruta, está en estado "CONFIRMADO"`,
+			);
+		}
 
-		const routeIdOld = JSON.parse(JSON.stringify(existingRecord.routeId));
+		// const routeIdOld = JSON.parse(JSON.stringify(existingRecord.routeId));
 
 		existingRecord.routeId = routeId;
 
 		await this.receptionRepository.update(id, { routeId });
 
-		// if (existingRecord.auditGuide) {
-		// 	await this.auditGuideService.updateRouteId(routeIdOld, routeId);
+		// if (existingRecord.auditRoute) {
+		// 	await this.auditRouteService.updateRouteId(routeIdOld, routeId);
 		// }
 
 		// await this.auditGuideService.checkAndSyncAuditGuides([routeId]);
