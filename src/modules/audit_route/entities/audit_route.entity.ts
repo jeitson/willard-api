@@ -69,4 +69,8 @@ export class AuditRoute extends CompleteEntity {
 	@ApiProperty({ description: 'ID de la solicitud recogida (FK)' })
 	@OneToOne(() => CollectionRequest, (collectionRequest) => collectionRequest.auditRoute)
 	collectionRequest: CollectionRequest;
+
+	@ApiProperty({ description: 'RadicadoDocumento' })
+	@Column({ type: 'varchar', length: 50, name: 'RadicadoDocumento', default: null, nullable: true })
+	residing?: string;
 }
