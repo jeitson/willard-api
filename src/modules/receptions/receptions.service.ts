@@ -303,10 +303,12 @@ export class ReceptionsService {
 			throw new BusinessException(`No se encontró ningún registro con ID: ${id}`);
 		}
 
-		if (![AUDIT_ROUTE_STATUS.CONFIRMED].includes(+existingRecord.auditRoute.requestStatusId)) {
-			throw new BusinessException(
-				`No se puede actualizar el registro, ya que la auditoría de ruta, está en estado "CONFIRMADO"`,
-			);
+		if (existingRecord?.auditRoute) {
+			if (![AUDIT_ROUTE_STATUS.CONFIRMED].includes(+existingRecord.auditRoute.requestStatusId)) {
+				throw new BusinessException(
+					`No se puede actualizar el registro, ya que tiene vinculada una auditoría de ruta y está en estado "CONFIRMADO"`,
+				);
+			}
 		}
 
 		// const routeIdOld = JSON.parse(JSON.stringify(existingRecord.routeId));
