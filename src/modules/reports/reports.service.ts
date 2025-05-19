@@ -18,7 +18,7 @@ export class ReportsService {
 
 		return this.ercRepository.createQueryBuilder('erc')
 			.where('erc.createdAt >= :start', { start })
-			.andWhere('erc.createdAt < :end', { end })
+			.andWhere('erc.createdAt <= :end', { end })
 			.getMany();
 
 		// 	return await this.entityManager.query(

@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
+import { Erc } from "./erc.entity";
 
 @Entity({ name: 'documento' })
 export class Document extends CompleteEntity {
@@ -47,4 +48,7 @@ export class Document extends CompleteEntity {
 	@ApiProperty({ description: 'Observacion' })
 	@Column({ type: 'varchar', length: 100, default: null, nullable: true, name: 'Observacion' })
 	observation: string;
+
+	@OneToMany(() => Erc, (erc) => erc.document)
+	ercs: Erc[];
 }

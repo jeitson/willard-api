@@ -1,6 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Erc } from "./erc.entity";
+import { Item } from "./item.entity";
 
 @Entity({ name: 'irc' })
 export class Irc extends CompleteEntity {
@@ -42,4 +44,11 @@ export class Irc extends CompleteEntity {
 	@ApiProperty({ description: 'Observacion' })
 	@Column({ type: 'varchar', length: 100, default: null, nullable: true, name: 'Observacion' })
 	observation: string;
+
+    @ManyToOne(() => Erc, (erc) => erc.ircs)
+    @JoinColumn({ name: 'ErcIdRef' })
+    erc: Erc;
+
+    @OneToMany(() => Item, (item) => item.irc)
+    items: Item[];
 }
