@@ -5,12 +5,19 @@ import { Column, Entity } from "typeorm";
 @Entity({ name: 'irc' })
 export class Irc extends CompleteEntity {
 	@ApiProperty({ description: 'Radicado' })
-	@Column({ type: 'varchar', length: 50, name: 'Radicado' })
-	residing: string;
+    @Column({ type: 'varchar', length: 50, name: 'Radicado' })
+    residing: string;
 
-	@ApiProperty({ description: 'IrcId' })
-	@Column({ type: 'varchar', length: 50, default: null, nullable: true, name: 'IrcId' })
-	ircId: string;
+    @ApiProperty({ description: 'IrcId' })
+    @Column({
+        type: 'varchar',
+        length: 50,
+        default: null,
+        nullable: true,
+        name: 'IrcId',
+        unique: true
+    })
+    ircId: string;
 
 	@ApiProperty({ description: 'Guia' })
 	@Column({ type: 'varchar', length: 25, default: null, nullable: true, name: 'Guia' })

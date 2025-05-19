@@ -1,19 +1,24 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, Index } from "typeorm";
 
 @Entity({ name: 'item' })
 export class Item extends CompleteEntity {
-	@ApiProperty({ description: 'IrcId' })
-	@Column({ type: 'varchar', length: 50, default: null, nullable: true, name: 'IrcId' })
+	@Column({
+		type: 'varchar',
+		length: 50,
+		name: 'IrcId'
+	})
 	ircId: string;
 
-	@ApiProperty({ description: 'Referencia' })
-	@Column({ type: 'varchar', length: 25, default: null, nullable: true, name: 'Referencia' })
+	@Column({
+		type: 'varchar',
+		length: 50,
+		name: 'Referencia'
+	})
 	reference: string;
-
-	@ApiProperty({ description: 'Cantidad' })
-	@Column({ type: 'varchar', length: 25, default: null, nullable: true, name: 'Cantidad' })
+	@Index(['ircId', 'referencia'], { unique: true })
+	@Column({ type: 'int', name: 'Cantidad' })
 	quantity: string;
 
 	@ApiProperty({ description: 'OtroTipoDocumento' })

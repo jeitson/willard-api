@@ -5,7 +5,7 @@ import { Column, Entity } from "typeorm";
 @Entity({ name: 'documento' })
 export class Document extends CompleteEntity {
 	@ApiProperty({ description: 'Radicado' })
-	@Column({ type: 'varchar', length: 50, name: 'Radicado' })
+	@Column({ type: 'varchar', length: 50, name: 'Radicado', unique: true })
 	residing: string;
 
 	@ApiProperty({ description: 'Remision' })

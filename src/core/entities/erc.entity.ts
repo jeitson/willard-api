@@ -9,7 +9,14 @@ export class Erc extends CompleteEntity {
 	residing: string;
 
 	@ApiProperty({ description: 'ErcId' })
-	@Column({ type: 'varchar', length: 50, default: null, nullable: true, name: 'ErcId' })
+	@Column({
+		type: 'varchar',
+		length: 50,
+		default: null,
+		nullable: true,
+		name: 'ErcId',
+		unique: true
+	})
 	ercId: string;
 
 	@ApiProperty({ description: 'Agencia' })
