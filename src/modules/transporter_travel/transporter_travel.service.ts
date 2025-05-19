@@ -15,6 +15,7 @@ import { Pagination } from 'src/core/helper/paginate/pagination';
 import { paginate } from 'src/core/helper/paginate';
 import { AuditRouteService } from '../audit_route/audit_route.service';
 import { UserContextService } from '../users/user-context.service';
+import { ROL } from 'src/core/constants/rol.constant';
 
 @Injectable()
 export class TransporterTravelService {
@@ -53,7 +54,7 @@ export class TransporterTravelService {
 			throw new BusinessException('El usuario no tiene configurado zonas');
 		}
 
-		if(!zones.map(({ zone }) => zone.name).includes(travelRecordDto.zona)) {
+		if (!zones.map(({ zone }) => zone.name).includes(travelRecordDto.zona)) {
 			throw new BusinessException('Está intentando ingresar una zona que no tiene asignada');
 		}
 
@@ -141,7 +142,7 @@ export class TransporterTravelService {
 
 			const _zones = zones.map(({ zone }) => zone.name);
 
-			if(!recordsToCreate.map((element) => (element.zone || '')?.toUpperCase()).every((element) => _zones.includes(element))) {
+			if (!recordsToCreate.map((element) => (element.zone || '')?.toUpperCase()).every((element) => _zones.includes(element))) {
 				throw new BusinessException('Está intentando ingresar una zona que no tiene asignada');
 			}
 
@@ -151,7 +152,7 @@ export class TransporterTravelService {
 				await this.updateTransporterTravel(record);
 			}
 
-			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate.map((element) => ({ ...element, transporter,  })));
+			const savedRecords = await this.transporterTravelRepository.save(recordsToCreate.map((element) => ({ ...element, transporter, })));
 
 			const allSavedRecords = [
 				...savedRecords,
@@ -279,19 +280,24 @@ export class TransporterTravelService {
 	}
 
 	async findAll(query: any): Promise<Pagination<TransporterTravel>> {
-		let { id: user_id, transporter: transporter } = this.userContextService.getUserDetails();
+		let { id: user_id, transporter, roles } = this.userContextService.getUserDetails();
 
-		if (!transporter) {
-			throw new BusinessException('El usuario no tiene configurado una transportadora');
-		}
-
-		const transporterId = transporter.id;
+		roles = roles.map(({ roleId }) => +roleId);
 
 		const queryBuilder = this.transporterTravelRepository
 			.createQueryBuilder('transporter_travel')
 			.leftJoinAndSelect('transporter_travel.details', 'details')
 			.leftJoinAndSelect('transporter_travel.transporter', 'transporter')
-			.where('transporter_travel.createdBy = :user_id AND transporter.id = :transporterId', { user_id, transporterId });
+
+		if (!roles.includes(ROL.ADMINISTRATOR)) {
+			if (!transporter) {
+				throw new BusinessException('El usuario no tiene configurado una transportadora');
+			}
+
+			const transporterId = transporter.id;
+			queryBuilder.where('transporter_travel.createdBy = :user_id AND transporter.id = :transporterId', { user_id, transporterId });
+		}
+
 
 		return await paginate<TransporterTravel>(queryBuilder, {
 			page: query.page,
