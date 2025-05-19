@@ -420,6 +420,15 @@ export class AuditRouteService {
 			return acc;
 		}, {});
 
+		conciliationTotal = transporterTravels.reduce(
+			(acc, travel) => {
+				const total = travel.details.reduce(
+					(sum, detail) => sum + (detail.quantityConciliated || 0),
+					0
+				);
+				return acc + total;
+			}, 0)
+
 		// Crear nueva auditoría de ruta si no existe
 		if (!auditRoute) {
 			const collectionRequest = await this.collectionRequestRepository.findOne({
