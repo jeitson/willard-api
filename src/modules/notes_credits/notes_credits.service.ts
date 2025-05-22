@@ -25,6 +25,8 @@ export class NotesCreditsService {
 			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
 		}
 
+		const createdBy = this.userContextService.getUserId();
+
 		for (const element of auditRoute.auditRouteDetails) {
 			const item = this.noteCreditRepository.create({
 				auditRoute,
@@ -32,6 +34,8 @@ export class NotesCreditsService {
 				product: element.product,
 				quantity: element.quantityConciliated,
 				guideId: element.guideId,
+				createdBy,
+				modifiedBy: createdBy,
 			})
 
 			await this.noteCreditRepository.save(item);
