@@ -41,4 +41,14 @@ export class NotesCreditsService {
 			await this.noteCreditRepository.save(item);
 		}
 	}
+
+	async findAll(): Promise<NotesCredit[]> {
+		const query = this.noteCreditRepository.createQueryBuilder('notesCredit')
+			.leftJoinAndSelect('notesCredit.auditRoute', 'auditRoute')
+			.leftJoinAndSelect('notesCredit.product', 'product')
+			.andWhere('notesCredit.requestStatusId = :requestStatusId', { requestStatusId: NOTE_CREDIT_STATUS.PENDING })
+			.orderBy('notesCredit.createdAt', 'DESC');
+
+		return await query.getMany();
+	}
 }
