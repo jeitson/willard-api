@@ -1,12 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Reception } from "src/modules/receptions/entities/reception.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import { AuditRouteDetail } from "./audit_route_detail.entity";
-import { Transporter } from "src/modules/transporters/entities/transporter.entity";
-import { CollectionSite } from "src/modules/collection_sites/entities/collection_site.entity";
-import { NoteCredit } from "./note_credit.entity";
 import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
+import { NotesCredit } from "src/modules/notes_credits/entities/notes_credit.entity";
 
 @Entity({ name: 'auditoria_ruta' })
 export class AuditRoute extends CompleteEntity {
@@ -62,8 +60,8 @@ export class AuditRoute extends CompleteEntity {
 	@OneToMany(() => AuditRouteDetail, (auditRouteDetail) => auditRouteDetail.auditRoute)
 	auditRouteDetails: AuditRouteDetail[];
 
-	@OneToMany(() => NoteCredit, (NoteCredit) => NoteCredit.auditRoute)
-	notesCredits: NoteCredit[];
+	@OneToMany(() => NotesCredit, (NotesCredit) => NotesCredit.auditRoute)
+	notesCredits: NotesCredit[];
 
 	@JoinColumn({ name: 'SolicitudRecogidaId' })
 	@ApiProperty({ description: 'ID de la solicitud recogida (FK)' })

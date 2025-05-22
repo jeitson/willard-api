@@ -37,6 +37,7 @@ import { Document } from './core/entities/document.entity';
 import { Erc } from './core/entities/erc.entity';
 import { Irc } from './core/entities/irc.entity';
 import { Item } from './core/entities/item.entity';
+import { NotesCreditsModule } from './modules/notes_credits/notes_credits.module';
 
 @Module({
 	imports: [
@@ -73,6 +74,7 @@ import { Item } from './core/entities/item.entity';
 		HistoryJobsModule,
 		AuditRouteModule,
 		ReportsModule,
+		NotesCreditsModule,
 	],
 	controllers: [],
 	providers: [

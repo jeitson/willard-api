@@ -12,9 +12,9 @@ import { AuditRouteDetail } from './entities/audit_route_detail.entity';
 import { TransporterTravelDetail } from '../transporter_travel/entities/transporter_travel_detail.entity';
 import { Product } from '../products/entities/product.entity';
 import { UserContextService } from '../users/user-context.service';
-import { NoteCredit } from './entities/note_credit.entity';
 import { CollectionRequest } from '../collection_request/entities/collection_request.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
+import { NotesCreditsService } from '../notes_credits/notes_credits.service';
 
 @Injectable()
 export class AuditRouteService {
@@ -34,13 +34,12 @@ export class AuditRouteService {
 		private readonly productRepository: Repository<Product>,
 		@InjectRepository(Child)
 		private readonly childRepository: Repository<Child>,
-		@InjectRepository(NoteCredit)
-		private readonly noteCreditRepository: Repository<NoteCredit>,
 		@InjectRepository(CollectionRequest)
 		private readonly collectionRequestRepository: Repository<CollectionRequest>,
 		@InjectRepository(Transporter)
 		private readonly transporterRepository: Repository<Transporter>,
 		private userContextService: UserContextService,
+		private notesCreditsService: NotesCreditsService,
 	) { }
 
 	async findAllSyncPending(): Promise<ListAuditRouteDto[]> {
@@ -575,33 +574,13 @@ export class AuditRouteService {
 				transporterTotal
 			});
 
-			this.createNoteCredit(auditRoute.id);
+			this.notesCreditsService.create(auditRoute.id);
 		} else {
 			await this.auditRouteRepository.update(auditRoute.id, {
 				conciliationTotal,
 				recuperatorTotal,
 				transporterTotal,
 			});
-		}
-	}
-
-	async createNoteCredit(id: number): Promise<void> {
-		const auditRoute = await this.auditRouteRepository.findOne({ where: { id }, relations: ['auditRouteDetails'] });
-
-		if (auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.CONFIRMED) {
-			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
-		}
-
-		for (const element of auditRoute.auditRouteDetails) {
-			const item = this.noteCreditRepository.create({
-				auditRoute,
-				requestStatusId: NOTE_CREDIT_STATUS.PENDING,
-				product: element.product,
-				quantity: element.quantityConciliated,
-				guideId: element.guideId,
-			})
-
-			await this.noteCreditRepository.save(item);
 		}
 	}
 

@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { AuditRoute } from "./audit_route.entity";
 import { Product } from "src/modules/products/entities/product.entity";
+import { AuditRoute } from "src/modules/audit_route/entities/audit_route.entity";
 
 @Entity({ name: 'nota_credito' })
-export class NoteCredit extends CompleteEntity {
+export class NotesCredit extends CompleteEntity {
 	@JoinColumn({ name: 'AuditoriId' })
 	@ApiProperty({ description: 'ID de la auditoria (FK)' })
 	@ManyToOne(() => AuditRoute, (auditRoute) => auditRoute.notesCredits)

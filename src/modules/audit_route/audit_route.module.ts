@@ -9,16 +9,16 @@ import { ReceptionsModule } from '../receptions/receptions.module';
 import { CatalogsModule } from '../catalogs/catalogs.module';
 import { UsersModule } from '../users/users.module';
 import { ProductsModule } from '../products/products.module';
-import { NoteCredit } from './entities/note_credit.entity';
 import { CollectionRequestModule } from '../collection_request/collection_request.module';
 import { TransportersModule } from '../transporters/transporters.module';
+import { NotesCreditsModule } from '../notes_credits/notes_credits.module';
 
 const providers = [AuditRouteService]
 
 @Module({
-	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail, NoteCredit]), forwardRef(() => TransporterTravelModule), forwardRef(() => ReceptionsModule), CatalogsModule, UsersModule, ProductsModule, forwardRef(() => CollectionRequestModule), TransportersModule],
+	imports: [TypeOrmModule.forFeature([AuditRoute, AuditRouteDetail]), forwardRef(() => TransporterTravelModule), forwardRef(() => ReceptionsModule), CatalogsModule, UsersModule, ProductsModule, forwardRef(() => CollectionRequestModule), TransportersModule, NotesCreditsModule],
 	controllers: [AuditRouteController],
 	providers,
 	exports: [TypeOrmModule, ...providers],
 })
-export class AuditRouteModule {}
+export class AuditRouteModule { }

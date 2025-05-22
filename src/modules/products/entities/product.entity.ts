@@ -1,8 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CompleteEntity } from "src/core/common/entity/common.entity";
 import { AuditRouteDetail } from "src/modules/audit_route/entities/audit_route_detail.entity";
-import { NoteCredit } from "src/modules/audit_route/entities/note_credit.entity";
-import { CollectionRequest } from "src/modules/collection_request/entities/collection_request.entity";
+import { NotesCredit } from "src/modules/notes_credits/entities/notes_credit.entity";
 import { ReceptionDetail } from "src/modules/receptions/entities/reception_detail.entity";
 import { ReportsPh } from "src/modules/reports_ph/entities/reports_ph.entity";
 import { ShipmentDetail } from "src/modules/shipments/entities/shipment_detail.entity";
@@ -70,8 +69,8 @@ export class Product extends CompleteEntity {
 	@OneToMany(() => AuditRouteDetail, (auditRouteDetail) => auditRouteDetail.product)
 	auditRouteDetails: AuditRouteDetail[];
 
-	@OneToMany(() => NoteCredit, (noteCredit) => noteCredit.product)
-	noteCredits: NoteCredit[];
+	@OneToMany(() => NotesCredit, (noteCredit) => noteCredit.product)
+	noteCredits: NotesCredit[];
 
 	// @OneToMany(() => ReportsPh, (reportsPh) => reportsPh.product)
 	reportsPh: ReportsPh[];
