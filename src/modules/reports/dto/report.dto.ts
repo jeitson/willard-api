@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface, Validate, IsDateString } from "class-validator";
+import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface, Validate, IsDateString, IsInt } from "class-validator";
 
 @ValidatorConstraint({ name: 'IsEndDateAfterOrEqualStartDate', async: false })
 class IsEndDateAfterOrEqualStartDateConstraint implements ValidatorConstraintInterface {
@@ -24,4 +24,8 @@ export class ReportQueryDto {
 	@IsDateString({}, { message: 'La fecha final debe tener formato válido (YYYY-MM-DD).' })
 	@Validate(IsEndDateAfterOrEqualStartDateConstraint)
 	endDate: string;
+
+	@ApiProperty({ description: 'ID de la sede de acopio' })
+	@IsInt({ message: 'El ID de la sede de acopio debe ser un número entero.' })
+	agencyId: number;
 }

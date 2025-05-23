@@ -12,20 +12,29 @@ export class ReportsService {
 		@InjectEntityManager() private readonly entityManager: EntityManager
 	) { }
 
-	async getBatteryRecyclingByDate({ startDate, endDate }: ReportQueryDto): Promise<Erc[]> {
-		const start = new Date(startDate).toISOString().split('T')[0];
-		const end = new Date(endDate).toISOString().split('T')[0];
-
-		return this.ercRepository.createQueryBuilder('erc')
-			.where('erc.createdAt >= :start', { start })
-			.andWhere('erc.createdAt <= :end', { end })
-			.getMany();
-
-		// 	return await this.entityManager.query(
-		// 		`SELECT * FROM erc
-		//  WHERE fechacreacion >= $1
-		//    AND fechacreacion < $2`,
-		// 		[start, end]
-		// 	);
+	async getBatteryRecyclingByDate({ startDate, endDate, agencyId }: ReportQueryDto): Promise<any[]> {
+		const result = await this.entityManager.query(`
+			SELECT
+				e."Id" AS id,
+				e."Fecha" AS delivery_date,
+				SUM(it."Cantidad") AS quantity_batteries,
+				JSON_AGG(
+					JSON_BUILD_OBJECT(
+						'material', p."name",
+						'cantidad', it."quantity",
+						'unidad', ch."unity"
+					)
+				) AS materiales
+			FROM erc e
+			INNER JOIN sedes_acopio sa ON sa."ReferenciaPH" = e."Agencia"
+			INNER JOIN irc i ON i."ErcIdRef" = e."Id"
+			INNER JOIN item it ON it."IrcIdRef" = i."Id"
+			INNER JOIN producto p ON p."ReferenciaPH" = it."Referencia"
+			INNER JOIN catalogo_hijo ch ON ch."Id" = p."UnidadMedidaId"
+			WHERE e."Fecha" >= $1 AND e."Fecha" <= $2
+			AND sa."Id" = $3
+			GROUP BY e."Id", e."Fecha"
+		`, [startDate, endDate, agencyId]);
+		return result;
 	}
 }
