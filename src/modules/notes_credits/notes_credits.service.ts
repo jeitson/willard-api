@@ -6,6 +6,7 @@ import { UserContextService } from '../users/user-context.service';
 import { AuditRoute } from '../audit_route/entities/audit_route.entity';
 import { AUDIT_ROUTE_STATUS, NOTE_CREDIT_STATUS } from 'src/core/constants/status.constant';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
+import { NotesCreditQueryDto } from './dto/notes_credits.dto';
 
 @Injectable()
 export class NotesCreditsService {
@@ -44,13 +45,25 @@ export class NotesCreditsService {
 		}
 	}
 
-	async findAll(): Promise<NotesCredit[]> {
-		const query = this.noteCreditRepository.createQueryBuilder('notesCredit')
-			.leftJoinAndSelect('notesCredit.auditRoute', 'auditRoute')
-			.leftJoinAndSelect('notesCredit.product', 'product')
-			.andWhere('notesCredit.requestStatusId = :requestStatusId', { requestStatusId: NOTE_CREDIT_STATUS.PENDING })
-			.orderBy('notesCredit.createdAt', 'DESC');
-
-		return await query.getMany();
+	async findAll({ transporterId }: NotesCreditQueryDto): Promise<any[]> {
+		const result = await this.noteCreditRepository.query(`
+			SELECT
+				d."Transportadora" AS transporter,
+				nc."GuiaId" AS guide,
+				e."Factura" AS invoice,
+				JSON_AGG(
+					JSON_BUILD_OBJECT(
+						'name', p."Nombre",
+						'quantity', nc."Cantidad"
+					)
+				) AS baterias_pendiente
+			FROM nota_credito nc
+			INNER JOIN documento d ON d."Guia" = nc."GuiaId"
+			INNER JOIN erc e ON e."DocumentoRadicado" = d."Id"
+			INNER JOIN producto p ON p."Id" = nc."ProductoId"
+			WHERE d."Transportadora" = $1
+			GROUP BY d."Transportadora", nc."GuiaId", e."Factura"
+		`, [transporterId]);
+		return result;
 	}
 }
