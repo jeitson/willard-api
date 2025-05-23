@@ -33,7 +33,7 @@ export class NotesCreditsService {
 					auditRoute,
 					requestStatusId: NOTE_CREDIT_STATUS.PENDING,
 					product: element.product,
-					quantity: element.quantityConciliated,
+					quantity: element.quantity - element.quantityConciliated,
 					guideId: element.guideId,
 					createdBy,
 					modifiedBy: createdBy,
