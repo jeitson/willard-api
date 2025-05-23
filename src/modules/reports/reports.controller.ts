@@ -1,9 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ReportQueryDto } from './dto/report.dto';
+import { ReportQueryDto, ReportResponseDto } from './dto/report.dto';
 import { Public } from 'src/core/common/decorators/public.decorator';
-import { Erc } from 'src/core/entities/erc.entity';
 import { ApiResult } from 'src/core/common/decorators/api-result.decorator';
 
 @ApiTags('Negocio - Reportes')
@@ -14,8 +13,8 @@ export class ReportsController {
 
   @Get('battery-recycling')
 	@ApiOperation({ summary: 'Reporte de Reciclaje de Baterías' })
-	@ApiResult({ type: [Erc] })
-	async findAll(@Query() query: ReportQueryDto): Promise<any> {
+	@ApiResult({ type: [ReportResponseDto] })
+	async findAll(@Query() query: ReportQueryDto): Promise<ReportResponseDto[]> {
 		return this.reportsService.getBatteryRecyclingByDate(query);
 	}
 }

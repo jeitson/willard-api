@@ -6,7 +6,7 @@ import { UserContextService } from '../users/user-context.service';
 import { AuditRoute } from '../audit_route/entities/audit_route.entity';
 import { AUDIT_ROUTE_STATUS, NOTE_CREDIT_STATUS } from 'src/core/constants/status.constant';
 import { BusinessException } from 'src/core/common/exceptions/biz.exception';
-import { NotesCreditQueryDto } from './dto/notes_credits.dto';
+import { NotesCreditQueryDto, NotesCreditResponseDto } from './dto/notes_credits.dto';
 
 @Injectable()
 export class NotesCreditsService {
@@ -45,7 +45,7 @@ export class NotesCreditsService {
 		}
 	}
 
-	async findAll({ transporterId }: NotesCreditQueryDto): Promise<any[]> {
+	async findAll({ transporterId }: NotesCreditQueryDto): Promise<NotesCreditResponseDto[]> {
 		const result = await this.noteCreditRepository.query(`
 			SELECT
 				d."Transportadora" AS transporter,

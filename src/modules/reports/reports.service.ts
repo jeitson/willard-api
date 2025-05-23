@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ReportQueryDto } from './dto/report.dto';
+import { ReportQueryDto, ReportResponseDto } from './dto/report.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Erc } from 'src/core/entities/erc.entity';
@@ -12,7 +12,7 @@ export class ReportsService {
 		@InjectEntityManager() private readonly entityManager: EntityManager
 	) { }
 
-	async getBatteryRecyclingByDate({ startDate, endDate, agencyId }: ReportQueryDto): Promise<any[]> {
+	async getBatteryRecyclingByDate({ startDate, endDate, agencyId }: ReportQueryDto): Promise<ReportResponseDto[]> {
 		const result = await this.entityManager.query(`
 			SELECT
 				e."Id" AS id,

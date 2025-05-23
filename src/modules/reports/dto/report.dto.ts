@@ -29,3 +29,28 @@ export class ReportQueryDto {
 	@IsInt({ message: 'El ID de la sede de acopio debe ser un número entero.' })
 	agencyId: number;
 }
+
+export class ReportDetailResponseDto {
+	@ApiProperty({ description: 'Nombre del producto' })
+	name: string
+
+	@ApiProperty({ description: 'Cantidad' })
+	quantity: string
+
+	@ApiProperty({ description: 'Unidad de medida' })
+	unity: string
+}
+
+export class ReportResponseDto {
+	@ApiProperty({ description: 'ID de la entrega' })
+	id: number;
+
+	@ApiProperty({ description: 'Fecha de entrega' })
+	delivery_date: string;
+
+	@ApiProperty({ description: 'Cantidad de baterías' })
+	quantity_batteries: number;
+
+	@ApiProperty({ description: 'Materiales', type: [ReportDetailResponseDto] })
+	materiales: ReportDetailResponseDto[];
+}
