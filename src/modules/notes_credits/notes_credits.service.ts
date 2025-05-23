@@ -28,17 +28,19 @@ export class NotesCreditsService {
 		const createdBy = this.userContextService.getUserId();
 
 		for (const element of auditRoute.auditRouteDetails) {
-			const item = this.noteCreditRepository.create({
-				auditRoute,
-				requestStatusId: NOTE_CREDIT_STATUS.PENDING,
-				product: element.product,
-				quantity: element.quantityConciliated,
-				guideId: element.guideId,
-				createdBy,
-				modifiedBy: createdBy,
-			})
+			if (element.quantityConciliated - element.quantity < 0) {
+				const item = this.noteCreditRepository.create({
+					auditRoute,
+					requestStatusId: NOTE_CREDIT_STATUS.PENDING,
+					product: element.product,
+					quantity: element.quantityConciliated,
+					guideId: element.guideId,
+					createdBy,
+					modifiedBy: createdBy,
+				})
 
-			await this.noteCreditRepository.save(item);
+				await this.noteCreditRepository.save(item);
+			}
 		}
 	}
 

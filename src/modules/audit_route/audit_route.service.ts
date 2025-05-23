@@ -574,7 +574,10 @@ export class AuditRouteService {
 				transporterTotal
 			});
 
-			this.notesCreditsService.create(auditRoute.id);
+			if (transporterTotal - recuperatorTotal < 0) {
+				await this.notesCreditsService.create(auditRoute.id);
+			}
+
 		} else {
 			await this.auditRouteRepository.update(auditRoute.id, {
 				conciliationTotal,
