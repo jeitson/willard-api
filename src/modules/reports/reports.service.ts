@@ -20,9 +20,9 @@ export class ReportsService {
 				SUM(it."Cantidad") AS quantity_batteries,
 				JSON_AGG(
 					JSON_BUILD_OBJECT(
-						'material', p."name",
-						'cantidad', it."quantity",
-						'unidad', ch."unity"
+						'material', p."Nombre",
+						'cantidad', it."Cantidad",
+						'unidad', ch."Nombre"
 					)
 				) AS materiales
 			FROM erc e
