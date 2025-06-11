@@ -192,7 +192,7 @@ export class TransporterTravelService {
 
 	private convertDetail(details: any): any[] {
 		return details.map((d) => ({
-			batteryType: d.tipoBat.toUpperCase(),
+			batteryType: d.tipoBat.toString().toUpperCase(),
 			quantity: d.cantidad,
 		})) || [];
 	}
