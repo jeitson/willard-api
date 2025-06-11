@@ -574,7 +574,7 @@ export class AuditRouteService {
 				transporterTotal
 			});
 
-			if (transporterTotal - recuperatorTotal < 0) {
+			if (recuperatorTotal - transporterTotal < 0) {
 				await this.notesCreditsService.create(auditRoute.id);
 			}
 
