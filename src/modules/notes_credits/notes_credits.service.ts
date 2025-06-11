@@ -22,8 +22,8 @@ export class NotesCreditsService {
 	async create(id: number): Promise<void> {
 		const auditRoute = await this.auditRouteRepository.findOne({ where: { id }, relations: ['auditRouteDetails'] });
 
-		if (auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.CONFIRMED) {
-			throw new BusinessException('La auditoria de ruta no aplica para la acción a ejecutar', 400);
+		if (+auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.CONFIRMED) {
+			throw new BusinessException('La auditoría de ruta no aplica para la acción a ejecutar', 400);
 		}
 
 		const createdBy = this.userContextService.getUserId();
