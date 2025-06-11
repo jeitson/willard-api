@@ -340,7 +340,7 @@ export class AuditRouteService {
 		}
 
 		// Obtener viajes de la transportadora
-		const transporterTravels = await this.transporterTravelRepository.find({
+		let transporterTravels = await this.transporterTravelRepository.find({
 			where: { routeId, transporter: { id: transporterId } },
 			relations: ['details'],
 		});
@@ -413,6 +413,11 @@ export class AuditRouteService {
 			}
 		);
 
+		transporterTravels = await this.transporterTravelRepository.find({
+			where: { routeId, transporter: { id: transporterId } },
+			relations: ['details'],
+		});
+
 		// Obtener productos activos
 		const activeProducts = await this.productRepository.find({ where: { status: true } });
 		const productMap = activeProducts.reduce((acc, product) => {
@@ -469,14 +474,21 @@ export class AuditRouteService {
 
 			const auditRouteDetails = transporterTravels.flatMap((travel) =>
 				travel.details.map((detail) => ({
-					guideId: travel.guideId,
-					product: productMap[detail.batteryType],
-					quantity: detail.quantity,
-					quantityConciliated: products.find(
-						(product) => product.productId === productMap[detail.batteryType]?.id
-					)?.quantity,
-				}))
+						guideId: travel.guideId,
+						product: productMap[detail.batteryType],
+						quantity: detail.quantity,
+						quantityConciliated: products.find(
+							(product) => +product.productId === +productMap[detail.batteryType]?.id
+						)?.quantity
+					}))
 			);
+
+			auditRouteDetails.forEach((e) => {
+				const index = products.findIndex((y) => y.productId === e.product.id);
+				if (index > -1) {
+					products.slice(index, 1);
+				}
+			})
 
 			const newAuditRoute = this.auditRouteRepository.create({
 				createdBy: userId,
@@ -508,16 +520,17 @@ export class AuditRouteService {
 			travel.details.forEach((detail) => {
 				const productId = productMap[detail.batteryType]?.id;
 				if (productId) {
-					acc[productId] = travel.guideId;
+					acc[productId] = {quantity: detail.quantity, guideId: travel.guideId};
 				}
 			});
 			return acc;
-		}, {} as Record<number, string>);
+		}, {} as Record<number, { quantity: number, guideId: string }>);
 
 		await this.auditRouteDetailRepository.manager.transaction(
 			async (transactionalEntityManager) => {
-				for (const { productId, quantity } of createProductItems) {
-					const guideId = guideIdMap[productId];
+				for (const { productId, quantity: quantityConciliated } of createProductItems) {
+					const guide = guideIdMap[productId];
+					const guideId = guide.guideId;
 
 					// if (!guideId) continue;
 
@@ -535,15 +548,15 @@ export class AuditRouteService {
 						await transactionalEntityManager.update(
 							AuditRouteDetail,
 							{ id: existingDetail.id },
-							{ quantityConciliated: quantity }
+							{ quantityConciliated }
 						);
 					} else {
 						// Si no existe, crear un nuevo detalle
 						const newAuditRouteDetail = this.auditRouteDetailRepository.create({
 							auditRoute: auditRoute || undefined, // Asegurarse de que auditRoute no sea undefined
 							product: { id: +productId }, // Convertir productId a número
-							quantity,
-							quantityConciliated: quantity,
+							quantity: guide.quantity,
+							quantityConciliated,
 							guideId,
 						});
 

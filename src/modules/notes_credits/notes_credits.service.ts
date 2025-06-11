@@ -20,13 +20,13 @@ export class NotesCreditsService {
 		) { }
 
 	async create(id: number): Promise<void> {
-		const auditRoute = await this.auditRouteRepository.findOne({ where: { id }, relations: ['auditRouteDetails'] });
+		const auditRoute = await this.auditRouteRepository.findOne({ where: { id }, relations: ['auditRouteDetails', 'auditRouteDetails.product'] });
 
 		if (+auditRoute.requestStatusId !== AUDIT_ROUTE_STATUS.CONFIRMED) {
 			throw new BusinessException('La auditoría de ruta no aplica para la acción a ejecutar', 400);
 		}
 
-		const createdBy = this.userContextService.getUserId();
+		const createdBy = this.userContextService.getUserDetails()?.id;
 
 		for (const element of auditRoute.auditRouteDetails) {
 			if (element.quantityConciliated - element.quantity < 0) {
