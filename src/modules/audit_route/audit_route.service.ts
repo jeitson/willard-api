@@ -15,6 +15,7 @@ import { UserContextService } from '../users/user-context.service';
 import { CollectionRequest } from '../collection_request/entities/collection_request.entity';
 import { Transporter } from '../transporters/entities/transporter.entity';
 import { NotesCreditsService } from '../notes_credits/notes_credits.service';
+import { TYPES_OF_COLLECTION_SITES } from 'src/core/constants/system.constant';
 
 @Injectable()
 export class AuditRouteService {
@@ -250,7 +251,7 @@ export class AuditRouteService {
 
 			const client = {
 				name: collectionRequest.collectionSite.name,
-				isAgency: collectionRequest.collectionSite.siteTypeId === 49
+				isAgency: collectionRequest.collectionSite.siteTypeId === TYPES_OF_COLLECTION_SITES.AGENCY
 			}
 
 			const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...element, ...y, client })))
@@ -297,7 +298,7 @@ export class AuditRouteService {
 
 		const client = {
 			name: collectionRequest.collectionSite.name,
-			isAgency: collectionRequest.collectionSite.siteTypeId === 49
+			isAgency: collectionRequest.collectionSite.siteTypeId === TYPES_OF_COLLECTION_SITES.AGENCY
 		}
 
 		const t = transporterTravel.flatMap(({ details, ...element }) => details.map((y) => ({ ...element, ...y, client })))
@@ -601,7 +602,7 @@ export class AuditRouteService {
 	}
 
 	async calculateIsNotify({ routeId, transporterId }): Promise<boolean> {
-		const collectionRequest = await this.collectionRequestRepository.find({ where: { routeId, transporter: { id: transporterId }, collectionSite: { siteTypeId: 48 } }, relations: ['collectionSite'] });
+		const collectionRequest = await this.collectionRequestRepository.find({ where: { routeId, transporter: { id: transporterId }, collectionSite: { siteTypeId: TYPES_OF_COLLECTION_SITES.RECOVERY } }, relations: ['collectionSite'] });
 
 		if (!collectionRequest) {
 			// throw new BusinessException('No existe una solicitud de recogida configurada con la ruta: ' + routeId, 400);
