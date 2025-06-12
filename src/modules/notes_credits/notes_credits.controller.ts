@@ -17,7 +17,7 @@ export class NotesCreditsController {
 	@Get('')
 	// @Roles(ROL.AUDITORIA_PH, ROL.ADMINISTRATOR)
 	@ApiResult({ type: [NotesCreditResponseDto] })
-	@ApiOperation({ summary: 'Confirmación de conciliación' })
+	@ApiOperation({ summary: 'Obtener listado de notas de créditos' })
 	async findAll(@Query() query: NotesCreditQueryDto) {
 		return this.notesCreditsService.findAll(query);
 	}

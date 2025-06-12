@@ -12,12 +12,12 @@ import { NotesCreditQueryDto, NotesCreditResponseDto } from './dto/notes_credits
 export class NotesCreditsService {
 
 	constructor(
-			@InjectRepository(AuditRoute)
-			private readonly auditRouteRepository: Repository<AuditRoute>,
-			@InjectRepository(NotesCredit)
-			private readonly noteCreditRepository: Repository<NotesCredit>,
-			private userContextService: UserContextService,
-		) { }
+		@InjectRepository(AuditRoute)
+		private readonly auditRouteRepository: Repository<AuditRoute>,
+		@InjectRepository(NotesCredit)
+		private readonly noteCreditRepository: Repository<NotesCredit>,
+		private userContextService: UserContextService,
+	) { }
 
 	async create(id: number): Promise<void> {
 		const auditRoute = await this.auditRouteRepository.findOne({ where: { id }, relations: ['auditRouteDetails', 'auditRouteDetails.product'] });
@@ -48,21 +48,22 @@ export class NotesCreditsService {
 	async findAll({ transporterId }: NotesCreditQueryDto): Promise<NotesCreditResponseDto[]> {
 		const result = await this.noteCreditRepository.query(`
 			SELECT
-				d."Transportadora" AS transporter,
-				nc."GuiaId" AS guide,
-				e."Factura" AS invoice,
-				JSON_AGG(
-					JSON_BUILD_OBJECT(
-						'name', p."Nombre",
-						'quantity', nc."Cantidad"
-					)
-				) AS baterias_pendiente
-			FROM nota_credito nc
-			INNER JOIN documento d ON d."Guia" = nc."GuiaId"
-			INNER JOIN erc e ON e."DocumentoRadicado" = d."Id"
-			INNER JOIN producto p ON p."Id" = nc."ProductoId"
-			WHERE d."Transportadora" = $1
-			GROUP BY d."Transportadora", nc."GuiaId", e."Factura"
+	d."Transportadora" AS transporter
+	,nc."GuiaId" AS guide
+	,e."Factura" AS invoice
+	,JSON_AGG(
+		JSON_BUILD_OBJECT(
+			'name', p."Nombre"
+			,'quantity', nc."Cantidad"
+		)
+	) AS baterias_pendiente
+FROM nota_credito nc
+INNER JOIN documento d ON d."Guia" = nc."GuiaId"
+INNER JOIN transportadora t ON UPPER(t."Nombre") = UPPER(d."Transportadora")
+INNER JOIN erc e ON e."DocumentoRadicado" = d."Id"
+INNER JOIN producto p ON p."Id" = nc."ProductoId"
+WHERE t."Id" = $1
+GROUP BY d."Transportadora", nc."GuiaId", e."Factura"
 		`, [transporterId]);
 		return result;
 	}
