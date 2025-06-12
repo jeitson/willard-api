@@ -20,6 +20,7 @@ export class TransporterTravelController {
 
 	@Post()
 	@Roles(ROL.PLANEADOR_TRANSPORTE, ROL.ADMINISTRATOR)
+	@ApiOperation({ summary: 'Cargue de registros' })
 	@UseInterceptors(FileInterceptor('file'))
 	@ApiResult({ type: [ResponseCodeTransporterTravel] })
 	async createRecord(

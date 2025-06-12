@@ -31,12 +31,12 @@ export class RolesController {
 		return this.rolesService.findOneById(+id);
 	}
 
-	@Post()
-	@Roles(ROL.ADMINISTRATOR)
-	@ApiOperation({ summary: 'Crear rol' })
-	async create(@Body() dto: RolDto): Promise<void> {
-		await this.rolesService.create(dto);
-	}
+	// @Post()
+	// @Roles(ROL.ADMINISTRATOR)
+	// @ApiOperation({ summary: 'Crear rol' })
+	// async create(@Body() dto: RolDto): Promise<void> {
+	// 	await this.rolesService.create(dto);
+	// }
 
 	@Put(':id')
 	@Roles(ROL.ADMINISTRATOR)

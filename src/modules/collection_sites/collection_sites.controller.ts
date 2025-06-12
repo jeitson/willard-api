@@ -52,6 +52,7 @@ export class CollectionSitesController {
 
 	@Delete(':id')
 	@Roles(ROL.ADMINISTRATOR)
+	@ApiOperation({ summary: 'Eliminar centro de acopio' })
 	remove(@IdParam('id') id: string): Promise<void> {
 		return this.collectionSitesService.remove(+id);
 	}

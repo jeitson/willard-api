@@ -14,6 +14,7 @@ export class FilesController {
 	constructor(private readonly firebaseService: FirebaseService) { }
 
 	@Post('upload')
+	@ApiOperation({ summary: 'Cargar archivos' })
 	@UseInterceptors(AllFilesInterceptor)
 	async uploadFile(@UploadedFiles(FileSizeValidationPipe) files: Array<any>) {
 		if (files.length === 0) {

@@ -45,13 +45,13 @@ export class ClientsController {
 	@Patch(':id/change-status')
 	@Roles(ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Cambiar de estado cliente' })
-
 	changeStatus(@IdParam('id') id: string): Promise<Client> {
 		return this.clientsService.changeStatus(+id);
 	}
 
 	@Delete(':id')
 	@Roles(ROL.ADMINISTRATOR)
+	@ApiOperation({ summary: 'Eliminar cliente' })
 	remove(@IdParam('id') id: string): Promise<void> {
 		return this.clientsService.remove(+id);
 	}
