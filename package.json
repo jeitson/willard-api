@@ -5,6 +5,9 @@
 	"author": "Isaias Palacio",
 	"private": true,
 	"license": "UNLICENSED",
+	"engines": {
+		"node": ">=20.15.0"
+	},
 	"scripts": {
 		"prestart": "npm install && nest build",
 		"build": "npm install &&  nest build",
@@ -45,7 +48,8 @@
 		"reflect-metadata": "0.1.13",
 		"rxjs": "7.8.1",
 		"typeorm": "0.3.20",
-		"xlsx": "0.18.5"
+		"xlsx": "0.18.5",
+		"brace-expansion": "1.1.11"
 	},
 	"devDependencies": {
 		"@antfu/eslint-config": "2.26.0",
