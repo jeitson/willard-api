@@ -48,8 +48,7 @@
 		"reflect-metadata": "^0.1.13",
 		"rxjs": "^7.8.1",
 		"typeorm": "^0.3.20",
-		"xlsx": "^0.18.5",
-		"brace-expansion": "1.1.11"
+		"xlsx": "^0.18.5"
 	},
 	"devDependencies": {
 		"@antfu/eslint-config": "^2.26.0",
