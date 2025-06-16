@@ -48,7 +48,9 @@ export class NotesCreditsService {
 	async findAll({ transporterId }: NotesCreditQueryDto): Promise<NotesCreditResponseDto[]> {
 		const result = await this.noteCreditRepository.query(`
 			SELECT
-	d."Transportadora" AS transporter
+	nc."AuditoriaRutaId" AS auditRouteId
+	,t."Id" AS transporterId
+	,d."Transportadora" AS transporter
 	,nc."GuiaId" AS guide
 	,e."Factura" AS invoice
 	,JSON_AGG(
@@ -63,8 +65,28 @@ INNER JOIN transportadora t ON UPPER(t."Nombre") = UPPER(d."Transportadora")
 INNER JOIN erc e ON e."DocumentoRadicado" = d."Id"
 INNER JOIN producto p ON p."Id" = nc."ProductoId"
 WHERE t."Id" = $1
-GROUP BY d."Transportadora", nc."GuiaId", e."Factura"
+GROUP BY nc."AuditoriaRutaId", t."Id",  d."Transportadora", nc."GuiaId", e."Factura"
 		`, [transporterId]);
 		return result;
+	}
+
+	async confirm(id: number): Promise<void> {
+		const notesCredit = await this.noteCreditRepository.find({
+			where: { auditRoute: { id }, requestStatusId: NOTE_CREDIT_STATUS.PENDING },
+		});
+
+		if (!notesCredit.length) {
+			throw new BusinessException(
+				'No hay registros con la configuración ingresada, o no aplican para cambio de estado'
+			);
+		}
+
+		await Promise.all(
+			notesCredit.map(note =>
+				this.noteCreditRepository.update(note.id, {
+					requestStatusId: NOTE_CREDIT_STATUS.CONFIRMED,
+				})
+			)
+		);
 	}
 }
