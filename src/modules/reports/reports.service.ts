@@ -20,11 +20,11 @@ export class ReportsService {
 				SUM(it."Cantidad") AS quantity_batteries,
 				JSON_AGG(
 					JSON_BUILD_OBJECT(
-						'material', p."Nombre",
-						'cantidad', it."Cantidad",
-						'unidad', ch."Nombre"
+						'name', p."Nombre",
+						'quantity', it."Cantidad",
+						'unity', ch."Nombre"
 					)
-				) AS materiales
+				) AS materials
 			FROM erc e
 			INNER JOIN sedes_acopio sa ON sa."ReferenciaPH" = e."Agencia"
 			INNER JOIN irc i ON i."ErcIdRef" = e."Id"

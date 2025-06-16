@@ -52,5 +52,5 @@ export class ReportResponseDto {
 	quantity_batteries: number;
 
 	@ApiProperty({ description: 'Materiales', type: [ReportDetailResponseDto] })
-	materiales: ReportDetailResponseDto[];
+	materials: ReportDetailResponseDto[];
 }
