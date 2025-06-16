@@ -56,7 +56,7 @@ export class NotesCreditsService {
 			'name', p."Nombre"
 			,'quantity', nc."Cantidad"
 		)
-	) AS baterias_pendiente
+	) AS batteries_pending
 FROM nota_credito nc
 INNER JOIN documento d ON d."Guia" = nc."GuiaId"
 INNER JOIN transportadora t ON UPPER(t."Nombre") = UPPER(d."Transportadora")

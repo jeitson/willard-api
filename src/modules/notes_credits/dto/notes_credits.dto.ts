@@ -26,5 +26,5 @@ export class NotesCreditResponseDto {
 	invoice: string;
 
 	@ApiProperty({ description: 'Baterías pendientes', type: [NotesCreditDetailResponseDto] })
-	baterias_pendiente: NotesCreditDetailResponseDto[];
+	batteries_pending: NotesCreditDetailResponseDto[];
 }
