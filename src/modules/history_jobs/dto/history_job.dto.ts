@@ -3,6 +3,7 @@ import {
 	IsArray,
 	IsEnum,
 	IsNotEmpty,
+	IsOptional,
 	IsString,
 	MaxLength,
 } from 'class-validator';
@@ -39,6 +40,9 @@ export class HistoryJobDto {
 	@ApiProperty({ description: 'Estado del Proceso' })
 	@IsEnum(['SUCCESS', 'FAILED'], { message: 'Debe de ser un SUCCESS o FAILED' })
 	statusProcess: 'SUCCESS' | 'FAILED' = 'SUCCESS';
+
+	@IsOptional()
+	creatorBy?: string;
 }
 
 export class HistoryJobQueryDto extends IntersectionType(

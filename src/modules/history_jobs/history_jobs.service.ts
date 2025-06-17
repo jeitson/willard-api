@@ -29,6 +29,7 @@ export class HistoryJobsService {
 			const r = manager.create(HistoryJob, {
 				inputContent: JSON.stringify(inputContent),
 				outputContent: JSON.stringify(outputContent),
+				modifiedBy: content.creatorBy ? content.creatorBy : null,
 				...content,
 			});
 
@@ -87,13 +88,18 @@ export class HistoryJobsService {
 		pageSize,
 		name,
 		key,
+		createdBy
 	}: HistoryJobQueryDto): Promise<Pagination<HistoryJob>> {
 		const queryBuilder = this.historyJobRepository
-			.createQueryBuilder('proceso_historial')
+			.createQueryBuilder('history_process')
 			.where({
 				...(name ? { name: Like(`%${name}%`) } : null),
 				...(key ? { key: Like(`%${key}%`) } : null),
 			});
+
+		if (createdBy) {
+			queryBuilder.andWhere('history_process.createdBy = :createdBy', { createdBy });
+		}
 
 		const paginatedResult: any = await paginate<HistoryJob>(queryBuilder, {
 			page,
