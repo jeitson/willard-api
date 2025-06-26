@@ -1,6 +1,7 @@
 import { INestApplication, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+// import * as fs from 'fs';
 
 import { ConfigKeyPaths, IAppConfig, ISwaggerConfig } from './core/config'
 import { API_SECURITY_AUTH } from './core/common/decorators/swagger.decorator'
@@ -25,6 +26,9 @@ export function setupSwagger(
 		ignoreGlobalPrefix: false,
 		extraModels: [ResOp, TreeResult],
 	});
+
+	// Guardar el JSON generado en un archivo
+	// fs.writeFileSync('swagger.json', JSON.stringify(document, null, 2));
 
 	SwaggerModule.setup(path, app, document, {
 		swaggerOptions: {
