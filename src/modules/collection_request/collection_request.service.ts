@@ -5,7 +5,7 @@ import { BusinessException } from "src/core/common/exceptions/biz.exception";
 import { Pagination } from "src/core/helper/paginate/pagination";
 import { paginate } from "src/core/helper/paginate";
 import { CollectionRequest } from "./entities/collection_request.entity";
-import { CollectionRequestCompleteDto, CollectionRequestCreateDto, CollectionRequestRouteInfoDto, CollectionRequestRouteList, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
+import { CollectionRequestCompleteDto, CollectionRequestCreateDto, CollectionRequestQueryDto, CollectionRequestRouteInfoDto, CollectionRequestRouteList, CollectionRequestUpdateDto } from "./dto/collection_request.dto";
 import { PickUpLocation } from "../pick_up_location/entities/pick_up_location.entity";
 import { CollectionRequestAudit } from "../collection_request_audits/entities/collection_request_audit.entity";
 import { Transporter } from "../transporters/entities/transporter.entity";
@@ -17,6 +17,7 @@ import { Child } from "../catalogs/entities/child.entity";
 import { REQUEST_STATUS } from "src/core/constants/status.constant";
 import { ROL } from "src/core/constants/rol.constant";
 import { Product } from "../products/entities/product.entity";
+import { COLLECTION_REQUEST_MODULE } from "src/core/constants/modules.constant";
 
 @Injectable()
 export class CollectionRequestService {
@@ -266,44 +267,86 @@ export class CollectionRequestService {
 			.leftJoinAndMapOne('pickUpLocation.zoneId', Child, 'zone', 'zone.id = pickUpLocation.zoneId');
 	}
 
-	async findAll(query: any): Promise<Pagination<CollectionRequest>> {
+	async findAll(query: CollectionRequestQueryDto): Promise<Pagination<CollectionRequest>> {
 		const queryBuilder = this.createBaseQueryBuilder();
 
-
-		let { roles, id, zones } = this.userContextService.getUserDetails();
-		roles = roles.map(({ roleId }) => +roleId);
-
-		if (!roles.includes(ROL.ADMINISTRATOR)) {
-			zones = zones.map(({ zoneId }) => +zoneId);
-
-			if (roles.find((role: number) => [ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH].includes(role))) {
-				queryBuilder.where('collectionRequest.createdBy = :id', { id });
-			}
-
-			if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
-
-				if (zones.length === 0) {
-					throw new BusinessException('El usuario no tiene zonas configuradas', 400);
-				}
-
-				queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING })
-
-				if (zones.length > 0) {
-					queryBuilder.andWhere('zone.id IN (:...zones)', { zones });
-				}
-			}
-
-			if (roles.includes(ROL.WILLARD_LOGISTICA)) {
-				queryBuilder.where('collectionRequest.isSpecial = :status', { status: true })
-					.andWhere('collectionRequest.requestStatusId = :request_status', { request_status: REQUEST_STATUS.INCOMPLETE });
-			}
-		}
-
+		await this.applyFilters(queryBuilder, query);
 
 		return paginate<CollectionRequest>(queryBuilder, {
 			page: query.page,
 			pageSize: query.pageSize,
 		});
+	}
+
+	private async applyFilters(
+		queryBuilder: any,
+		query
+	): Promise<void> {
+		let { roles, id, zones } = this.userContextService.getUserDetails();
+
+		roles = roles.map(({ roleId }) => +roleId);
+		zones = zones.map(({ zoneId }) => +zoneId);
+
+		if (roles.includes(ROL.ADMINISTRATOR)) {
+			this.applyAdminFilters(queryBuilder, query.module);
+		} else {
+			this.applyNonAdminFilters(queryBuilder, roles, id, zones);
+		}
+	}
+
+	private applyAdminFilters(queryBuilder: any, module?: string): void {
+		if (!module || ![
+			COLLECTION_REQUEST_MODULE.PLANEADOR_TRANSPORTE,
+			COLLECTION_REQUEST_MODULE.WILLARD_LOGISTICA,
+			COLLECTION_REQUEST_MODULE.ASESOR_PH,
+			COLLECTION_REQUEST_MODULE.FABRICA_BW,
+			COLLECTION_REQUEST_MODULE.AGENCIA_PH,
+		].includes(module as any)) {
+			throw new BusinessException('El módulo no es válido para el usuario', 400);
+		}
+
+		switch (module) {
+			case COLLECTION_REQUEST_MODULE.PLANEADOR_TRANSPORTE:
+				queryBuilder.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING });
+				break;
+
+			case COLLECTION_REQUEST_MODULE.WILLARD_LOGISTICA:
+				queryBuilder
+					.where('collectionRequest.isSpecial = :specialStatus', { specialStatus: true })
+					.andWhere('collectionRequest.requestStatusId = :requestStatus', { requestStatus: REQUEST_STATUS.INCOMPLETE });
+				break;
+		}
+	}
+
+	private applyNonAdminFilters(
+		queryBuilder: any,
+		roles: number[],
+		id: number,
+		zones: number[],
+	): void {
+		const hasAdvisorRole = roles.some((role: number) =>
+			[ROL.ASESOR_PH, ROL.FABRICA_BW, ROL.AGENCIA_PH].includes(role)
+		);
+
+		if (hasAdvisorRole) {
+			queryBuilder.where('collectionRequest.createdBy = :id', { id });
+		}
+
+		if (roles.includes(ROL.PLANEADOR_TRANSPORTE)) {
+			if (zones.length === 0) {
+				throw new BusinessException('El usuario no tiene zonas configuradas', 400);
+			}
+
+			queryBuilder
+				.where('collectionRequest.requestStatusId = :status', { status: REQUEST_STATUS.PENDING })
+				.andWhere('zone.id IN (:...zones)', { zones });
+		}
+
+		if (roles.includes(ROL.WILLARD_LOGISTICA)) {
+			queryBuilder
+				.where('collectionRequest.isSpecial = :specialStatus', { specialStatus: true })
+				.andWhere('collectionRequest.requestStatusId = :requestStatus', { requestStatus: REQUEST_STATUS.INCOMPLETE });
+		}
 	}
 
 	async findOne(id: number): Promise<CollectionRequest> {

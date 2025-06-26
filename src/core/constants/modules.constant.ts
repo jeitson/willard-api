@@ -1,0 +1,8 @@
+// ""
+export enum COLLECTION_REQUEST_MODULE {
+	'PLANEADOR_TRANSPORTE' = 'PT',
+	'WILLARD_LOGISTICA' = 'WL',
+	'ASESOR_PH' = 'AP',
+	'FABRICA_BW' = 'FB',
+	'AGENCIA_PH' = 'AG',
+}

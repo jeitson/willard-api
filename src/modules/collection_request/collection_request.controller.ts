@@ -27,7 +27,7 @@ export class CollectionRequestController {
 	@Get()
 	@Roles(ROL.ASESOR_PH, ROL.PLANEADOR_TRANSPORTE, ROL.WILLARD_LOGISTICA, ROL.FABRICA_BW, ROL.AGENCIA_PH, ROL.ADMINISTRATOR)
 	@ApiOperation({ summary: 'Listar solicitudes' })
-	@ApiResult({ type: [CollectionRequest] })
+	@ApiResult({ type: [CollectionRequest], isPage: true })
 	async findAll(@Query() query: any): Promise<any> {
 		return this.collectionsRequestervice.findAll(query);
 	}
